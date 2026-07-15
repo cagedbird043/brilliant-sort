@@ -2,6 +2,8 @@
 
 A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The project is designed as an engineering assessment artifact: the same TypeScript reducer drives the React UI, fixture replay, Harness diagnostics, and core tests.
 
+Live demo: <https://cagedbird043.github.io/brilliant-sort/>
+
 ## What is implemented
 
 - Fixed, versioned JSON puzzle fixtures.
