@@ -85,6 +85,12 @@ The presentation layer SHALL derive a motion plan from pre-command and post-comm
 - **THEN** the view animates a temporary sprite ghost from the measured source location to the measured destination location when both locations are available
 - **AND THEN** the destination responds with a short pixel-aware landing/settle effect without delaying the reducer state update.
 
+#### Scenario: Locking input during an accepted spatial transition
+
+- **WHEN** an accepted command starts a lift, flight, landing, or Shelf compaction motion
+- **THEN** board and Shelf command input is temporarily locked for approximately 180ms while the reducer state remains already updated
+- **AND THEN** the lock does not queue commands and releases after the motion completes or its safe fallback fires.
+
 #### Scenario: Compacting the Shelf
 
 - **WHEN** a Shelf placement causes the reducer to emit `shelf-compacted`
@@ -109,10 +115,16 @@ The renderer SHALL honor `prefers-reduced-motion: reduce`. Reduced-motion mode S
 
 ### Requirement: The presentation SHALL remain original and functional
 
-The dark crystal-repair workbench SHALL use project-owned sprites and code-rendered structure. It SHALL not introduce copied game art, non-functional coin/power-up/lock UI, payment affordances, or commercial progression controls.
+The dark crystal-repair workbench SHALL use project-owned sprites and code-rendered structure. Reset and clear-selection controls SHALL render as pure pixel-icon buttons while retaining accessible names. Victory SHALL render a small in-canvas completion plaque with restrained pixel celebration and a real replay icon action; it SHALL not introduce a next-level, reward, currency, power-up, lock, payment, or commercial progression affordance.
 
 #### Scenario: Reviewing the completed game canvas
 
 - **WHEN** a reviewer opens the game after the pixel renderer cutover
 - **THEN** all visible controls correspond to currently implemented gameplay actions
 - **AND THEN** no decorative economy or unimplemented power-up controls appear.
+
+#### Scenario: Completing the available level
+
+- **WHEN** the reducer reaches the won phase
+- **THEN** the presentation shows a compact completion plaque and a replay icon action near the board
+- **AND THEN** it does not show a non-functional next-level or reward action.
