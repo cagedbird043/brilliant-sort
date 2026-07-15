@@ -53,7 +53,7 @@ std::vector<std::pair<int, int>> FindConnectedMovableGems(
     // component doubles as the FIFO queue, preserving breadth-first discovery order.
     for (std::size_t next = 0; next < component.size(); ++next) {
         const Position current = component[next];
-        for (const Position offset : kNeighborOffsets) {
+        for (const Position& offset : kNeighborOffsets) {
             const int row = current.first + offset.first;
             const int col = current.second + offset.second;
             if (!IsInBounds(board, row, col)) {
