@@ -51,7 +51,7 @@ The Shelf SHALL retain its twelve-column row-major semantics and accessible butt
 #### Scenario: Placing a selected board gem into an empty Shelf slot
 
 - **WHEN** a board selection is stored in the Shelf
-- **THEN** each resulting Shelf gem renders above a tray at its reducer-defined index
+- **THEN** each resulting Shelf gem renders above a tray at its `GameCorePort`-defined index
 - **AND THEN** the board/Shelf command behavior and `data-testid` values remain unchanged.
 
 ### Requirement: Pixel artwork SHALL retain crisp visual geometry and accessible hit areas
@@ -69,9 +69,9 @@ Runtime sprite images SHALL preserve aspect ratio and use pixel-aware rendering.
 - **WHEN** the game is viewed at a desktop viewport
 - **THEN** the game canvas remains board-dominant and does not expand runtime sprites into blurred, arbitrary-scale decoration.
 
-### Requirement: The view SHALL provide reducer-derived tactile motion without changing gameplay state
+### Requirement: The view SHALL provide GameCorePort-derived tactile motion without changing gameplay state
 
-The presentation layer SHALL derive a motion plan from pre-command and post-command `GameState` locations keyed by stable gem IDs. It SHALL not change reducer inputs, reducer outputs, LevelSpec, Shelf rules, selection rules, or victory conditions.
+The presentation layer SHALL derive a motion plan from pre-command and post-command `GameCorePort` transition states keyed by stable gem IDs. It SHALL not change core inputs, core outputs, LevelSpec, Shelf rules, selection rules, or victory conditions.
 
 #### Scenario: Selecting movable gems
 
@@ -81,25 +81,25 @@ The presentation layer SHALL derive a motion plan from pre-command and post-comm
 
 #### Scenario: Placing a selected gem
 
-- **WHEN** a reducer command places a selected gem into a target or Shelf slot
+- **WHEN** a `GameCorePort` command places a selected gem into a target or Shelf slot
 - **THEN** the view animates a temporary sprite ghost from the measured source location to the measured destination location when both locations are available
-- **AND THEN** the destination responds with a short pixel-aware landing/settle effect without delaying the reducer state update.
+- **AND THEN** the destination responds with a short pixel-aware landing/settle effect without delaying the `GameCorePort` state update.
 
 #### Scenario: Locking input during an accepted spatial transition
 
 - **WHEN** an accepted command starts a lift, flight, landing, or Shelf compaction motion
-- **THEN** board and Shelf command input is temporarily locked for approximately 180ms while the reducer state remains already updated
+- **THEN** board and Shelf command input is temporarily locked for approximately 180ms while `GameCorePort` state remains already updated
 - **AND THEN** the lock does not queue commands and releases after the motion completes or its safe fallback fires.
 
 #### Scenario: Compacting the Shelf
 
-- **WHEN** a Shelf placement causes the reducer to emit `shelf-compacted`
+- **WHEN** a `GameCorePort` transition emits `shelf-compacted`
 - **THEN** remaining Shelf gems animate toward their new stable row-major indices using their gem IDs
 - **AND THEN** the final DOM order exactly matches reducer state.
 
 #### Scenario: Rejecting an invalid command
 
-- **WHEN** a reducer command is rejected
+- **WHEN** `GameCorePort` returns a rejected command transition
 - **THEN** the view gives local rejection feedback without moving a gem or changing state
 - **AND THEN** it preserves the existing accessible rejection message.
 
@@ -109,7 +109,7 @@ The renderer SHALL honor `prefers-reduced-motion: reduce`. Reduced-motion mode S
 
 #### Scenario: Playing with reduced motion enabled
 
-- **WHEN** a user enables reduced motion and selects, places, rejects, or compacts gems
+- **WHEN** a user enables reduced motion and `GameCorePort` selects, places, rejects, or compacts gems
 - **THEN** no spatial sprite ghost or board/Shelf shake runs
 - **AND THEN** all resulting game state and status messages remain correct.
 
@@ -125,6 +125,6 @@ The dark crystal-repair workbench SHALL use project-owned sprites and code-rende
 
 #### Scenario: Completing the available level
 
-- **WHEN** the reducer reaches the won phase
+- **WHEN** `GameCorePort` reaches the won phase
 - **THEN** the presentation shows a compact completion plaque and a replay icon action near the board
 - **AND THEN** it does not show a non-functional next-level or reward action.

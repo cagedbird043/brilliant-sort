@@ -1,25 +1,26 @@
-## 1. Approved asset promotion
+## 1. C++ core protocol and native rules
 
-- [ ] 1.1 Inspect the selected gem, socket, and Shelf tray candidates with `pixel-bloom` and record their accepted dimensions/Alpha facts.
-- [ ] 1.2 Derive the four runtime gem variants from the approved ice master and committed Brilliant Sort palette manifest.
-- [ ] 1.3 Promote only approved PNGs into `src/assets/pixel/` under stable semantic names; keep `art/inbox/` and `art/review/` ignored and unimported.
+- [ ] 1.1 Freeze JSON v1 fixture/command/transition/canonical-dump protocol examples from the existing deterministic core.
+- [ ] 1.2 Implement complete C++20 `BrilliantSortCore` and make the existing connected-component algorithm its production selection primitive.
+- [ ] 1.3 Add native C++ tests for complete rules, assessment function compatibility, canonical state output, events, rejections, Shelf compaction, restart, and win.
 
-## 2. Static pixel renderer cutover
+## 2. WebAssembly port and differential Harness
 
-- [ ] 2.1 Add sprite-aware board and Shelf view components/helpers while retaining existing command handlers, ARIA labels, and test IDs.
-- [ ] 2.2 Render target-color underlays, `socket-neutral`, gem sprites, gem shadows, continuous Shelf rail, and `shelf-tray-neutral` in layered order.
-- [ ] 2.3 Replace porcelain/card and CSS-gradient gem styling with the original deep crystal-repair workbench, pure icon-only functional controls, and compact replay-only completion plaque.
-- [ ] 2.4 Preserve twelve-column row-major Shelf behavior, responsive hit targets, pixelated sprite rendering, and no horizontal overflow.
+- [ ] 2.1 Add CMake native and Emscripten targets with isolated ES-module WebAssembly output and restricted C ABI exports.
+- [ ] 2.2 Implement TypeScript `GameCorePort` / `WasmGameCore`, migrate production App/Harness consumers behind the port, and keep TypeScript reducer logic test-only.
+- [ ] 2.3 Add TS-reference ↔ native-C++ ↔ WASM differential replay diagnostics for all fixed traces and critical failure paths.
+- [ ] 2.4 Add local/CI commands that build WASM before browser/Vite verification and fail closed on protocol parity errors.
 
-## 3. Reducer-derived motion
+## 3. Approved assets and pixel presentation
 
-- [ ] 3.1 Build stable gem location indexing and a view-local motion plan from pre/post reducer state without changing core reducer contracts.
-- [ ] 3.2 Implement selected lift/shadow separation, source-to-destination ghost flight, landing response, local rejection feedback, Shelf FLIP compaction, and the 180ms no-queue input lock.
-- [ ] 3.3 Implement `prefers-reduced-motion` fallbacks that render correct final state without spatial motion.
+- [ ] 3.1 Inspect/derive/promote the locked gem family, socket, and Shelf tray into `src/assets/pixel/`; preserve ignored candidate inbox boundaries.
+- [ ] 3.2 Replace CSS-shaped board/Shelf/gem artwork with layered sprites, code-rendered target/rail geometry, pure icon controls, and replay-only completion plaque.
+- [ ] 3.3 Implement GameCorePort-transition-driven lift, ghost flight, landing, local rejection, Shelf FLIP, 180ms input lock, and reduced-motion fallback.
+- [ ] 3.4 Preserve twelve-column Shelf semantics, accessibility labels, test IDs, responsive hit targets, and no horizontal overflow.
 
-## 4. Verification and cleanup
+## 4. Verification and completion
 
-- [ ] 4.1 Add focused tests for promoted asset inspection, sprite rendering, locked/movable visual state, motion fallback behavior, and transition input locking.
-- [ ] 4.2 Update Playwright coverage for real sprite assets, board/Shelf interactions, completion, reduced motion, and desktop/mobile no-overflow checks.
-- [ ] 4.3 Run `pixel-bloom` inspection/derivation, typecheck, Bun tests, C++ tests, Vite build, Playwright, and strict OpenSpec validation.
-- [ ] 4.4 Update README with the final pixel renderer asset contract and archive the completed change after human visual approval.
+- [ ] 4.1 Add focused protocol, asset, rendering, motion, native, WASM, and differential tests.
+- [ ] 4.2 Update Playwright for real assets, WASM boot, gameplay replay, completion, reduced motion, and desktop/mobile visual smoke checks.
+- [ ] 4.3 Run pixel-bloom, C++ native, WASM, differential, Bun, Vite, Playwright, GitHub Pages, and strict OpenSpec validation evidence.
+- [ ] 4.4 Update README with C++/WASM architecture and archive the unified change after human visual/product approval.

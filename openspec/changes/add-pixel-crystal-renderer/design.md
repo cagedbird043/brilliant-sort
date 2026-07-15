@@ -1,40 +1,130 @@
 ## Context
 
-The current application keeps all gameplay state in the deterministic reducer and renders it directly in `src/app/App.tsx`. Board and Shelf controls are semantic HTML buttons, while gems, target rings, target colors, and shelf slots are CSS-created shapes. The archived presentation change improved hierarchy and feedback but deliberately stayed within a light porcelain/card language; the approved dark pixel assets now make that language obsolete.
-
-The project has completed and archived `pixel-asset-pipeline`. Its v1 CLI validates true transparency, binary Alpha, finite palettes, exact semantic color derivation, and local previews. Current approved candidate roles are:
+Brilliant Sort already has three pieces of evidence that must now become one production Demo:
 
 ```text
-gem family             ice / navy / coral / jade PNG sprites derived from one reviewed master
-socket-neutral         deep, dark target socket structural sprite
-shelf-tray-neutral     shallow, light buffer-tray structural sprite
+TypeScript core      deterministic reducer, versioned LevelSpec, canonicalDump, replay Harness
+C++ exercise         stable eight-neighbor FindConnectedMovableGems implementation and native tests
+Pixel assets         reviewed gem family, target socket, Shelf tray, and deterministic pixel-bloom pipeline
 ```
 
-Candidate files remain ignored in `art/inbox/` until this change explicitly promotes them. The runtime must never import an ignored inbox candidate directly.
+The assessment values a pure core that can be driven by automated Harness, separated from UI/presentation/Cocos, serialised for debugging, and expressed through C++. The current browser still renders generic CSS and invokes the TypeScript reducer directly, so neither the asset pipeline nor the C++ exercise is yet on the production execution path.
+
+This change delivers the complete browser Demo through a headless C++20 game core compiled to WebAssembly, a TypeScript presentation/Harness port, and the approved dark pixel-crystal renderer. WebAssembly is a compiled game-core target, not a replacement for browser UI: React/TypeScript retains DOM, PNG assets, accessibility, input, animation, and static-page integration.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Make the approved sprite family, target socket, and Shelf tray the visible visual language of the playable game.
-- Keep game state, selection semantics, command behavior, test IDs, keyboard/focus behavior, and accessibility labels intact.
-- Keep source artwork crisp through real Alpha, integer-aware pixel rendering, and separate interaction hit areas.
-- Give selection, placement, rejection, and Shelf compaction material depth through object-level sprite motion rather than generic card animation.
-- Preserve the compact twelve-column row-major Shelf invariant at all responsive widths.
-- Use original structural geometry and color composition; do not reproduce an existing game's asset, economy, or layout.
+- Make one complete C++ `BrilliantSortCore` the production authority for all current deterministic rules.
+- Reuse the assessment C++ connected-component algorithm in that production core rather than maintaining a parallel exercise-only implementation.
+- Define a debuggable JSON v1 ABI that maps directly to the existing LevelSpec, commands, events, rejections, and canonical dumps.
+- Build the same C++ source natively for rule tests and to WebAssembly for browser/Bun consumers.
+- Prove TS-reference ↔ native-C++ ↔ WASM parity at every fixed command-trace transition before production cutover.
+- Keep TypeScript as a thin `GameCorePort` consumer for React, Harness, Agent audit, pixel assets, motion, and accessibility.
+- Promote approved pixel assets and perform one coherent dark crystal-repair workbench cutover.
+- Automate build, differential diagnostics, replay, browser checks, and CI so human work is limited to visual/product acceptance.
 
 **Non-Goals:**
 
-- Changing LevelSpec, reducer rules, connected-component selection, Shelf semantics, win conditions, Harness, or C++ exercise behavior.
-- Adding coins, magic wands, locked future levels, purchases, power-ups, random generation, random mode, or decorative fake controls.
-- Adding a Canvas/WebGL engine, PixiJS, Cocos, remote asset requests, image generation calls, or a second visual runtime.
-- Extending `pixel-bloom` beyond its completed v1 contract, except invoking it to validate promoted assets.
+- A C++ Canvas/WebGL full-stack game, Cocos clone, ECS framework, scene graph, generic engine, or second rendering runtime.
+- Duplicate production rule engines, a TypeScript runtime fallback after WASM parity is accepted, binary ABI optimisation, or opaque cross-language memory sharing.
+- Changing LevelSpec schema semantics, selection rules, Shelf semantics, victory conditions, fixed fixture behavior, or deferred commercial/power-up scope.
+- Calling AI APIs, storing AI credentials, generating runtime assets, adding PixiJS/Cocos, or extending pixel-bloom beyond validation/derivation/preview.
 
 ## Decisions
 
-### 1. Promote approved assets before rendering them
+### 1. Build a headless C++ game core, not a C++ UI engine
 
-The implementation SHALL run `pixel-bloom inspect` on every selected candidate. Only passing candidates are copied from ignored `art/inbox/` into `src/assets/pixel/` under stable semantic names:
+`BrilliantSortCore` owns the full current deterministic simulation:
+
+```text
+LevelSpec loading and validation
+Board / BoardCell / Gem / Color / GemId
+Selection and eight-neighbor same-color movable components
+Locked matching gems and safe extraction policy
+Target placement, Shelf placement, twelve-column compaction
+Rejections, ordered events, restart, victory, canonical state dump
+```
+
+It does not own browser events, DOM, CSS, PNG drawing, layout, animation timing, ARIA, HUD controls, or pixel asset paths. This is the actual future Cocos boundary: a Cocos client can consume the same core protocol without React-specific rule code.
+
+The existing public `FindConnectedMovableGems` assessment function remains available with its documented signature and stable BFS order. Its implementation becomes the production component-selection primitive used by `BrilliantSortCore`; tests cover it both as the interview-facing function and through full command traces. There is no copy-pasted second connected-component algorithm.
+
+### 2. Use a versioned JSON v1 protocol and narrow C ABI
+
+Cross-language communication uses readable JSON because the board is small and debugging/Harness evidence is more valuable than a binary micro-optimisation. JSON v1 reuses current semantic shapes:
+
+```text
+input level       LevelSpec JSON
+input command     GameCommand JSON
+output transition CoreTransition JSON
+state evidence    canonicalDump string plus structured GameState
+```
+
+`CoreTransition` is canonicalised as:
+
+```json
+{
+  "schemaVersion": 1,
+  "state": { "...": "GameState" },
+  "events": [{ "type": "gem-placed", "detail": "gem-1->2:3" }],
+  "rejection": null,
+  "canonicalDump": "{...stable sorted JSON...}"
+}
+```
+
+C++ exports a narrow `extern "C"` ABI with opaque session handles and byte-buffer inputs/outputs. The TypeScript adapter owns allocation/copy/free boundaries; JavaScript never observes C++ STL containers, pointers, classes, or mutable core memory directly.
+
+```text
+bs_core_create(level_json_bytes, length) -> session_handle
+bs_core_dispatch(session_handle, command_json_bytes, length) -> status
+bs_core_result_length(session_handle) -> byte_length
+bs_core_copy_result(session_handle, output_bytes, capacity) -> copied_length
+bs_core_destroy(session_handle)
+```
+
+Protocol failures return an actionable JSON error envelope or explicit status and never crash the browser. The v1 protocol is intentionally synchronous: each `dispatch` produces exactly one complete deterministic transition before the next command.
+
+### 3. Build the same C++ source natively and as isolated WebAssembly
+
+CMake defines native core/test targets and an Emscripten target. Native C++ tests exercise rules independently of JavaScript. The WebAssembly target uses Emscripten modular ES-module output with an isolated async factory, a restricted exported-function list, and `web,node` environments so the same artifact can be exercised by browser presentation and Bun/Node differential tests.
+
+Generated `.wasm`/glue output is build output, not hand-authored source or a committed SDK. Local development and CI run the WASM build before Vite consumes it; static GitHub Pages receives the generated artifact through the normal Vite build. The Emscripten SDK/toolchain remains local or CI-provisioned and is never committed.
+
+### 4. Make TypeScript a port consumer and keep the reducer only as a test oracle
+
+TypeScript exposes a small asynchronous factory and synchronous loaded-session interface:
+
+```text
+GameCoreFactory.load(levelSpec) -> Promise<GameCorePort>
+GameCorePort.dispatch(command) -> CoreTransition
+GameCorePort.snapshot() -> GameState
+GameCorePort.restart() -> CoreTransition
+GameCorePort.destroy()
+```
+
+`WasmGameCore` maps protocol JSON to existing presentation-friendly TypeScript types. React, replay Harness, Agent audit, and browser tests call `GameCorePort`; they do not call `reduce()` on the production path.
+
+The existing TypeScript reducer is retained only while differential verification exists. It is a reference oracle, never a production fallback: after parity passes, a browser load failure is a visible initialization/build failure, not a silent switch to a different rule engine.
+
+### 5. Differential Harness is the main cross-language quality gate
+
+Every fixed fixture and trace is replayed through three paths:
+
+```text
+TypeScript reference reducer
+Native C++ BrilliantSortCore
+WebAssembly BrilliantSortCore through WasmGameCore
+```
+
+At each command index, the Harness compares byte-for-byte canonical dumps, structured events, and rejection codes/details. A failure reports command JSON, backend name, before/after dump, first JSON path mismatch, events, rejection, and fixture metadata.
+
+Mandatory coverage includes the existing winning trace, diagonal eight-neighbor selection, locked-gem rejection, wrong-target rejection, full Shelf rejection, partial safe extraction, Shelf compaction, restart, and win transition. This makes an AI-generated C++ port objectively verifiable instead of plausibly similar.
+
+### 6. Promote and consume the locked pixel asset set
+
+Before rendering, `pixel-bloom inspect` validates every reviewed candidate. The approved files are promoted into `src/assets/pixel/` under stable semantic names:
 
 ```text
 src/assets/pixel/gem-ice.png
@@ -45,90 +135,75 @@ src/assets/pixel/socket-neutral.png
 src/assets/pixel/shelf-tray-neutral.png
 ```
 
-The four gem files are generated by `pixel-bloom derive` from the approved ice master and the committed Brilliant Sort palette manifest. The structural socket and tray retain their reviewed source dimensions; CSS uses `image-rendering: pixelated`, preserves aspect ratio, and sizes only at visually appropriate integer/half-scale steps after live viewport review.
+The four gem files are derived from the approved ice master through the committed semantic palette manifest. `socket-neutral` and `shelf-tray-neutral` retain their reviewed source dimensions; CSS uses `image-rendering: pixelated`, preserves aspect ratio, and selects discrete display scale after portrait/desktop review. No runtime import, test, or build path may point into ignored `art/inbox/` or `art/review/`.
 
-The currently reviewed gem family, `socket-neutral`, and `shelf-tray-neutral` are locked as the complete v1 runtime asset set. No alternative asset generation belongs to this renderer change unless a locked candidate fails its required inspection or live viewport review.
+The current reviewed asset family is locked as the complete v1 set. No more asset generation belongs to this change unless an asset fails inspection or a real viewport review proves it unreadable.
 
-The ignored inbox remains a scratch space. No application import, test fixture, or deployment path may point into `art/inbox/` or `art/review/`.
+### 7. Render a layered dark crystal-repair workbench from GameCorePort state
 
-### 2. Replace CSS-shaped artwork with layered semantic rendering
-
-The interactive board and Shelf remain buttons because keyboard focus, ARIA labels, test IDs, and click targets are already correct. Artwork becomes layered visual content inside those buttons:
+React remains semantic HTML. Board and Shelf controls preserve keyboard behavior, ARIA labels, `data-testid` values, and usable hit areas; pixel imagery is decorative layered content inside them:
 
 ```text
 Board cell
-  target-color underlay (small CSS/SVG pixel-safe ring or inset)
+  target-color underlay (CSS/SVG constrained geometry)
   socket-neutral sprite
-  gem shadow layer
+  gem shadow
   optional gem sprite
 
-Shelf slot
-  continuous code-rendered rail behind the twelve slots
-  shelf-tray-neutral sprite
-  gem shadow layer
+Shelf
+  continuous code-rendered rail
+  twelve row-major semantic slots
+  shelf-tray-neutral sprite per slot
+  gem shadow
   optional gem sprite
 ```
 
-A target's color remains visible even when a mismatched movable gem sits above it. A locked matched gem is visually seated in its socket and never visually offered as movable. Empty targets and empty Shelf slots retain enough contrast to indicate valid drop destinations without relying on text or color alone.
+A mismatched movable gem leaves its target color visible beneath it; a matching gem is seated/locked and never styled as selectable. The board workbench, target-color underlay, continuous Shelf rail, and pure icon controls are code-rendered geometry, not stretched AI images.
 
-The board's outer workbench, target color underlay, and full Shelf rail are constrained geometry and SHALL be rendered through CSS/SVG or repeatable structural rules, not additional AI-generated assets. This avoids stretching or repeating an image generation into an incoherent twelve-cell rail.
+The presentation moves from porcelain cards to an original dark indigo crystal-repair workbench. Reset and clear-selection controls are pure functional pixel-icon buttons with accessible names. Victory is a compact in-canvas completion plaque with restrained pixel celebration and one real replay icon action; it never invents next-level, reward, currency, power-up, lock, payment, or commercial progression UI.
 
-### 3. Keep source sprites crisp while preserving hit targets
+### 8. Derive tactile motion from C++ transitions without changing state
 
-Source sprite resolution and CSS hit-target size are intentionally separate. Buttons maintain at least a 44 CSS-pixel interactive dimension where layout permits; sprites preserve their own aspect ratio and use pixelated image rendering. Source images MAY sit within larger interactive cells and SHALL not be continuously stretched to arbitrary fractional visual dimensions when a discrete scale is available.
-
-The presentation SHALL retain the compact twelve-column row-major Shelf. On narrow viewports, the rail and tray grid may become denser, but it SHALL not change semantic order, turn into a scrolling carousel, or leave the viewport horizontally overflowing.
-
-### 4. Derive motion from reducer state without modifying reducer contracts
-
-The reducer remains authoritative and returns the same `GameState`, events, and rejection behavior. The view layer keeps a prior-state location index keyed by stable gem IDs and derives a `GemMotionPlan` around each accepted command:
+The renderer indexes gem locations by stable gem IDs before and after every `GameCorePort.dispatch`. It creates a presentation-only `GemMotionPlan`:
 
 ```text
-GemMotionPlan
-  selected gems: lift and detach a pixel shadow
-  moved gems: source location → destination location ghost flight
-  placed gems: destination socket/tray landing compression and spark
-  compacted Shelf gems: stable-ID FLIP shift toward their new row-major slot
-  rejected command: local board/target nudge without moving a gem
+selection          lift sprites and detach pixel shadows
+placement          temporary source-to-destination sprite ghost
+landing            socket/tray compression and restrained spark
+Shelf compaction   stable-ID FLIP shift to new row-major slots
+rejection          local target/board feedback without gem movement
 ```
 
-The application SHALL measure pre-command and post-render element rectangles through stable gem data attributes, animate a temporary visual ghost using the same sprite, and then remove it. The underlying reducer state updates immediately; the motion layer is presentation-only and must not delay, mutate, or fabricate game state.
+The C++ transition updates state immediately. React measures pre/post DOM targets through stable gem data attributes, animates only a temporary ghost, and never changes core state for visual purposes. Accepted spatial transitions impose a 180ms no-queue input lock so a new command cannot visually race an old ghost; the lock always releases after completion or a safe fallback.
 
-To keep state and motion visually coherent, accepted spatial transitions SHALL impose a short 180ms input lock. The reducer processes the initiating command immediately; the lock neither queues nor changes commands, and always releases when the motion completes or its safe fallback fires.
+Reduced motion skips spatial flight/lift/shake/FLIP but shows the correct WASM state immediately with non-spatial feedback. Motion failure or unavailable DOM measurement cannot leave stale ghosts or block play.
 
-If measurement is unavailable or reduced motion is active, the view SHALL render the correct next state immediately with a short non-spatial highlight rather than fail or leave a ghost. Motion may use Web Animations API/CSS transforms but SHALL not apply blur, global card shake, or non-pixel vector effects to sprite artwork.
+### 9. Preserve responsive accessibility and static deployment
 
-### 5. Establish a dark crystal-repair workbench, not a copied mobile screen
+Sprite size and interactive button size are separate. Buttons retain at least 44 CSS-pixel targets where layout permits; sprites stay crisp through pixel-aware rendering rather than arbitrary visual stretching. The Shelf remains compact twelve-column row-major at all supported widths, never becomes a carousel, and never causes horizontal overflow at approximately 390 CSS pixels.
 
-The game canvas moves from low-contrast white porcelain to an original deep indigo workbench with restrained blue-gray supports, pixel-safe metal edges, and clear interactive hierarchy. The board remains the dominant object; reset and clear-selection controls become pure functional pixel-icon buttons with accessible names, not faux economy/navigation. The Shelf appears as a continuous lower mechanical buffer rail directly related to the board.
-
-The result borrows no original game assets, branding, layout, power-up controls, coin systems, or paywall affordances. It derives its identity from the project-owned crystal assets, deterministic movement language, and repair-workbench metaphor.
-
-Victory SHALL resolve through a small in-canvas completion plaque, restrained pixel celebration, and a real replay icon action. It SHALL not invent a next-level, reward, currency, or progression affordance.
-
-### 6. Accessibility and reduced motion remain first-class
-
-Existing button labels, `aria-live` feedback, keyboard focus, and `data-testid` values remain present. Decorative sprite layers are `aria-hidden`; accessible names continue to state gem color, target color, locked state, and Shelf occupancy.
-
-`prefers-reduced-motion: reduce` disables spatial flight, lifting, shaking, and compaction movement while preserving final state visibility, focus behavior, interaction, feedback text, and usable target sizing.
+The final bundle remains a static GitHub Pages artifact: Vite packages the React app and generated WASM output; no Bun daemon, backend, AI API, runtime asset service, or login is required.
 
 ## Risks / Trade-offs
 
-- **[Asset scale mismatch]** — approved sprites differ in source dimensions. Runtime review at portrait and desktop sizes determines discrete display scale; no new AI generation is used merely to force identical file dimensions.
-- **[Ghost animation races React rendering]** — the motion layer is optional presentation. It must remove its own ghost on completion/cancellation and immediately fall back to final state if a target cannot be measured.
-- **[The Socket becomes visually heavier than gems]** — target color underlays and image sizing must keep the gem readable; the 96px socket is a source asset, not a mandate to occupy more screen space.
-- **[Twelve Shelf slots become too dense on mobile]** — retain order and no overflow, but allow smaller tray art inside accessible buttons rather than scaling the whole page.
-- **[AI candidate drift]** — only approved, inspected runtime files are promoted; untracked inbox files remain excluded from build and Git.
+- **[C++ port divergence]** — differential traces are a mandatory gate; no WASM production cutover before exact parity.
+- **[JSON parsing/ABI complexity]** — the protocol is intentionally small, versioned, synchronous, and readable; no direct C++ object bindings or binary ABI in v1.
+- **[WASM initialization is asynchronous]** — app boot explicitly waits for `GameCoreFactory.load`; there is no hidden TypeScript fallback.
+- **[WASM build toolchain is unavailable initially]** — development/CI use a local or CI-provisioned Emscripten SDK; product code stays C++/TypeScript/Bun.
+- **[Source sprites differ in native dimensions]** — viewport review chooses discrete display scale; asset regeneration is not used merely to force matching file sizes.
+- **[Ghost motion races rendering]** — temporary ghosts cancel/clean up and input locks have safe release paths.
+- **[Full scope is broad]** — native C++ rules and parity are completed before visual cutover so failures remain diagnosable by layer.
 
 ## Migration Plan
 
-1. Inspect selected candidates with `pixel-bloom`; regenerate the gem family deterministically from the committed palette manifest.
-2. Promote accepted PNGs into `src/assets/pixel/` with stable names and retain the raw inbox only as ignored working material.
-3. Introduce sprite-aware board/Shelf rendering components while retaining existing core command handlers, test IDs, and labels.
-4. Replace old porcelain/CSS gem rules with the dark workbench, socket, tray, and target-color layers.
-5. Add motion-layer behavior and reduced-motion fallback after static asset rendering is correct.
-6. Validate actual gameplay at portrait and desktop viewports, then archive the change after human visual acceptance.
+1. Freeze JSON v1 protocol fixtures from current LevelSpec, commands, canonical dumps, events, and rejection behavior.
+2. Implement and native-test C++ `BrilliantSortCore`, reusing the connected-component production implementation.
+3. Build Emscripten WASM and implement `WasmGameCore`; run native/WASM/TS differential traces until exact parity.
+4. Change browser/Harness production consumers to `GameCorePort`; remove direct TypeScript reducer use from production code.
+5. Inspect/promote the locked pixel assets, replace the presentation, and add reducer-transition-driven motion.
+6. Run protocol, native, WASM, differential, Bun, C++, Vite, Playwright, browser visual, GitHub Pages, and strict OpenSpec verification.
+7. Archive this unified change only after human visual/product acceptance.
 
 ## Open Questions
 
-None. The currently reviewed candidate roles are sufficient for the first complete renderer cutover; additional particles, border imagery, or icon art are intentionally deferred until a demonstrated rendering need exists.
+None. JSON v1, complete-current-rule C++ scope, and WASM-only production core after differential parity are locked decisions.

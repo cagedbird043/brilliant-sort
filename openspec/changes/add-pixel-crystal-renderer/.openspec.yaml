@@ -1,3 +1,3 @@
 schema: spec-driven
 created: 2026-07-15
-goal: Replace Brilliant Sort's generic CSS puzzle presentation with approved pixel crystal assets, a dark workbench composition, and reducer-derived tactile motion
+goal: Deliver the complete Brilliant Sort Demo through a differential-verified C++ WebAssembly game core, approved pixel assets, and a dark accessible TypeScript presentation

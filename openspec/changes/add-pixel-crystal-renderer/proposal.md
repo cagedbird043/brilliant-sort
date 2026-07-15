@@ -1,30 +1,33 @@
 ## Why
 
-Brilliant Sort now has a deterministic `pixel-bloom` pipeline, a reviewed four-color gem family, a reviewed deep-crystal target socket, and a reviewed shallow Shelf tray. The playable game still renders its board, Shelf, gems, and feedback through generic CSS gradients, soft porcelain cards, and container-level nudges. That leaves the actual game visually disconnected from the approved pixel-art material system.
+Brilliant Sort now has reviewed pixel assets and a deterministic `pixel-bloom` pipeline, but the browser still renders through generic CSS while its production rules execute directly in TypeScript. The assessment values a pure core that can be driven by Harness, decoupled from UI/presentation/Cocos, and expressed through C++; the existing C++ connected-component exercise is currently an isolated proof rather than production code.
 
-The next change must perform one coherent presentation cutover: promote reviewed assets out of the ignored candidate inbox, replace CSS-fabricated gems with real pixel sprites, build the target/Shelf composition around the new structural assets, and make actual reducer transitions feel tactile at the gem level. This is not a cosmetic shadow tweak; it is the game-facing consumer of the completed asset pipeline.
+This unified Demo change turns the approved assets, complete rules, Harness, and C++ exercise into one evidence chain: a headless C++20 `BrilliantSortCore` runs natively and as WebAssembly, TypeScript becomes the browser presentation/Harness consumer of a versioned JSON protocol, and the React game renders the approved dark pixel-crystal workbench from that core.
 
 ## What Changes
 
-- Promote approved pixel assets into a versioned game-consumed asset location after `pixel-bloom inspect` review.
-- Replace the CSS gradient gem body/facets with `ice`, `navy`, `coral`, and `jade` PNG sprites while retaining semantic buttons and existing accessibility labels.
-- Replace board-cell porcelain/color-block presentation with deep-crystal target sockets plus a precise target-color layer.
-- Replace generic Shelf slots with the reviewed shallow pixel tray and a continuous, code-rendered Shelf rail.
-- Introduce a view-local gem motion layer that derives motion intent from pre/post reducer state without changing game rules, LevelSpec, or reducer outcomes.
-- Implement selected lift/shadow separation, placement flight/landing, rejection feedback, and Shelf compaction as pixel-aware motion with a reduced-motion path.
-- Replace the remaining generic dashboard/porcelain framing around the interactive board with an original dark crystal-repair workbench presentation.
-- Add behavioral, asset, responsive, and visual smoke coverage for the new renderer.
+- Promote the complete current game rules into a deterministic C++20 `BrilliantSortCore`: LevelSpec loading, board, gems, selection, safe extraction, Shelf compaction, placement, rejections, restart, events, victory, and canonical dumps.
+- Reuse the existing C++ eight-neighbor `FindConnectedMovableGems` implementation as the production component-selection algorithm while retaining its assessment-facing contract and native tests.
+- Define a language-neutral JSON v1 ABI for loading levels, dispatching commands, reading transitions, events, rejections, and canonical state dumps.
+- Build the C++ core through CMake for native tests and through Emscripten into an isolated ES-module WebAssembly artifact; no C++ Canvas/full-stack UI is introduced.
+- Add a TypeScript `GameCorePort` and `WasmGameCore` adapter. React, Harness, replay, and Agent audit consume the port; TypeScript reducer code remains only a differential-test oracle until clean production cutover.
+- Add TS-reference ↔ native-C++ ↔ WASM differential replay tests over every fixed trace and key rejection/Shelf path.
+- Promote approved pixel assets after `pixel-bloom inspect`, then replace CSS-fabricated board/Shelf/gems with project-owned PNG sprites, code-rendered target/rail geometry, pure icon controls, a compact replay-only completion plaque, and reducer-derived tactile motion.
+- Preserve the deterministic rules, compact twelve-column Shelf, accessibility, reduced-motion behavior, static GitHub Pages deployment, and deferred commercial/power-up scope.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `pixel-crystal-renderer`: Pixel-art game presentation that consumes approved sprite assets and renders board/Shelf state, target colors, and reducer-driven tactile motion.
+- `wasm-game-core`: Complete C++ deterministic Brilliant Sort core with native and WebAssembly targets, JSON v1 ABI, TypeScript port adapter, and differential Harness verification.
+- `pixel-crystal-renderer`: Original dark pixel-crystal game presentation consuming approved sprites and `GameCorePort` transitions.
 
 ### Modified Capabilities
 
-- `android-inspired-presentation`: The presentation moves from a generic light Android-inspired card composition to an original dark pixel-crystal material system while preserving its portrait-first, accessible gameplay affordances.
+- `core-gameplay`: Browser production execution moves behind a language-neutral core port while preserving current rules and canonical observable behavior.
+- `game-harness`: Replay and audit flows gain native/WASM differential diagnostics while retaining fixed-trace contracts.
+- `android-inspired-presentation`: The presentation moves from generic light cards to an original dark pixel-crystal workbench while preserving portrait-first, accessible gameplay affordances.
 
 ## Impact
 
-Affected areas are `src/app/App.tsx`, `src/styles.css`, new view-layer components/helpers, approved runtime assets, end-to-end tests, and README/OpenSpec material documentation. The deterministic core, LevelSpec, reducer behavior, Harness, agent audit, C++ exercise, GitHub Pages deployment mechanism, and deferred commercial/power-up features remain unchanged.
+Affected areas are `cpp/`, CMake/Emscripten configuration, generated WASM build artifacts, TypeScript core-port/adapter modules, App/Harness command boundaries, `src/assets/pixel/`, view components/styles, differential tests, CI, README, and OpenSpec material documentation. The JSON LevelSpec schema, game rules, pixel-asset pipeline, React ownership of browser UI, GitHub Pages deployment model, and deferred commercial features remain unchanged.
