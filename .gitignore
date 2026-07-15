@@ -4,3 +4,8 @@ dist/
 playwright-report/
 test-results/
 .DS_Store
+
+# Local AI candidate sources and generated pixel-asset reviews
+/art/inbox/*
+!/art/inbox/.gitkeep
+/art/review/
