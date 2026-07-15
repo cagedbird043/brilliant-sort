@@ -14,16 +14,19 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "harness": "bun run src/harness/cli.ts",
+    "pixel-bloom": "bun run src/pixel-bloom/cli.ts",
     "test:e2e": "playwright test",
     "test:cpp": "mkdir -p .cache/cpp && c++ -std=c++20 -Wall -Wextra -Werror -pedantic cpp/connected_gems.cpp cpp/connected_gems_test.cpp -o .cache/cpp/connected_gems_test && .cache/cpp/connected_gems_test",
     "check": "bun run typecheck && bun test && bun run test:cpp && bun run build"
   },
   "dependencies": {
+    "pngjs": "^7.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",

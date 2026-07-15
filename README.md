@@ -27,6 +27,23 @@ Open the Vite URL printed by the command. The production app is static:
 bun run build
 ```
 
+## Pixel asset pipeline
+
+`pixel-bloom` turns one reviewed pixel-art PNG master into a validated family of semantic palette variants. It runs locally with Bun; no AI API, service, or image editor is required after the source art has been approved.
+
+```bash
+bun run pixel-bloom inspect art/inbox/<master>.png --json
+bun run pixel-bloom derive \
+  --source art/inbox/<master>.png \
+  --palette art/palettes/brilliant-sort.json \
+  --out art/review/pixel-bloom/gems
+bun run pixel-bloom preview \
+  --sprites art/review/pixel-bloom/gems \
+  --out art/review/pixel-bloom/index.html
+```
+
+The CLI rejects fake transparency, translucent v1 source pixels, and undeclared opaque palette noise. The project-local [`pixel-asset-pipeline`](./.agents/skills/pixel-asset-pipeline/SKILL.md) workflow requires inspect → derive → preview → human approval before art is promoted into the game.
+
 ## Verify
 
 ```bash
@@ -59,6 +76,9 @@ src/app/        React presentation adapter
 src/harness/    Replay, dump, diff, fixture diagnostics, and CLI
 src/agent/      Constrained agent context and auditable validation records
 cpp/            Independent C++ FindConnectedMovableGems exercise
+src/pixel-bloom/ Deterministic PNG inspection, palette derivation, and preview CLI
+art/             Candidate inbox, versioned palette manifests, and review artifacts
+.agents/skills/  Project-local agent workflows
 openspec/       Product rules, design, requirements, and task contracts
 ```
 

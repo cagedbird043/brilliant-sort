@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "roles": {
+    "outline": { "source": "#021951", "fixed": true },
+    "shadow": { "source": "#02517C" },
+    "darkFacet": { "source": "#035E8B" },
+    "midFacet": { "source": "#0174AF" },
+    "lightFacet": { "source": "#02A3DF" },
+    "mainFacet": { "source": "#03C5FE" },
+    "colorHighlight": { "source": "#78E9FE" },
+    "specular": { "source": "#FDFDFD", "fixed": true }
+  },
+  "variants": {
+    "ice": {
+      "shadow": "#02517C",
+      "darkFacet": "#035E8B",
+      "midFacet": "#0174AF",
+      "lightFacet": "#02A3DF",
+      "mainFacet": "#03C5FE",
+      "colorHighlight": "#78E9FE"
+    },
+    "navy": {
+      "shadow": "#13296F",
+      "darkFacet": "#1D368B",
+      "midFacet": "#2C4AB1",
+      "lightFacet": "#4567D9",
+      "mainFacet": "#6488FF",
+      "colorHighlight": "#ABBEFF"
+    },
+    "coral": {
+      "shadow": "#632A3B",
+      "darkFacet": "#85303D",
+      "midFacet": "#B13C41",
+      "lightFacet": "#DA514A",
+      "mainFacet": "#FF7059",
+      "colorHighlight": "#FFB88E"
+    },
+    "jade": {
+      "shadow": "#0C5141",
+      "darkFacet": "#10704F",
+      "midFacet": "#159460",
+      "lightFacet": "#21BA73",
+      "mainFacet": "#36DE87",
+      "colorHighlight": "#9FFFCA"
+    }
+  }
+}
