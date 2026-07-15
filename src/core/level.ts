@@ -1,4 +1,5 @@
 import { keyOf } from "./coords";
+import { isWon } from "./selectors";
 import type { BoardCell, GameState, LevelSpec } from "./types";
 
 export class LevelValidationError extends Error {
@@ -23,7 +24,7 @@ export function createGameState(spec: LevelSpec): GameState {
     gems[cell.gem.id] = cell.gem;
   }
 
-  return {
+  const state: GameState = {
     schemaVersion: 1,
     levelId: spec.id,
     board: {
@@ -40,6 +41,8 @@ export function createGameState(spec: LevelSpec): GameState {
     selection: null,
     status: "playing",
   };
+
+  return { ...state, status: isWon(state) ? "won" : "playing" };
 }
 
 export function validateLevelSpec(spec: LevelSpec): void {
