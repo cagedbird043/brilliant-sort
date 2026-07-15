@@ -53,6 +53,55 @@ test("accepted spatial moves briefly serialize input before the next command", a
   await expect(shelfSlot).toBeEnabled({ timeout: 1_000 });
 });
 
+test("wide workbench docks the Shelf as a first-viewport vertical rail", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "重新开始关卡" })).toBeVisible();
+
+  const layout = await page.evaluate(() => {
+    const board = document.querySelector(".calibration-bay")?.getBoundingClientRect().toJSON() ?? null;
+    const shelf = document.querySelector(".shelf-dock")?.getBoundingClientRect().toJSON() ?? null;
+    const grid = document.querySelector(".shelf-grid");
+    return {
+      board,
+      shelf,
+      columns: grid ? getComputedStyle(grid).gridTemplateColumns.split(" ").length : 0,
+      hasVerticalOverflow: document.documentElement.scrollHeight > window.innerHeight,
+    };
+  });
+
+  expect(layout.board).not.toBeNull();
+  expect(layout.shelf).not.toBeNull();
+  expect(layout.shelf!.left).toBeGreaterThan(layout.board!.right);
+  expect(Math.abs(layout.shelf!.top - layout.board!.top)).toBeLessThanOrEqual(1);
+  expect(layout.columns).toBe(1);
+  expect(layout.hasVerticalOverflow).toBe(false);
+});
+
+test("narrow workbench preserves the horizontal twelve-slot Shelf", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "重新开始关卡" })).toBeVisible();
+
+  const layout = await page.evaluate(() => {
+    const board = document.querySelector(".calibration-bay")?.getBoundingClientRect().toJSON() ?? null;
+    const shelf = document.querySelector(".shelf-dock")?.getBoundingClientRect().toJSON() ?? null;
+    const grid = document.querySelector(".shelf-grid");
+    return {
+      board,
+      shelf,
+      columns: grid ? getComputedStyle(grid).gridTemplateColumns.split(" ").length : 0,
+      hasHorizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
+    };
+  });
+
+  expect(layout.board).not.toBeNull();
+  expect(layout.shelf).not.toBeNull();
+  expect(layout.shelf!.top).toBeGreaterThan(layout.board!.bottom);
+  expect(layout.columns).toBe(12);
+  expect(layout.hasHorizontalOverflow).toBe(false);
+});
+
 test("reduced-motion preference keeps the puzzle state readable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");

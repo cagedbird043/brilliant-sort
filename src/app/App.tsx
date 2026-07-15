@@ -490,7 +490,12 @@ export function App() {
           <div className="board-chassis">
             <div
               className="game-board"
-              style={{ gridTemplateColumns: `repeat(${state.board.cols}, minmax(0, 1fr))` }}
+              style={
+                {
+                  gridTemplateColumns: `repeat(${state.board.cols}, minmax(0, 1fr))`,
+                  "--board-columns": state.board.cols,
+                } as CSSProperties
+              }
             >
               {boardSlots.map(({ coord, cell }) => {
                 if (!cell) {
@@ -560,7 +565,7 @@ export function App() {
           <div className="shelf-heading">
             <div>
               <p>缓冲导轨</p>
-              <span>{shelfFreeSlots} 个空位 / 12 列</span>
+              <span>{shelfFreeSlots} 个空位 / 12 槽</span>
             </div>
             <div className="shelf-actions">
               {state.selection?.container === "board" ? (

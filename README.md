@@ -2,7 +2,7 @@
 
 A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The browser drives a headless C++20 `BrilliantSortCore` compiled to WebAssembly; the original TypeScript reducer remains only as a differential-test oracle.
 
-Live demo: <https://cagedbird043.github.io/brilliant-sort/>
+Live demos: <https://cagedbird043.github.io/brilliant-sort/> · <https://brilliant-sort.cagedbird.cn/>
 
 ## What is implemented
 
@@ -32,6 +32,12 @@ Open the Vite URL printed by the command. `bun run dev` builds the local WASM co
 ```bash
 bun run build
 ```
+
+## Deployments
+
+`main` continues to publish the GitHub Pages build at `/brilliant-sort/`. After the same verification job passes, `publish-hk` downloads a separate root-based static artifact, rsyncs it to an immutable release under `/srv/cagedbird/brilliant-sort/releases/<sha>`, and atomically switches Caddy's `current` symlink for <https://brilliant-sort.cagedbird.cn/>.
+
+The Hong Kong job uses the repository secret `HK_EDGE_DEPLOY_KEY`, a pinned SSH host key, and a restricted remote key without shell forwarding. Caddy serves the site directly with compressed responses, immutable hashed assets, and uncached HTML; no origin application process or reverse proxy is needed for this static WASM game.
 
 ## Pixel asset pipeline
 

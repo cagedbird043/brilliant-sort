@@ -66,7 +66,7 @@ button:focus-visible {
 .crystal-workbench,
 .boot-panel {
   position: relative;
-  width: min(100%, 70rem);
+  width: min(100%, 76rem);
   border: 1px solid var(--edge-faint);
   background:
     linear-gradient(90deg, rgba(116, 143, 197, 0.04) 1px, transparent 1px) 0 0 / 2.25rem 2.25rem,
@@ -657,6 +657,123 @@ button:focus-visible {
 
   .board-chassis {
     padding: 0.82rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .workbench-shell {
+    padding-block: clamp(0.8rem, 2vh, 1.5rem);
+  }
+
+  .crystal-workbench {
+    display: grid;
+    grid-template-areas:
+      "header header"
+      "board shelf";
+    grid-template-columns: minmax(0, 1fr) clamp(7.4rem, 10vw, 9.25rem);
+    column-gap: clamp(0.9rem, 2vw, 1.5rem);
+    align-items: stretch;
+  }
+
+  .workbench-header {
+    grid-area: header;
+  }
+
+  .calibration-bay {
+    grid-area: board;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    margin-top: clamp(0.9rem, 2vh, 1.25rem);
+  }
+
+  .board-chassis {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .game-board {
+    --desktop-cell: clamp(3.65rem, min(8.4vw, 9.6svh), 8rem);
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    grid-template-columns: repeat(var(--board-columns, 6), var(--desktop-cell)) !important;
+  }
+
+  .shelf-dock {
+    grid-area: shelf;
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    margin-top: clamp(0.9rem, 2vh, 1.25rem);
+    padding-top: 0;
+    padding-left: clamp(0.65rem, 1.3vw, 1rem);
+    border-top: 0;
+    border-left: 1px solid var(--edge-faint);
+  }
+
+  .shelf-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.46rem;
+    margin-bottom: 0.48rem;
+  }
+
+  .shelf-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .shelf-rail {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    padding: 0.42rem 0.28rem;
+  }
+
+  .shelf-rail::before,
+  .shelf-rail::after {
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 1px;
+    height: auto;
+  }
+
+  .shelf-rail::before {
+    right: auto;
+    left: 0.28rem;
+  }
+
+  .shelf-rail::after {
+    right: 0.28rem;
+    left: auto;
+  }
+
+  .shelf-grid {
+    min-height: 0;
+    flex: 1;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(12, minmax(2.25rem, 1fr));
+    gap: clamp(0.08rem, 0.35svh, 0.2rem);
+  }
+
+  .shelf-slot {
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .shelf-sprite {
+    width: auto;
+    height: min(88%, 3rem);
+  }
+
+  .shelf-slot .gem {
+    width: min(64%, 2.75rem);
+    height: auto;
+    aspect-ratio: 1;
   }
 }
 

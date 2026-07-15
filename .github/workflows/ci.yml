@@ -53,15 +53,19 @@ jobs:
       - name: Browser E2E
         run: bun run test:e2e
 
-      - name: Production build
-        run: bun run build -- --base=/brilliant-sort/
+      - name: Build Hong Kong static artifact
+        run: bun run build
 
-      - name: Upload static artifact
+      - name: Upload Hong Kong static artifact
         uses: actions/upload-artifact@v4
         with:
-          name: brilliant-sort-dist
+          name: brilliant-sort-hk-dist
           path: dist/
           if-no-files-found: error
+
+      - name: Build GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: bun run build -- --base=/brilliant-sort/
 
       - name: Upload GitHub Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -89,3 +93,57 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  publish-hk:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency:
+      group: brilliant-sort-hk
+      cancel-in-progress: true
+    env:
+      DEPLOY_HOST: 38.55.198.139
+      DEPLOY_USER: cagedbird
+      DEPLOY_ROOT: /srv/cagedbird/brilliant-sort
+    steps:
+      - name: Check deployment credential
+        id: gate
+        env:
+          HK_EDGE_DEPLOY_KEY: ${{ secrets.HK_EDGE_DEPLOY_KEY }}
+        run: |
+          if [ -z "$HK_EDGE_DEPLOY_KEY" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::HK publish skipped because HK_EDGE_DEPLOY_KEY is not configured."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download Hong Kong static artifact
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: brilliant-sort-hk-dist
+          path: dist/
+
+      - name: Configure pinned SSH transport
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          HK_EDGE_DEPLOY_KEY: ${{ secrets.HK_EDGE_DEPLOY_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$HK_EDGE_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' '38.55.198.139 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMuBAPFaTEVO3MMT30+48mfpn3Lxeg/cCb9I2OSZpuEP' > ~/.ssh/known_hosts
+
+      - name: Publish immutable Hong Kong release
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          RELEASE: ${{ github.sha }}
+        run: |
+          release_dir="$DEPLOY_ROOT/releases/$RELEASE"
+          rsync -az --delete --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r dist/ "$DEPLOY_USER@$DEPLOY_HOST:$release_dir/"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "ln -sfn '$DEPLOY_ROOT/releases/$RELEASE' '$DEPLOY_ROOT/current' && test -f '$DEPLOY_ROOT/current/index.html'"
+
+      - name: Verify public Hong Kong origin
+        if: steps.gate.outputs.enabled == 'true'
+        run: curl --fail --show-error --retry 6 --retry-delay 2 https://brilliant-sort.cagedbird.cn/ > /dev/null
