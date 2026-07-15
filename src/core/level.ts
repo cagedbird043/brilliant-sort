@@ -1,6 +1,6 @@
 import { keyOf } from "./coords";
 import { isWon } from "./selectors";
-import type { BoardCell, GameState, LevelSpec } from "./types";
+import type { BoardCell, GameState, Gem, LevelSpec } from "./types";
 
 export class LevelValidationError extends Error {
   constructor(message: string) {
@@ -13,7 +13,7 @@ export function createGameState(spec: LevelSpec): GameState {
   validateLevelSpec(spec);
 
   const cells: Record<string, BoardCell> = {};
-  const gems: GameState["gems"] = {};
+  const gems: Record<string, Gem> = {};
 
   for (const cell of spec.cells) {
     const key = keyOf(cell);

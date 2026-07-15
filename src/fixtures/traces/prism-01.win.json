@@ -1,0 +1,12 @@
+[
+  { "type": "select-board-gem", "coord": { "row": 0, "col": 0 } },
+  { "type": "place-selection-in-shelf" },
+  { "type": "select-board-gem", "coord": { "row": 3, "col": 3 } },
+  { "type": "place-selection-at-target", "coord": { "row": 0, "col": 0 } },
+  { "type": "select-board-gem", "coord": { "row": 3, "col": 0 } },
+  { "type": "place-selection-at-target", "coord": { "row": 3, "col": 3 } },
+  { "type": "select-board-gem", "coord": { "row": 0, "col": 3 } },
+  { "type": "place-selection-at-target", "coord": { "row": 3, "col": 0 } },
+  { "type": "select-shelf-gem", "index": 0 },
+  { "type": "place-selection-at-target", "coord": { "row": 0, "col": 3 } }
+]

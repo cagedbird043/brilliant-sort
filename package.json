@@ -13,6 +13,7 @@
     "preview": "bunx --bun vite preview",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "harness": "bun run src/harness/cli.ts",
     "test:e2e": "playwright test",
     "test:cpp": "mkdir -p .cache/cpp && c++ -std=c++20 -Wall -Wextra -Werror -pedantic cpp/connected_gems.cpp cpp/connected_gems_test.cpp -o .cache/cpp/connected_gems_test && .cache/cpp/connected_gems_test",
     "check": "bun run typecheck && bun test && bun run test:cpp && bun run build"

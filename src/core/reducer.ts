@@ -67,7 +67,7 @@ function resolveStatus(
   nextState: GameState,
   events: readonly GameEvent[],
 ): ReduceResult {
-  const status = isWon(nextState) ? "won" : "playing";
+  const status: GameState["status"] = isWon(nextState) ? "won" : "playing";
   const stateWithStatus = nextState.status === status ? nextState : { ...nextState, status };
   const wonNow = previousState.status !== "won" && status === "won";
 
