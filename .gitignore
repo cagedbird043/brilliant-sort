@@ -9,3 +9,8 @@ test-results/
 /art/inbox/*
 !/art/inbox/.gitkeep
 /art/review/
+
+# Generated Emscripten output; keep source declarations tracked.
+/src/wasm/generated/*.mjs
+/src/wasm/generated/*.wasm
+/src/wasm/generated/*.map

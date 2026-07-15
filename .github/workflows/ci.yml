@@ -12,6 +12,9 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      EMSDK: ${{ runner.temp }}/emsdk
+      EM_CONFIG: ${{ runner.temp }}/emsdk/.emscripten
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,26 +24,36 @@ jobs:
         with:
           bun-version: "1.3.14"
 
+      - name: Install pinned Emscripten
+        run: |
+          git clone --depth 1 --branch 6.0.3 https://github.com/emscripten-core/emsdk.git "$EMSDK"
+          "$EMSDK/emsdk" install 6.0.3
+          "$EMSDK/emsdk" activate 6.0.3
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Typecheck
         run: bun run typecheck
 
-      - name: Core tests
-        run: bun test
-
-      - name: C++ tests
+      - name: Native C++ tests
         run: bun run test:cpp
 
-      - name: Production build
-        run: bun run build -- --base=/brilliant-sort/
+      - name: Build WebAssembly core
+        run: bun run build:wasm
+
+      - name: Core and differential tests
+        run: bun test
+
 
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
 
       - name: Browser E2E
         run: bun run test:e2e
+
+      - name: Production build
+        run: bun run build -- --base=/brilliant-sort/
 
       - name: Upload static artifact
         uses: actions/upload-artifact@v4

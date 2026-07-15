@@ -8,16 +8,20 @@
     "bun": ">=1.3.14"
   },
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build",
+    "dev": "bun run build:wasm && bunx --bun vite",
+    "build": "bun run build:wasm && bunx --bun vite build",
     "preview": "bunx --bun vite preview",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "harness": "bun run src/harness/cli.ts",
+    "harness": "bun run build:cpp && bun run build:wasm && bun run src/harness/cli.ts",
     "pixel-bloom": "bun run src/pixel-bloom/cli.ts",
-    "test:e2e": "playwright test",
-    "test:cpp": "mkdir -p .cache/cpp && c++ -std=c++20 -Wall -Wextra -Werror -pedantic cpp/connected_gems.cpp cpp/connected_gems_test.cpp -o .cache/cpp/connected_gems_test && .cache/cpp/connected_gems_test",
-    "check": "bun run typecheck && bun test && bun run test:cpp && bun run build"
+    "test:e2e": "bun run build && playwright test",
+    "build:cpp": "cmake -S . -B .cache/cmake -DCMAKE_BUILD_TYPE=Release && cmake --build .cache/cmake --parallel",
+    "test:cpp": "bun run build:cpp && ctest --test-dir .cache/cmake --output-on-failure",
+    "build:wasm": "env EM_CONFIG=\"${EM_CONFIG:-${EMSDK:-$PWD/.cache/emsdk}/.emscripten}\" \"${EMSDK:-$PWD/.cache/emsdk}\"/upstream/emscripten/emcmake cmake -S . -B .cache/wasm -DCMAKE_BUILD_TYPE=Release -DBRILLIANT_SORT_WASM_OUTPUT_DIR=src/wasm/generated && env EM_CONFIG=\"${EM_CONFIG:-${EMSDK:-$PWD/.cache/emsdk}/.emscripten}\" cmake --build .cache/wasm --target brilliant_sort_wasm --parallel",
+    "test:wasm": "bun run build:wasm && bun test tests/wasm",
+    "test:differential": "bun run build:cpp && bun run build:wasm && bun test tests/harness/differential.test.ts",
+    "check": "bun run typecheck && bun run build:cpp && bun run build:wasm && bun test && ctest --test-dir .cache/cmake --output-on-failure && bunx --bun vite build"
   },
   "dependencies": {
     "pngjs": "^7.0.0",

@@ -1,7 +1,9 @@
 import { canonicalDump } from "../core";
-import { prismWinningTrace } from "../fixtures";
-import { listScenarioNames, loadScenario } from "./scenario";
+import { prismLevel, prismWinningTrace } from "../fixtures";
+import { GameCoreFactory } from "../wasm/game-core";
+import { replayDifferential } from "./differential";
 import { replayCommandLog } from "./replay";
+import { listScenarioNames, loadScenario } from "./scenario";
 
 const [operation = "list", scenarioName = "prism-01"] = Bun.argv.slice(2);
 
@@ -15,18 +17,44 @@ switch (operation) {
     break;
   }
   case "replay": {
-    const { initialState } = loadScenario(scenarioName);
     if (scenarioName !== "prism-01") {
       throw new Error(`No committed replay trace for scenario: ${scenarioName}`);
     }
-    const replay = replayCommandLog(initialState, prismWinningTrace);
+    const core = await GameCoreFactory.load(prismLevel);
+    try {
+      const replay = replayCommandLog(core, prismWinningTrace);
+      console.log(
+        JSON.stringify(
+          {
+            scenario: scenarioName,
+            commands: replay.transitions.length,
+            status: replay.finalState.status,
+            shelfSize: replay.finalState.shelf.gemIds.length,
+            final: JSON.parse(replay.final),
+          },
+          null,
+          2,
+        ),
+      );
+    } finally {
+      core.destroy();
+    }
+    break;
+  }
+  case "differential": {
+    if (scenarioName !== "prism-01") {
+      throw new Error(`No committed differential trace for scenario: ${scenarioName}`);
+    }
+    const replay = await replayDifferential({
+      name: scenarioName,
+      level: prismLevel,
+      commands: prismWinningTrace,
+    });
     console.log(
       JSON.stringify(
         {
-          scenario: scenarioName,
-          commands: replay.transitions.length,
-          status: replay.finalState.status,
-          shelfSize: replay.finalState.shelf.gemIds.length,
+          scenario: replay.scenario,
+          commands: replay.commandCount,
           final: JSON.parse(replay.final),
         },
         null,
@@ -36,5 +64,5 @@ switch (operation) {
     break;
   }
   default:
-    throw new Error("Usage: bun run harness [list | dump <scenario> | replay <scenario>]");
+    throw new Error("Usage: bun run harness [list | dump <scenario> | replay <scenario> | differential <scenario>]");
 }

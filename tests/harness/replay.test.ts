@@ -1,51 +1,58 @@
 import { expect, test } from "bun:test";
-import { canonicalDump, reduce } from "../../src/core";
-import type { GameCommand, GameState } from "../../src/core";
-import { diffSnapshots, loadScenario, replayCommandLog } from "../../src/harness";
-import prismWinningTraceJson from "../../src/fixtures/traces/prism-01.win.json";
+import { canonicalDump } from "../../src/core";
+import { prismLevel, prismWinningTrace } from "../../src/fixtures";
+import { diffSnapshots, replayCommandLog } from "../../src/harness";
+import { GameCoreFactory } from "../../src/wasm/game-core";
 
-const prismWinningTrace = prismWinningTraceJson as unknown as readonly GameCommand[];
+test("the committed prism trace reaches victory through the WASM core", async () => {
+  const core = await GameCoreFactory.load(prismLevel);
+  try {
+    const replay = replayCommandLog(core, prismWinningTrace);
 
-function advanceToWrongTargetAttempt(initialState: GameState): GameState {
-  let state = reduce(initialState, { type: "select-board-gem", coord: { row: 0, col: 0 } }, initialState).nextState;
-  state = reduce(state, { type: "place-selection-in-shelf" }, initialState).nextState;
-  return reduce(state, { type: "select-board-gem", coord: { row: 3, col: 0 } }, initialState).nextState;
-}
-
-test("the committed prism trace reaches victory without rejection", () => {
-  const { initialState } = loadScenario("prism-01");
-  const replay = replayCommandLog(initialState, prismWinningTrace);
-
-  expect(replay.transitions).toHaveLength(prismWinningTrace.length);
-  expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
-  expect(replay.finalState.status).toBe("won");
-  expect(replay.finalState.shelf.gemIds).toHaveLength(0);
-  expect(replay.finalState.selection).toBeNull();
+    expect(replay.transitions).toHaveLength(prismWinningTrace.length);
+    expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
+    expect(replay.finalState.status).toBe("won");
+    expect(replay.finalState.shelf.gemIds).toHaveLength(0);
+    expect(replay.finalState.selection).toBeNull();
+  } finally {
+    core.destroy();
+  }
 });
 
-test("identical fixture and command trace produce byte-equivalent dumps", () => {
-  const first = loadScenario("prism-01").initialState;
-  const second = loadScenario("prism-01").initialState;
+test("independent WASM sessions produce byte-equivalent trace dumps", async () => {
+  const [first, second] = await Promise.all([
+    GameCoreFactory.load(prismLevel),
+    GameCoreFactory.load(prismLevel),
+  ]);
+  try {
+    const firstReplay = replayCommandLog(first, prismWinningTrace);
+    const secondReplay = replayCommandLog(second, prismWinningTrace);
 
-  const firstReplay = replayCommandLog(first, prismWinningTrace);
-  const secondReplay = replayCommandLog(second, prismWinningTrace);
-
-  expect(firstReplay.final).toBe(secondReplay.final);
-  expect(canonicalDump(firstReplay.finalState)).toBe(canonicalDump(secondReplay.finalState));
+    expect(firstReplay.final).toBe(secondReplay.final);
+    expect(canonicalDump(firstReplay.finalState)).toBe(canonicalDump(secondReplay.finalState));
+  } finally {
+    first.destroy();
+    second.destroy();
+  }
 });
 
-test("a rejected wrong-color target leaves semantic state unchanged", () => {
-  const { initialState } = loadScenario("prism-01");
-  const state = advanceToWrongTargetAttempt(initialState);
-  const before = canonicalDump(state);
-  const result = reduce(
-    state,
-    { type: "place-selection-at-target", coord: { row: 0, col: 0 } },
-    initialState,
-  );
-  const after = canonicalDump(result.nextState);
+test("a rejected wrong-color target leaves WASM state unchanged", async () => {
+  const core = await GameCoreFactory.load(prismLevel);
+  try {
+    core.dispatch({ type: "select-board-gem", coord: { row: 0, col: 0 } });
+    core.dispatch({ type: "place-selection-in-shelf" });
+    core.dispatch({ type: "select-board-gem", coord: { row: 3, col: 0 } });
+    const before = canonicalDump(core.snapshot());
+    const result = core.dispatch({
+      type: "place-selection-at-target",
+      coord: { row: 0, col: 0 },
+    });
+    const after = canonicalDump(core.snapshot());
 
-  expect(result.rejection?.code).toBe("target-color-mismatch");
-  expect(after).toBe(before);
-  expect(diffSnapshots(JSON.parse(before), JSON.parse(after))).toEqual([]);
+    expect(result.rejection?.code).toBe("target-color-mismatch");
+    expect(after).toBe(before);
+    expect(diffSnapshots(JSON.parse(before), JSON.parse(after))).toEqual([]);
+  } finally {
+    core.destroy();
+  }
 });

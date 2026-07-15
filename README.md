@@ -1,6 +1,6 @@
 # Brilliant Sort
 
-A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The project is designed as an engineering assessment artifact: the same TypeScript reducer drives the React UI, fixture replay, Harness diagnostics, and core tests.
+A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The browser drives a headless C++20 `BrilliantSortCore` compiled to WebAssembly; the original TypeScript reducer remains only as a differential-test oracle.
 
 Live demo: <https://cagedbird043.github.io/brilliant-sort/>
 
@@ -10,7 +10,7 @@ Live demo: <https://cagedbird043.github.io/brilliant-sort/>
 - Same-color movable eight-neighbor component selection.
 - Safe boundary extraction that keeps partially moved selections connected.
 - Matching target-component placement and compact twelve-column Shelf storage.
-- Deterministic victory state, canonical replay, browser E2E, and an independent C++ connected-component exercise.
+- Deterministic victory state, canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
 
 Commercial power-ups, payment, random generation, random mode, and progression are intentionally deferred. See [`openspec/`](./openspec/) for the evidence boundary and acceptance contracts.
 
@@ -18,10 +18,16 @@ Commercial power-ups, payment, random generation, random mode, and progression a
 
 ```bash
 bun install
+
+# One local, ignored Emscripten 6.0.3 toolchain setup.
+git clone --depth 1 --branch 6.0.3 https://github.com/emscripten-core/emsdk.git .cache/emsdk
+.cache/emsdk/emsdk install 6.0.3
+.cache/emsdk/emsdk activate 6.0.3
+
 bun run dev
 ```
 
-Open the Vite URL printed by the command. The production app is static:
+Open the Vite URL printed by the command. `bun run dev` builds the local WASM core before starting Vite. The production app is static:
 
 ```bash
 bun run build
@@ -48,34 +54,37 @@ The CLI rejects fake transparency, translucent v1 source pixels, and undeclared 
 
 ```bash
 bun run typecheck
-bun test
 bun run test:cpp
-bun run build
+bun run test:wasm
+bun run test:differential
 bun run test:e2e
 ```
 
-`bun run check` runs the non-browser verification and production build. Browser E2E requires Chromium installed through Playwright:
+`bun run check` runs typechecking, native C++ tests, WASM build, TypeScript/WASM/native differential tests, and a Vite production build. Browser E2E requires Chromium installed through Playwright:
 
 ```bash
 bunx playwright install chromium
 ```
 
-Replay the committed winning trace through the same production reducer:
+Replay the fixed trace through the production WASM core, or run the three-backend Harness gate:
 
 ```bash
 bun run harness replay prism-01
+bun run harness differential prism-01
 ```
 
 
 ## Architecture
 
 ```text
-src/core/       Pure TypeScript game state, topology, reducer, invariants
+cpp/            C++20 BrilliantSortCore, C ABI, CMake targets, and component exercise
+src/core/       Versioned state types, dump format, and TypeScript differential oracle
+src/wasm/       Emscripten module declaration and GameCorePort adapter
 src/fixtures/   Fixed JSON LevelSpec content and replay traces
-src/app/        React presentation adapter
-src/harness/    Replay, dump, diff, fixture diagnostics, and CLI
+src/app/        React workbench presentation, accessibility, and motion
+src/harness/    GameCorePort replay, native/WASM differential diagnostics, and CLI
+src/assets/     Promoted locked pixel sprites consumed by the browser bundle
 src/agent/      Constrained agent context and auditable validation records
-cpp/            Independent C++ FindConnectedMovableGems exercise
 src/pixel-bloom/ Deterministic PNG inspection, palette derivation, and preview CLI
 art/             Candidate inbox, versioned palette manifests, and review artifacts
 .agents/skills/  Project-local agent workflows

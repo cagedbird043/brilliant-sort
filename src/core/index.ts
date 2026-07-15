@@ -14,6 +14,7 @@ export {
   isWon,
 } from "./selectors";
 export { findConnectedComponent8, isConnected8, neighbors8 } from "./topology";
+export type { CoreTransition, GameCoreFactory, GameCorePort } from "./port";
 export type {
   Board,
   BoardCell,

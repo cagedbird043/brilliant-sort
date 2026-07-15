@@ -23,6 +23,10 @@ test("a player can complete the fixed prism level in the browser", async ({ page
 
   await expect(page.getByRole("heading", { name: "棱镜已归位" })).toBeVisible();
   await expect(page.getByText("已完成")).toBeVisible();
+
+  await page.getByRole("button", { name: "再玩一次" }).click();
+  await expect(page.getByRole("heading", { name: "棱镜已归位" })).toBeHidden();
+  await expect(page.getByTestId("board-cell-0-0")).toHaveAttribute("aria-label", /冰蓝宝石/);
 });
 
 test("restart restores the deterministic initial board", async ({ page }) => {
@@ -36,6 +40,17 @@ test("restart restores the deterministic initial board", async ({ page }) => {
 
   await expect(page.getByTestId("shelf-slot-0")).not.toHaveClass(/has-gem/);
   await expect(page.getByTestId("board-cell-0-0")).toHaveAttribute("aria-label", /冰蓝宝石/);
+});
+
+test("accepted spatial moves briefly serialize input before the next command", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByTestId("board-cell-0-0").click();
+  const shelfSlot = page.getByTestId("shelf-slot-0");
+  await shelfSlot.click();
+
+  await expect(shelfSlot).toBeDisabled();
+  await expect(shelfSlot).toBeEnabled({ timeout: 1_000 });
 });
 
 test("reduced-motion preference keeps the puzzle state readable", async ({ page }) => {

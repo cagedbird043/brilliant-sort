@@ -1,5 +1,5 @@
-import { canonicalDump, reduce } from "../core";
-import type { GameCommand, GameEvent, GameState, Rejection } from "../core";
+import { canonicalDump } from "../core";
+import type { GameCommand, GameCorePort, GameEvent, GameState, Rejection } from "../core";
 import { diffSnapshots, type SnapshotDifference } from "./diff";
 
 export interface CommandTransition {
@@ -20,14 +20,13 @@ export interface ReplayResult {
 }
 
 export function applyCommand(
-  state: GameState,
+  core: GameCorePort,
   command: GameCommand,
-  initialState: GameState,
   index = 0,
-): CommandTransition & { readonly nextState: GameState } {
-  const before = canonicalDump(state);
-  const result = reduce(state, command, initialState);
-  const after = canonicalDump(result.nextState);
+): CommandTransition {
+  const before = canonicalDump(core.snapshot());
+  const result = core.dispatch(command);
+  const after = result.canonicalDump;
 
   return {
     index,
@@ -35,35 +34,23 @@ export function applyCommand(
     before,
     after,
     events: result.events,
-    rejection: result.rejection,
+    rejection: result.rejection ?? undefined,
     diff: diffSnapshots(JSON.parse(before), JSON.parse(after)),
-    nextState: result.nextState,
   };
 }
 
-export function replayCommandLog(initialState: GameState, commands: readonly GameCommand[]): ReplayResult {
-  let state = initialState;
-  const initial = canonicalDump(initialState);
-  const transitions: CommandTransition[] = [];
-
-  commands.forEach((command, index) => {
-    const transition = applyCommand(state, command, initialState, index);
-    transitions.push({
-      index: transition.index,
-      command: transition.command,
-      before: transition.before,
-      after: transition.after,
-      events: transition.events,
-      rejection: transition.rejection,
-      diff: transition.diff,
-    });
-    state = transition.nextState;
-  });
+export function replayCommandLog(
+  core: GameCorePort,
+  commands: readonly GameCommand[],
+): ReplayResult {
+  const initial = canonicalDump(core.snapshot());
+  const transitions = commands.map((command, index) => applyCommand(core, command, index));
+  const finalState = core.snapshot();
 
   return {
     initial,
-    finalState: state,
-    final: canonicalDump(state),
+    finalState,
+    final: canonicalDump(finalState),
     transitions,
   };
 }
