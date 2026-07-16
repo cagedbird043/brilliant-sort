@@ -241,10 +241,11 @@ UI、动画、音频和具体引擎无关的确定性状态机。生产规则由
 仅保留为独立差分 Oracle。固定
 <code>LevelSpec</code>、命令回放、canonical dump、原生/WASM 三后端差分
 Harness、浏览器 E2E 与人工视觉/听觉验收共同构成可执行证据链。</p>
-<p>题目要求的是 Demo
-的核心逻辑与工程结构；仓库额外实现了一个可在线游玩的 Tux
-旗舰关卡、确定性像素资产管线、独立 C++ AudioWorklet
-合成器和双站静态部署。这些额外部分不改变核心论点：<strong>规则唯一、边界可驱动、状态可序列化、失败可定位、AI
+<p>题目要求的是 Demo 的核心逻辑与工程结构；仓库额外实现了可在线游玩的
+Tux 旗舰关卡、确定性像素资产管线、独立 C++ AudioWorklet
+合成器、双站静态部署、两级本地 Git 门禁，以及四种 Agent 可直接使用的
+OpenSpec
+技能。这些额外部分不改变核心论点：<strong>规则唯一、边界可驱动、状态可序列化、失败可定位、AI
 输出可验证。</strong></p>
 <h2 id="玩法假设8-行">1. 玩法假设（8 行）</h2>
 <ol type="1">
@@ -352,6 +353,14 @@ key；新手提示和静音偏好不跟着清空。<code>PixelAudioEngine</code>
 post-dispatch <code>AudioCue</code>；AudioContext
 生命周期、设备采样率、静音偏好、音乐进度均不进入 <code>GameState</code>
 或 replay。</p>
+<p>重玩功能暴露了原实现里一个很具体的生命周期错误：音频引擎把
+<code>won</code>
+当成“整个引擎只能提交一次”，所以第二局不会再播胜利音乐。修复没有重建
+AudioContext，而是在 12 字节 Cue 协议里追加
+<code>Restart = 7</code>；浏览器按 <code>Won → Restart → Won</code>
+投递，C++ 引擎按局重置 Voice、Score Transport、Layer
+和胜利锁存，同时保留静音状态。原生诊断断言两次 fanfare，浏览器 E2E
+断言实际传入 Worklet 的 kind 序列为 <code>[6, 7, 6]</code>。</p>
 <h3 id="typescript-的定位">TypeScript 的定位</h3>
 <p>TypeScript reducer 保留为差分
 Oracle，而不是浏览器生产回退。生产浏览器经 WASM 调用 C++ 核心；如果 WASM
@@ -460,18 +469,26 @@ Demo 辅助，不是商业 Power-up。</p>
 <h3 id="给-agent-的上下文与可执行反馈">给 Agent
 的上下文与可执行反馈</h3>
 <p>已归档和活动中的 OpenSpec
-提供题目事实、假设、非目标、模块边界、接受标准和人工验收门。<code>src/agent/context.ts</code>
+提供题目事实、假设、非目标、模块边界、接受标准和人工验收门。项目上下文已迁入
+<code>openspec/config.yaml</code>；OpenSpec 1.6 官方生成的
+<code>propose / apply / explore / sync / archive</code> 技能提交在
+<code>.omp/</code>、<code>.codex/</code>、<code>.claude/</code> 和
+<code>.opencode/</code>，同一套约束可以直接交给 Oh My Pi、Codex、Claude
+Code 与 OpenCode。<code>src/agent/context.ts</code>
 会拒绝请求中包含明确延期的能力；<code>src/agent/audit.ts</code>
-将规格版本、改动文件、验证命令、验证结果、下一决策和时间戳序列化为审计记录。</p>
+记录规格版本、改动文件、验证命令、结果、下一决策和时间戳。</p>
 <p><a href="tests/agent/context.test.ts"><code>tests/agent/context.test.ts</code></a>
 里的
 <code>deferred capability requests stop before speculative implementation</code>
 会把含有 <code>power-up</code> 和 <code>payment</code>
 的请求交给上下文构造器，并断言结果为
 <code>blocked</code>。也就是说，越界请求在生成实现方案之前就会停住。</p>
-<p>Agent 的可执行反馈不是自然语言“看起来不对”，而是：固定
+<p>Agent 的可执行反馈不是自然语言“看起来不对”，而是固定
 fixture、命令日志、canonical dump、事件、rejection、Harness 首个 JSON
-差异、原生/WASM 差分、浏览器 E2E 以及人工视觉/听觉 review。</p>
+差异、原生/WASM 差分和浏览器 E2E。Lefthook
+再把这些门禁放到真实开发路径上：pre-commit 并行跑类型、Bun
+测试、夹具与严格规格，pre-push 顺序跑 native/WASM/生产构建和
+desktop/mobile Playwright，避免共享构建目录互相打架。</p>
 <h3 id="一个容易误解的边界与发现方式">一个容易误解的边界与发现方式</h3>
 <p><strong>规则误解</strong>：两个视觉 Shelf Bank 很容易诱导 Agent
 实现成两个独立逻辑容器。规格明确规定核心仅有一个紧凑
@@ -553,22 +570,28 @@ Shelf
 基线、Harness 断言、C++/WASM 协议和 Agent 约束。</p>
 <h2 id="复现与证据">9. 复现与证据</h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> install <span class="at">--frozen-lockfile</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run check</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run test:e2e</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness replay tux-01</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness differential tux-01</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run level:check:tux</span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run hooks:install</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bunx</span> lefthook run pre-commit <span class="at">--all-files</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bunx</span> lefthook run pre-push <span class="at">--all-files</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run check</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run test:e2e</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness replay tux-01</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness differential tux-01</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run level:check:tux</span></code></pre></div>
 <p>作为复现成本参考，<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29488358577">GitHub
 Actions run #29488358577</a> 的 <code>verify</code> 在 Ubuntu runner
 上用时 2 分 13 秒，其中包括安装固定版本的 Emscripten 和
 Chromium、编译三个后端并运行全部自动化检查。本地已有依赖和浏览器缓存时通常更快；第一次运行主要看下载速度。</p>
-<p>对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48
-kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux
-与初始/中途魔法棒场景的三后端逐 transition
-parity。浏览器回归还覆盖手动/魔法棒通关后的重玩时机、键盘操作、canonical
-重开、相机复位、偏好保留、移动布局和 reduced motion。CI 在 Ubuntu
-上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium
-E2E、Hong Kong 静态产物和 GitHub Pages 部署。</p>
+<p>在本答卷工作站上，四项并行 pre-commit 门禁用时 1.27 秒，完整 pre-push
+门禁用时 20.91 秒；这是实测值，不是对其它机器的固定承诺。</p>
+<p>对应版本的本地验证包括 35 个 Bun 测试、4 个 native CTest（含固定 48
+kHz PCM 哈希和两局 fanfare 诊断）、22 次 desktop/mobile Chromium
+E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition
+parity。浏览器回归还覆盖 <code>Won → Restart → Won</code> 音频
+Cue、重玩时机、键盘操作、canonical 重开、相机复位、偏好保留、移动布局和
+reduced motion。CI 在 Ubuntu 上重新执行类型检查、native C++、WASM
+构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages
+部署。</p>
 <p>详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：<a href="submission/evidence-matrix.md"><code>submission/evidence-matrix.md</code></a>。OpenSpec
 是需求来源和验收记录，不是事后补写的故事。已验收功能均已归档；重玩功能的活动规格保留到人工视觉验收：</p>
 <ul>

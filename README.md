@@ -18,9 +18,11 @@ Assessment submission: [`SUBMISSION.md`](./SUBMISSION.md) · [`PDF`](./submissio
 - A deterministic `apply-global-wand` demo assist shared by TypeScript, native C++, and WASM: locked gems stay fixed while every remaining identity is paired to its target, the Shelf is cleared, and victory is emitted once.
 - Responsive desktop/square/portrait Tux staging with integer fit, bounded zoom/pan, ordinary WAAPI flight, a diagonal full-board wand wave, and a shared SVG arc-light plus three pixel-firework victory finale.
 - A contextual post-finale replay control that dispatches the canonical restart command, restores the initial Board and camera, and keeps onboarding/audio preferences without reloading the page.
-- A separate deterministic C++20 pixel-audio engine compiled to AudioWorklet WASM, with gameplay cues, first-gesture resume, persisted in-world mute, and silent failure fallback.
+- A separate deterministic C++20 pixel-audio engine compiled to AudioWorklet WASM, with gameplay cues, first-gesture resume, persisted in-world mute, silent failure fallback, and an ordered replay reset cue so every run can play its victory fanfare.
 - Canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
 - One-sentence, versioned onboarding that disappears only after an accepted puzzle or wand command and remains non-blocking when browser storage is unavailable.
+- Pinned Lefthook local gates: parallel type/unit/fixture/spec checks before commit, then native/WASM/build/browser verification before push.
+- Official OpenSpec 1.6 skills and commands checked into the repository for Oh My Pi, Codex, Claude Code, and OpenCode.
 
 The built-in wand is a deterministic, non-commercial demo assist. Commercial power-ups, payment, random generation, random mode, and progression are intentionally deferred. See [`openspec/`](./openspec/) for the evidence boundary and acceptance contracts.
 
@@ -96,11 +98,21 @@ bun run test:e2e
 ```
 
 `bun run check` runs typechecking, native C++ tests, WASM build, TypeScript/WASM/native differential tests, and a Vite production build. Browser E2E requires Chromium installed through Playwright:
-The current local gate covers 34 Bun tests, four native CTests, and 22 Playwright runs across eleven desktop/mobile Chromium scenarios.
+The current local gate covers 35 Bun tests, four native CTests, and 22 Playwright runs across eleven desktop/mobile Chromium scenarios.
 
 ```bash
 bunx playwright install chromium
 ```
+
+`bun install` installs the pinned Lefthook runner. Install or refresh the Git hooks explicitly, then exercise the same local gates without creating a commit:
+
+```bash
+bun run hooks:install
+bunx lefthook run pre-commit --all-files
+bunx lefthook run pre-push --all-files
+```
+
+Pre-commit runs typecheck, Bun tests, fixture drift, and strict OpenSpec validation in parallel. Pre-push runs the native/WASM/production build, desktop/mobile Playwright, fixture drift, and strict specs sequentially so shared build outputs cannot race.
 
 Replay the flagship fixed trace through the production WASM core, or run the three-backend Harness gate:
 
@@ -129,6 +141,10 @@ src/pixel-bloom/ Deterministic PNG inspection, palette derivation, and preview C
 tools/           Deterministic compact-map compiler
 art/             Candidate inbox, versioned palette manifests, and review artifacts
 .agents/skills/  Project-local agent workflows
+lefthook.yml     Fast pre-commit and complete pre-push local quality gates
+.omp/.codex/     Generated OpenSpec skills for Oh My Pi and Codex
+.claude/         Generated Claude Code OpenSpec skills and `/opsx:*` commands
+.opencode/       Generated OpenCode OpenSpec skills and commands
 openspec/        Product rules, design, requirements, and task contracts
 ```
 
@@ -158,9 +174,11 @@ The deployed artifact is `dist/`; production does not require a Bun daemon or ba
 - 确定性的 `apply-global-wand` Demo 辅助命令由 TypeScript、原生 C++ 和 WASM 共同实现：锁定宝石保持不动，其余宝石身份全局配对到目标，Shelf 清空，并且只产生一次胜利。
 - 自适应桌面/方屏/竖屏 Tux 舞台：整数尺寸拟合、受限缩放/平移、普通 WAAPI 飞行、对角线全图魔法棒波次，以及手动/魔法棒通关共用的 SVG 弧光与三组像素烟花终章。
 - 终章结束后，右上角魔法棒会换成重玩按钮；它走 canonical 重开命令，复原初始棋盘和相机，同时保留新手提示与音频偏好，不刷新页面。
-- 独立的确定性 C++20 像素音频引擎，编译到 AudioWorklet WASM，支持玩法 Cue、首次交互恢复、场景内静音持久化和静默失败降级。
+- 独立的确定性 C++20 像素音频引擎，编译到 AudioWorklet WASM，支持玩法 Cue、首次交互恢复、场景内静音持久化、静默失败降级，以及按顺序处理的重玩重置 Cue，保证每一局都能再次播放胜利音乐。
 - Canonical replay、浏览器 E2E，以及 TypeScript ↔ 原生 C++ ↔ WebAssembly 的逐字节差分验证。
 - 版本化的一句话新手提示：仅在首次接受的棋盘/Shelf/魔法棒命令后消失；浏览器存储不可用时仍不阻塞游戏。
+- 固定版本的 Lefthook 本地门禁：提交前并行检查类型、单测、夹具和规格；推送前再跑 native/WASM、生产构建与浏览器 E2E。
+- 仓库内直接提供 OpenSpec 1.6 为 Oh My Pi、Codex、Claude Code、OpenCode 生成的技能与命令。
 
 内置魔法棒是确定性的非商业 Demo 辅助。商业 Power-up、付费、运行时随机生成、随机模式和进度系统均被明确延后。证据边界和验收契约见 [`openspec/`](./openspec/)。
 
@@ -236,11 +254,21 @@ bun run test:e2e
 ```
 
 `bun run check` 会运行类型检查、原生 C++ 测试、WASM 构建、TypeScript/WASM/原生差分测试和 Vite 生产构建。浏览器 E2E 需要通过 Playwright 安装 Chromium：
-当前本地门禁覆盖 34 个 Bun 测试、4 个原生 CTest，以及 11 个 desktop/mobile Chromium 场景形成的 22 次 Playwright 运行。
+当前本地门禁覆盖 35 个 Bun 测试、4 个原生 CTest，以及 11 个 desktop/mobile Chromium 场景形成的 22 次 Playwright 运行。
 
 ```bash
 bunx playwright install chromium
 ```
+
+`bun install` 会安装固定版本的 Lefthook。可以显式安装/刷新 Git Hook，再手动跑一遍相同门禁：
+
+```bash
+bun run hooks:install
+bunx lefthook run pre-commit --all-files
+bunx lefthook run pre-push --all-files
+```
+
+Pre-commit 并行运行 typecheck、Bun 测试、夹具漂移和严格 OpenSpec；pre-push 顺序运行 native/WASM/生产构建、desktop/mobile Playwright、夹具漂移和严格规格，避免共享构建目录互相打架。
 
 可以通过生产 WASM 核心回放旗舰固定轨迹，或运行三后端 Harness 门禁：
 
@@ -268,6 +296,10 @@ src/pixel-bloom/ 确定性 PNG 检查、调色板派生和预览 CLI
 tools/           确定性紧凑地图编译器
 art/             候选 inbox、版本化调色板 manifest 和评审产物
 .agents/skills/  项目内 Agent 工作流
+lefthook.yml     快速 pre-commit 与完整 pre-push 本地质量门禁
+.omp/.codex/     Oh My Pi 与 Codex 的 OpenSpec 技能
+.claude/         Claude Code 的 OpenSpec 技能和 `/opsx:*` 命令
+.opencode/       OpenCode 的 OpenSpec 技能和命令
 openspec/        产品规则、设计、需求和任务契约
 ```
 
