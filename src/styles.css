@@ -327,6 +327,41 @@ button:focus-visible {
   cursor: grabbing;
 }
 
+.crystal-workbench.is-won .board-camera::after {
+  position: absolute;
+  z-index: 6;
+  top: -10%;
+  bottom: -10%;
+  left: -30%;
+  width: 22%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(102, 220, 255, 0.18) 18%,
+    rgba(240, 252, 255, 0.82) 48%,
+    rgba(115, 226, 255, 0.24) 76%,
+    transparent
+  );
+  content: "";
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0) skewX(-12deg);
+  animation: tux-victory-shimmer 900ms steps(16, end) 120ms both;
+}
+
+@keyframes tux-victory-shimmer {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) skewX(-12deg);
+  }
+  12% { opacity: 1; }
+  86% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(600%, 0, 0) skewX(-12deg);
+  }
+}
+
 .victory-finale {
   position: absolute;
   z-index: 8;
