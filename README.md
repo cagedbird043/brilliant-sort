@@ -6,11 +6,12 @@ Live demos: <https://cagedbird043.github.io/brilliant-sort/> · <https://brillia
 
 ## What is implemented
 
-- Fixed, versioned JSON puzzle fixtures.
-- Same-color movable eight-neighbor component selection.
-- Safe boundary extraction that keeps partially moved selections connected.
-- Matching target-component placement and compact twelve-column Shelf storage.
-- Deterministic victory state, canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
+- The compiled 24×32 `tux-01` flagship fixture: 546 active sockets, a deterministic 75.09% locked opening, and a sixteen-slot Shelf.
+- Same-color movable eight-neighbor component selection with connectivity-preserving partial extraction.
+- Matching target-component placement, compact configured Shelf storage, and ordered two-bank presentation.
+- Responsive desktop/square/portrait Tux staging with integer fit, bounded zoom/pan, authoritative WAAPI flight, and a solved-image shimmer.
+- A separate deterministic C++20 pixel-audio engine compiled to AudioWorklet WASM, with gameplay cues, first-gesture resume, persisted in-world mute, and silent failure fallback.
+- Canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
 
 Commercial power-ups, payment, random generation, random mode, and progression are intentionally deferred. See [`openspec/`](./openspec/) for the evidence boundary and acceptance contracts.
 
@@ -27,7 +28,7 @@ git clone --depth 1 --branch 6.0.3 https://github.com/emscripten-core/emsdk.git 
 bun run dev
 ```
 
-Open the Vite URL printed by the command. `bun run dev` builds the local WASM core before starting Vite. The production app is static:
+Open the Vite URL printed by the command. `bun run dev` builds the game-core and pixel-audio WASM modules before starting Vite. The production app is static:
 
 ```bash
 bun run build
@@ -56,6 +57,24 @@ bun run pixel-bloom preview \
 
 The CLI rejects fake transparency, translucent v1 source pixels, and undeclared opaque palette noise. The project-local [`pixel-asset-pipeline`](./.agents/skills/pixel-asset-pipeline/SKILL.md) workflow requires inspect → derive → preview → human approval before art is promoted into the game.
 
+## Flagship fixture and pixel audio
+
+The reviewed compact map at `src/fixtures/source/tux-01.map.json` is the authoring source for the canonical `LevelSpec`; `prism-01` remains a focused regression fixture. The committed Tux trace wins identically in the TypeScript oracle, native C++ core, and production WASM core.
+
+```bash
+bun run level:compile:tux
+bun run level:check:tux
+bun run harness replay tux-01
+bun run harness differential tux-01
+```
+
+Pixel music and effects are synthesized by `cpp/audio/` from the constrained score in `src/audio/tux-01.music.json`. The browser loads the raw standalone audio WASM only through an `AudioWorklet`; no PCM or tracker asset is shipped.
+
+```bash
+bun run build:cpp
+.cache/cmake/pixel_audio_offline_renderer --seconds 8
+```
+
 ## Verify
 
 ```bash
@@ -72,29 +91,34 @@ bun run test:e2e
 bunx playwright install chromium
 ```
 
-Replay the fixed trace through the production WASM core, or run the three-backend Harness gate:
+Replay the flagship fixed trace through the production WASM core, or run the three-backend Harness gate:
 
 ```bash
-bun run harness replay prism-01
-bun run harness differential prism-01
+bun run harness replay tux-01
+bun run harness differential tux-01
 ```
+
+Use `prism-01` with the same commands for the compact regression fixture.
 
 
 ## Architecture
 
 ```text
-cpp/            C++20 BrilliantSortCore, C ABI, CMake targets, and component exercise
-src/core/       Versioned state types, dump format, and TypeScript differential oracle
-src/wasm/       Emscripten module declaration and GameCorePort adapter
-src/fixtures/   Fixed JSON LevelSpec content and replay traces
-src/app/        React workbench presentation, accessibility, and motion
-src/harness/    GameCorePort replay, native/WASM differential diagnostics, and CLI
-src/assets/     Promoted locked pixel sprites consumed by the browser bundle
-src/agent/      Constrained agent context and auditable validation records
+cpp/             C++20 BrilliantSortCore, C ABI, CMake targets, and component exercise
+cpp/audio/       Fixed-capacity pixel synth, constrained Tux score, worklet ABI, and offline renderer
+src/core/        Versioned state types, dump format, and TypeScript differential oracle
+src/wasm/        Emscripten module declaration and GameCorePort adapter
+src/audio/       Cue bridge, persisted browser port, AudioWorklet processor, score, and audio WASM
+src/fixtures/    Compact Tux authoring map, generated LevelSpec fixtures, and replay traces
+src/app/         React Tux stage, adaptive camera, accessibility, and authoritative motion
+src/harness/     GameCorePort replay, native/WASM differential diagnostics, and CLI
+src/assets/      Promoted large and Micro pixel families consumed by the browser bundle
+src/agent/       Constrained agent context and auditable validation records
 src/pixel-bloom/ Deterministic PNG inspection, palette derivation, and preview CLI
+tools/           Deterministic compact-map compiler
 art/             Candidate inbox, versioned palette manifests, and review artifacts
 .agents/skills/  Project-local agent workflows
-openspec/       Product rules, design, requirements, and task contracts
+openspec/        Product rules, design, requirements, and task contracts
 ```
 
 The deployed artifact is `dist/`; production does not require a Bun daemon or backend service.

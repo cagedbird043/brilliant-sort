@@ -14,3 +14,10 @@ export {
   type TargetPlaceAudioCue,
   type WonAudioCue,
 } from "./contracts";
+export {
+  BrowserPixelAudioPort,
+  getBrowserPixelAudioPort,
+  type PixelAudioSnapshot,
+  type PixelAudioStatus,
+} from "./browser-audio";
+export { deriveAudioCues } from "./game-cues";

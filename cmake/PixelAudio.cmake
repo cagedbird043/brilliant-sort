@@ -35,6 +35,12 @@ function(pixel_audio_add_native_targets)
         target_link_libraries(pixel_audio_test PRIVATE pixel_audio)
         pixel_audio_enable_warnings(pixel_audio_test)
         add_test(NAME pixel_audio COMMAND pixel_audio_test)
+        add_test(NAME pixel_audio_offline_hash COMMAND pixel_audio_offline_renderer)
+        set_tests_properties(
+            pixel_audio_offline_hash
+            PROPERTIES
+                PASS_REGULAR_EXPRESSION
+                    "pcm_hash=10023643131642136347 frames=384000 peak=32768 deterministic=true")
     endif()
 endfunction()
 
@@ -53,15 +59,14 @@ function(pixel_audio_add_emscripten_target)
         brilliant_sort_audio
         PRIVATE
             "--no-entry"
-            "-sMODULARIZE=1"
-            "-sEXPORT_ES6=1"
-            "-sEXPORT_NAME=createBrilliantSortAudioModule"
-            "-sENVIRONMENT=web,worker"
+            "-sSTANDALONE_WASM=1"
             "-sFILESYSTEM=0"
-            "-sEXPORTED_FUNCTIONS=['_bs_audio_worklet_create','_bs_audio_worklet_destroy','_bs_audio_worklet_push_cue','_bs_audio_worklet_set_muted','_bs_audio_worklet_render']")
+            "-sALLOW_MEMORY_GROWTH=0"
+            "-sINITIAL_MEMORY=33554432"
+            "-sEXPORTED_FUNCTIONS=['_malloc','_free','_bs_audio_worklet_create','_bs_audio_worklet_destroy','_bs_audio_worklet_push_cue','_bs_audio_worklet_set_muted','_bs_audio_worklet_render']")
     set_target_properties(
         brilliant_sort_audio
         PROPERTIES
             OUTPUT_NAME "brilliant-sort-audio"
-            SUFFIX ".mjs")
+            SUFFIX ".wasm")
 endfunction()

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { keyOf } from "../core/coords";
+import { coordFromKey, keyOf } from "../core/coords";
 import type {
   BoardCell,
   Color,
@@ -11,14 +11,33 @@ import type {
   GameState,
   RejectionCode,
 } from "../core";
-import { prismLevel } from "../fixtures";
+import {
+  deriveAudioCues,
+  getBrowserPixelAudioPort,
+  type BrowserPixelAudioPort,
+  type PixelAudioSnapshot,
+} from "../audio";
+import { tuxLevel } from "../fixtures";
 import { GameCoreFactory } from "../wasm/game-core";
-import gemCoral from "../assets/pixel/gem-coral.png";
-import gemIce from "../assets/pixel/gem-ice.png";
-import gemJade from "../assets/pixel/gem-jade.png";
-import gemNavy from "../assets/pixel/gem-navy.png";
+import { BoardCamera } from "./BoardCamera";
+import { calculateStageLayout } from "./stage-layout";
+import audioCrystal from "../assets/pixel/audio-crystal.svg";
+import largeAmber from "../assets/pixel/gems/amber.png";
+import largeCoral from "../assets/pixel/gems/coral.png";
+import largeIce from "../assets/pixel/gems/ice.png";
+import largeJade from "../assets/pixel/gems/jade.png";
+import largeNavy from "../assets/pixel/gems/navy.png";
+import largeObsidian from "../assets/pixel/gems/obsidian.png";
+import largePearl from "../assets/pixel/gems/pearl.png";
+import microAmber from "../assets/pixel/micro/amber.png";
+import microCoral from "../assets/pixel/micro/coral.png";
+import microIce from "../assets/pixel/micro/ice.png";
+import microJade from "../assets/pixel/micro/jade.png";
+import microNavy from "../assets/pixel/micro/navy.png";
+import microObsidian from "../assets/pixel/micro/obsidian.png";
+import microPearl from "../assets/pixel/micro/pearl.png";
+import microSocket from "../assets/pixel/micro/neutral.png";
 import shelfTray from "../assets/pixel/shelf-tray-neutral.png";
-import socket from "../assets/pixel/socket-neutral.png";
 
 type FeedbackTone = "neutral" | "selected" | "placed" | "compacted" | "rejected" | "won";
 
@@ -29,29 +48,49 @@ interface MotionRect {
   readonly height: number;
 }
 
-interface GemGhost {
-  readonly key: number;
-  readonly gemId: string;
-  readonly color: Color;
-  readonly from: MotionRect;
-  readonly to: MotionRect;
-  readonly isMoving: boolean;
+interface MotionSource {
+  readonly rect: MotionRect;
+  readonly element: HTMLElement;
 }
 
-const MOTION_DURATION_MS = 180;
+interface PendingMotion {
+  readonly token: number;
+  readonly movedGemIds: readonly string[];
+  readonly sources: ReadonlyMap<string, MotionSource>;
+  readonly previousShelfIds: ReadonlySet<string>;
+  readonly nextShelfIds: ReadonlySet<string>;
+}
+
+const MOTION_DURATION_MS = 240;
 
 const COLOR_LABEL: Record<Color, string> = {
   navy: "深蓝",
   ice: "冰蓝",
   coral: "珊瑚红",
   jade: "翡翠绿",
+  obsidian: "黑曜石",
+  pearl: "珍珠白",
+  amber: "琥珀橙",
 };
 
-const GEM_SPRITE: Record<Color, string> = {
-  navy: gemNavy,
-  ice: gemIce,
-  coral: gemCoral,
-  jade: gemJade,
+const LARGE_GEM_SPRITE: Record<Color, string> = {
+  navy: largeNavy,
+  ice: largeIce,
+  coral: largeCoral,
+  jade: largeJade,
+  obsidian: largeObsidian,
+  pearl: largePearl,
+  amber: largeAmber,
+};
+
+const MICRO_GEM_SPRITE: Record<Color, string> = {
+  navy: microNavy,
+  ice: microIce,
+  coral: microCoral,
+  jade: microJade,
+  obsidian: microObsidian,
+  pearl: microPearl,
+  amber: microAmber,
 };
 
 const REJECTION_LABEL: Record<RejectionCode, string> = {
@@ -158,24 +197,82 @@ function IconReset() {
 }
 
 
+type GemSpriteFamily = "large" | "micro";
+
 interface GemSpriteProps {
   readonly gemId: string;
   readonly color: Color;
   readonly selected: boolean;
   readonly locked: boolean;
-  readonly landing: boolean;
+  readonly family: GemSpriteFamily;
 }
 
-function GemSprite({ gemId, color, selected, locked, landing }: GemSpriteProps) {
+function GemSprite({ gemId, color, selected, locked, family }: GemSpriteProps) {
   return (
     <span
-      className={`gem gem-${color}${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}${landing ? " is-landing" : ""}`}
+      className={`gem family-${family} gem-${color}${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}`}
       data-gem-id={gemId}
       aria-hidden="true"
     >
       <span className="gem-shadow" />
-      <img className="pixel-sprite gem-sprite" src={GEM_SPRITE[color]} alt="" />
+      <img
+        className="pixel-sprite gem-sprite"
+        src={family === "micro" ? MICRO_GEM_SPRITE[color] : LARGE_GEM_SPRITE[color]}
+        alt=""
+      />
     </span>
+  );
+}
+
+interface ShelfBankProps {
+  readonly bank: "a" | "b";
+  readonly indices: readonly number[];
+  readonly state: GameState;
+  readonly inputLocked: boolean;
+  readonly rejectedShelf: number | null;
+  readonly onSlotClick: (index: number, gemId: string | undefined) => void;
+}
+
+function ShelfBank({
+  bank,
+  indices,
+  state,
+  inputLocked,
+  rejectedShelf,
+  onSlotClick,
+}: ShelfBankProps) {
+  return (
+    <section className={`shelf-bank bank-${bank}`} aria-label={`缓冲 Shelf ${bank.toUpperCase()}`}>
+      <div className="shelf-grid">
+        {indices.map((index) => {
+          const gemId = state.shelf.gemIds[index];
+          const gem = gemId ? state.gems[gemId] : null;
+          const selected = Boolean(gem && state.selection?.gemIds.includes(gem.id));
+          return (
+            <button
+              className={`shelf-slot${selected ? " is-selected" : ""}${gem ? " has-gem" : ""}${rejectedShelf === index ? " is-rejected" : ""}`}
+              data-testid={`shelf-slot-${index}`}
+              type="button"
+              key={index}
+              onClick={() => onSlotClick(index, gemId)}
+              disabled={inputLocked || state.status === "won"}
+              aria-label={gem ? `${COLOR_LABEL[gem.color]}宝石缓冲槽` : "空缓冲槽"}
+            >
+              <img className="pixel-sprite shelf-sprite" src={shelfTray} alt="" aria-hidden="true" />
+              {gem ? (
+                <GemSprite
+                  gemId={gem.id}
+                  color={gem.color}
+                  selected={selected}
+                  locked={false}
+                  family="large"
+                />
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -206,9 +303,14 @@ function BootPanel({ error, onRetry }: { readonly error: string | null; readonly
 
 export function App() {
   const coreRef = useRef<GameCorePort | null>(null);
-  const motionTimerRef = useRef<number | null>(null);
   const feedbackTimerRef = useRef<number | null>(null);
-  const ghostSequenceRef = useRef(0);
+  const motionTokenRef = useRef(0);
+  const pendingMotionRef = useRef<PendingMotion | null>(null);
+  const activeMotionCleanupRef = useRef<(() => void) | null>(null);
+  const mountedRef = useRef(true);
+  const shellRef = useRef<HTMLElement | null>(null);
+  const audioPortRef = useRef<BrowserPixelAudioPort | null>(null);
+  const audioSequenceRef = useRef(0);
   const [bootAttempt, setBootAttempt] = useState(0);
   const [state, setState] = useState<GameState | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
@@ -217,15 +319,32 @@ export function App() {
   const [inputLocked, setInputLocked] = useState(false);
   const [rejectedCell, setRejectedCell] = useState<string | null>(null);
   const [rejectedShelf, setRejectedShelf] = useState<number | null>(null);
-  const [landingGemIds, setLandingGemIds] = useState<readonly string[]>([]);
-  const [ghosts, setGhosts] = useState<readonly GemGhost[]>([]);
   const reducedMotion = useReducedMotion();
+  const [audioSnapshot, setAudioSnapshot] = useState<PixelAudioSnapshot>({
+    status: "loading",
+    muted: false,
+  });
+  const [stageViewport, setStageViewport] = useState(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
+
+  useEffect(() => {
+    const port = getBrowserPixelAudioPort();
+    audioPortRef.current = port;
+    const unsubscribe = port.subscribe(setAudioSnapshot);
+    void port.prepare();
+    return () => {
+      unsubscribe();
+      audioPortRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     setState(null);
     setBootError(null);
-    void GameCoreFactory.load(prismLevel)
+    void GameCoreFactory.load(tuxLevel)
       .then((core) => {
         if (cancelled) {
           core.destroy();
@@ -246,35 +365,171 @@ export function App() {
       coreRef.current = null;
     };
   }, [bootAttempt]);
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    if (shell === null) {
+      return;
+    }
+    const update = () => {
+      const computed = window.getComputedStyle(shell);
+      const horizontalPadding =
+        Number.parseFloat(computed.paddingLeft) + Number.parseFloat(computed.paddingRight);
+      const verticalPadding =
+        Number.parseFloat(computed.paddingTop) + Number.parseFloat(computed.paddingBottom);
+      const visualHeight = window.visualViewport?.height ?? shell.clientHeight;
+      const next = {
+        width: Math.max(1, shell.clientWidth - horizontalPadding),
+        height: Math.max(1, Math.min(shell.clientHeight, visualHeight) - verticalPadding),
+      };
+      setStageViewport((current) =>
+        current.width === next.width && current.height === next.height ? current : next,
+      );
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(shell);
+    window.visualViewport?.addEventListener("resize", update);
+    update();
+    return () => {
+      observer.disconnect();
+      window.visualViewport?.removeEventListener("resize", update);
+    };
+  }, [state?.levelId]);
 
-  useEffect(
-    () => () => {
-      if (motionTimerRef.current !== null) {
-        window.clearTimeout(motionTimerRef.current);
-      }
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      activeMotionCleanupRef.current?.();
+      activeMotionCleanupRef.current = null;
       if (feedbackTimerRef.current !== null) {
         window.clearTimeout(feedbackTimerRef.current);
       }
-    },
-    [],
-  );
-
-  const clearMotion = useCallback(() => {
-    setGhosts([]);
-    setLandingGemIds([]);
-    setInputLocked(false);
+    };
   }, []);
 
-  const armInputLock = useCallback(() => {
-    setInputLocked(true);
-    if (motionTimerRef.current !== null) {
-      window.clearTimeout(motionTimerRef.current);
+  useLayoutEffect(() => {
+    const plan = pendingMotionRef.current;
+    if (plan === null || reducedMotion) {
+      return;
     }
-    motionTimerRef.current = window.setTimeout(() => {
-      motionTimerRef.current = null;
-      clearMotion();
-    }, MOTION_DURATION_MS);
-  }, [clearMotion]);
+    pendingMotionRef.current = null;
+    activeMotionCleanupRef.current?.();
+
+    const movedIds = new Set(plan.movedGemIds);
+    const hiddenDestinations: HTMLElement[] = [];
+    const clones: HTMLElement[] = [];
+    const animations: Animation[] = [];
+
+    for (const gemId of plan.movedGemIds) {
+      const source = plan.sources.get(gemId);
+      const destination = findGemElement(gemId);
+      if (source === undefined || destination === null) {
+        continue;
+      }
+
+      const to = rectOf(destination);
+      destination.style.visibility = "hidden";
+      destination.dataset.motionDestination = "hidden";
+      hiddenDestinations.push(destination);
+
+      const clone = source.element.cloneNode(true) as HTMLElement;
+      clone.classList.remove("is-selected", "is-locked", "is-landing");
+      clone.classList.add("gem-flight-clone");
+      clone.removeAttribute("data-gem-id");
+      clone.dataset.flightGemId = gemId;
+      Object.assign(clone.style, {
+        position: "fixed",
+        left: `${source.rect.left}px`,
+        top: `${source.rect.top}px`,
+        width: `${source.rect.width}px`,
+        height: `${source.rect.height}px`,
+        margin: "0",
+        pointerEvents: "none",
+        transform: "translate3d(0, 0, 0)",
+        zIndex: "1000",
+      });
+      document.body.append(clone);
+      clones.push(clone);
+      animations.push(
+        clone.animate(
+          [
+            { transform: "translate3d(0, 0, 0)" },
+            {
+              transform: `translate3d(${to.left - source.rect.left}px, ${to.top - source.rect.top}px, 0)`,
+            },
+          ],
+          {
+            duration: MOTION_DURATION_MS,
+            easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
+            fill: "forwards",
+          },
+        ),
+      );
+    }
+
+    for (const gemId of plan.previousShelfIds) {
+      if (movedIds.has(gemId) || !plan.nextShelfIds.has(gemId)) {
+        continue;
+      }
+      const source = plan.sources.get(gemId);
+      const destination = findGemElement(gemId);
+      if (source === undefined || destination === null) {
+        continue;
+      }
+      const to = rectOf(destination);
+      const deltaX = source.rect.left - to.left;
+      const deltaY = source.rect.top - to.top;
+      if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
+        continue;
+      }
+      animations.push(
+        destination.animate(
+          [
+            { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+            { transform: "translate3d(0, 0, 0)" },
+          ],
+          {
+            duration: MOTION_DURATION_MS,
+            easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
+          },
+        ),
+      );
+    }
+
+    let cleaned = false;
+    let safetyTimer = 0;
+    const cleanup = () => {
+      if (cleaned) {
+        return;
+      }
+      cleaned = true;
+      window.clearTimeout(safetyTimer);
+      for (const animation of animations) {
+        animation.cancel();
+      }
+      for (const clone of clones) {
+        clone.remove();
+      }
+      for (const destination of hiddenDestinations) {
+        destination.style.removeProperty("visibility");
+        delete destination.dataset.motionDestination;
+      }
+      if (activeMotionCleanupRef.current === cleanup) {
+        activeMotionCleanupRef.current = null;
+      }
+      if (mountedRef.current && motionTokenRef.current === plan.token) {
+        setInputLocked(false);
+      }
+    };
+    activeMotionCleanupRef.current = cleanup;
+    safetyTimer = window.setTimeout(cleanup, MOTION_DURATION_MS + 400);
+    if (animations.length === 0) {
+      cleanup();
+    } else {
+      void Promise.allSettled(animations.map((animation) => animation.finished)).then(cleanup);
+    }
+  }, [reducedMotion, state]);
 
   const showRejection = useCallback((command: GameCommand) => {
     if (feedbackTimerRef.current !== null) {
@@ -300,14 +555,18 @@ export function App() {
       if (!core || inputLocked) {
         return;
       }
+      audioPortRef.current?.resumeFromGesture();
 
       const beforeState = core.snapshot();
-      const beforeRects = new Map<string, MotionRect>();
+      const motionSources = new Map<string, MotionSource>();
       if (!reducedMotion) {
         document.querySelectorAll<HTMLElement>("[data-gem-id]").forEach((element) => {
           const gemId = element.dataset.gemId;
           if (gemId) {
-            beforeRects.set(gemId, rectOf(element));
+            motionSources.set(gemId, {
+              rect: rectOf(element),
+              element: element.cloneNode(true) as HTMLElement,
+            });
           }
         });
       }
@@ -320,75 +579,34 @@ export function App() {
         setActivity(error instanceof Error ? `核心通信失败：${error.message}` : "核心通信失败。");
         return;
       }
+
+      const audio = deriveAudioCues(result, command, audioSequenceRef.current);
+      audioSequenceRef.current = audio.nextSequence;
+      for (const cue of audio.cues) {
+        audioPortRef.current?.pushCue(cue);
+      }
       const feedback = describeTransition(result, command);
+      const movedIds = result.rejection === null ? movedGemIds(result) : [];
+      if (!reducedMotion && movedIds.length > 0) {
+        const token = ++motionTokenRef.current;
+        pendingMotionRef.current = {
+          token,
+          movedGemIds: movedIds,
+          sources: motionSources,
+          previousShelfIds: new Set(beforeState.shelf.gemIds),
+          nextShelfIds: new Set(result.state.shelf.gemIds),
+        };
+        setInputLocked(true);
+      }
+
       setState(result.state);
       setActivity(feedback.message);
       setFeedbackTone(feedback.tone);
-
       if (result.rejection) {
         showRejection(command);
-        return;
       }
-
-      const movedIds = movedGemIds(result);
-      if (movedIds.length === 0 || reducedMotion) {
-        return;
-      }
-
-      setLandingGemIds(movedIds);
-      armInputLock();
-      const previousShelfIds = new Set(beforeState.shelf.gemIds);
-      const nextShelfIds = new Set(result.state.shelf.gemIds);
-      window.requestAnimationFrame(() => {
-        const plans = movedIds.flatMap((gemId) => {
-          const from = beforeRects.get(gemId);
-          const destination = findGemElement(gemId);
-          const gem = result.state.gems[gemId];
-          if (!from || !destination || !gem) {
-            return [];
-          }
-          return [{
-            key: ++ghostSequenceRef.current,
-            gemId,
-            color: gem.color,
-            from,
-            to: rectOf(destination),
-            isMoving: false,
-          }];
-        });
-        if (plans.length > 0) {
-          setGhosts(plans);
-          window.requestAnimationFrame(() => {
-            setGhosts((current) => current.map((ghost) => ({ ...ghost, isMoving: true })));
-          });
-        }
-
-        for (const gemId of previousShelfIds) {
-          if (!nextShelfIds.has(gemId)) {
-            continue;
-          }
-          const from = beforeRects.get(gemId);
-          const destination = findGemElement(gemId);
-          if (!from || !destination) {
-            continue;
-          }
-          const to = rectOf(destination);
-          const deltaX = from.left - to.left;
-          const deltaY = from.top - to.top;
-          if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
-            continue;
-          }
-          destination.animate(
-            [
-              { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
-              { transform: "translate3d(0, 0, 0)" },
-            ],
-            { duration: MOTION_DURATION_MS, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
-          );
-        }
-      });
     },
-    [armInputLock, inputLocked, reducedMotion, showRejection],
+    [inputLocked, reducedMotion, showRejection],
   );
 
   const handleBoardClick = useCallback(
@@ -425,35 +643,81 @@ export function App() {
     return <BootPanel error={bootError} onRetry={() => setBootAttempt((attempt) => attempt + 1)} />;
   }
 
-  const boardSlots = Array.from({ length: state.board.rows * state.board.cols }, (_, index) => {
-    const coord = { row: Math.floor(index / state.board.cols), col: index % state.board.cols };
-    return { coord, cell: state.board.cells[keyOf(coord)] };
+  const stageLayout = calculateStageLayout({
+    width: stageViewport.width,
+    height: stageViewport.height,
+    rows: state.board.rows,
+    cols: state.board.cols,
+    shelfCapacity: state.shelf.capacity,
   });
+  const boardSlots = Object.entries(state.board.cells)
+    .map(([cellKey, cell]) => ({ coord: coordFromKey(cellKey), cell }))
+    .sort(
+      (left, right) =>
+        left.coord.row - right.coord.row || left.coord.col - right.coord.col,
+    );
+  const boardWidth = state.board.cols * stageLayout.boardCellSize;
+  const boardHeight = state.board.rows * stageLayout.boardCellSize;
+  const shelfIndices = Array.from({ length: state.shelf.capacity }, (_, index) => index);
+  const bankAIndices = shelfIndices.slice(0, stageLayout.bankSplitIndex);
+  const bankBIndices = shelfIndices.slice(stageLayout.bankSplitIndex);
+  const stageStyle = {
+    "--board-cell": `${stageLayout.boardCellSize}px`,
+    "--bank-cell": `${stageLayout.bankCellSize}px`,
+  } as CSSProperties;
 
   return (
-    <main className="workbench-shell" data-feedback={feedbackTone}>
-      <section className="crystal-workbench" aria-label="Brilliant Sort 游戏">
+    <main className="workbench-shell" data-feedback={feedbackTone} ref={shellRef}>
+      <button
+        className={`audio-crystal-control${audioSnapshot.muted ? " is-muted" : ""}${audioSnapshot.status === "failed" ? " is-unavailable" : ""}`}
+        type="button"
+        data-audio-status={audioSnapshot.status}
+        aria-label={audioSnapshot.muted ? "恢复像素音乐" : "静音像素音乐"}
+        aria-pressed={audioSnapshot.muted}
+        disabled={audioSnapshot.status === "failed"}
+        onClick={() => {
+          const port = audioPortRef.current;
+          port?.resumeFromGesture();
+          port?.setMuted(!audioSnapshot.muted);
+        }}
+      >
+        <img src={audioCrystal} alt="" aria-hidden="true" />
+      </button>
+      <section
+        className={`crystal-workbench stage-${stageLayout.orientation}${state.status === "won" ? " is-won" : ""}`}
+        style={stageStyle}
+        aria-label="Brilliant Sort 游戏"
+      >
+        <ShelfBank
+          bank="a"
+          indices={bankAIndices}
+          state={state}
+          inputLocked={inputLocked}
+          rejectedShelf={rejectedShelf}
+          onSlotClick={handleShelfClick}
+        />
 
-        <section className="calibration-bay" aria-label="宝石棋盘">
-
-          <div className="board-chassis">
+        <section className="calibration-bay" aria-label="Tux 宝石棋盘">
+          <BoardCamera
+            enabled={!stageLayout.directTouch}
+            maxZoom={stageLayout.maxZoom}
+            resetKey={`${state.levelId}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
+            width={boardWidth}
+            height={boardHeight}
+          >
             <div
               className="game-board"
-              style={
-                {
-                  gridTemplateColumns: `repeat(${state.board.cols}, minmax(0, 1fr))`,
-                  "--board-columns": state.board.cols,
-                } as CSSProperties
-              }
+              style={{
+                width: `${boardWidth}px`,
+                height: `${boardHeight}px`,
+                gridTemplateColumns: `repeat(${state.board.cols}, ${stageLayout.boardCellSize}px)`,
+                gridTemplateRows: `repeat(${state.board.rows}, ${stageLayout.boardCellSize}px)`,
+              }}
             >
               {boardSlots.map(({ coord, cell }) => {
-                if (!cell) {
-                  return <div className="board-void" key={keyOf(coord)} aria-hidden="true" />;
-                }
                 const gem = cell.gemId ? state.gems[cell.gemId] : null;
                 const selected = Boolean(gem && state.selection?.gemIds.includes(gem.id));
                 const locked = Boolean(gem && gem.color === cell.targetColor);
-                const landing = Boolean(gem && landingGemIds.includes(gem.id));
                 const rejected = rejectedCell === keyOf(coord);
                 return (
                   <button
@@ -461,19 +725,20 @@ export function App() {
                     data-testid={`board-cell-${coord.row}-${coord.col}`}
                     type="button"
                     key={keyOf(coord)}
+                    style={{ gridColumnStart: coord.col + 1, gridRowStart: coord.row + 1 }}
                     onClick={() => handleBoardClick(coord, cell)}
                     disabled={inputLocked || state.status === "won" || locked}
                     aria-label={describeCell(cell, state)}
                   >
                     <span className="target-underlay" aria-hidden="true" />
-                    <img className="pixel-sprite socket-sprite" src={socket} alt="" aria-hidden="true" />
+                    <img className="pixel-sprite socket-sprite" src={microSocket} alt="" aria-hidden="true" />
                     {gem ? (
                       <GemSprite
                         gemId={gem.id}
                         color={gem.color}
                         selected={selected}
                         locked={locked}
-                        landing={landing}
+                        family="micro"
                       />
                     ) : (
                       <span className="empty-socket-mark" aria-hidden="true" />
@@ -482,77 +747,26 @@ export function App() {
                 );
               })}
             </div>
-
-          </div>
-
-          <p
-            className="activity-announcer"
-            role="status"
-            aria-live={feedbackTone === "won" ? "assertive" : "polite"}
-          >
-            {activity}
-          </p>
+          </BoardCamera>
         </section>
 
-        <section className="shelf-dock" aria-label="缓冲 Shelf">
-          <div className="shelf-rail">
-            <div
-              className="shelf-grid"
-              style={{ gridTemplateColumns: `repeat(${state.shelf.width}, minmax(0, 1fr))` }}
-            >
-              {Array.from({ length: state.shelf.capacity }, (_, index) => {
-                const gemId = state.shelf.gemIds[index];
-                const gem = gemId ? state.gems[gemId] : null;
-                const selected = Boolean(gem && state.selection?.gemIds.includes(gem.id));
-                const landing = Boolean(gem && landingGemIds.includes(gem.id));
-                return (
-                  <button
-                    className={`shelf-slot${selected ? " is-selected" : ""}${gem ? " has-gem" : ""}${rejectedShelf === index ? " is-rejected" : ""}`}
-                    data-testid={`shelf-slot-${index}`}
-                    type="button"
-                    key={index}
-                    onClick={() => handleShelfClick(index, gemId)}
-                    disabled={inputLocked || state.status === "won"}
-                    aria-label={gem ? `${COLOR_LABEL[gem.color]}宝石缓冲槽` : "空缓冲槽"}
-                  >
-                    <img className="pixel-sprite shelf-sprite" src={shelfTray} alt="" aria-hidden="true" />
-                    {gem ? (
-                      <GemSprite
-                        gemId={gem.id}
-                        color={gem.color}
-                        selected={selected}
-                        locked={false}
-                        landing={landing}
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <ShelfBank
+          bank="b"
+          indices={bankBIndices}
+          state={state}
+          inputLocked={inputLocked}
+          rejectedShelf={rejectedShelf}
+          onSlotClick={handleShelfClick}
+        />
+
+        <p
+          className="activity-announcer"
+          role="status"
+          aria-live={feedbackTone === "won" ? "assertive" : "polite"}
+        >
+          {activity}
+        </p>
       </section>
-
-      {ghosts.map((ghost) => {
-        const style = {
-          "--ghost-from-x": `${ghost.from.left}px`,
-          "--ghost-from-y": `${ghost.from.top}px`,
-          "--ghost-to-x": `${ghost.to.left}px`,
-          "--ghost-to-y": `${ghost.to.top}px`,
-          width: `${ghost.from.width}px`,
-          height: `${ghost.from.height}px`,
-        } as CSSProperties;
-        return (
-          <span
-            className={`gem-motion-ghost${ghost.isMoving ? " is-moving" : ""}`}
-            key={ghost.key}
-            style={style}
-            aria-hidden="true"
-          >
-            <img className="pixel-sprite" src={GEM_SPRITE[ghost.color]} alt="" />
-          </span>
-        );
-      })}
     </main>
   );
 }

@@ -407,6 +407,32 @@ void TestBoundedSaturatedOutput() {
          "mix bus should saturate without wraparound");
 }
 
+void TestDeviceSampleRates() {
+  constexpr std::array<std::uint32_t, 3> kSupportedRates{44'100, 48'000,
+                                                         96'000};
+  for (const std::uint32_t sample_rate : kSupportedRates) {
+    PixelAudioEngine engine(sample_rate);
+    Expect(engine.Initialize(),
+           "supported device sample rate should initialize");
+    Expect(engine.sample_rate() == sample_rate,
+           "engine should retain the device sample rate");
+    Expect(engine.PushCue(
+               AudioCue{1, CueKind::Selection, CueColor::Pearl, 4, 0, 0}),
+           "device-rate engine should accept cues");
+    std::array<std::int16_t, 256> pcm{};
+    engine.Render(pcm.data(), pcm.size());
+    Expect(engine.diagnostics().rendered_frames == pcm.size(),
+           "device-rate engine should render the requested frame count");
+  }
+
+  PixelAudioEngine below_minimum(7'999);
+  PixelAudioEngine above_maximum(192'001);
+  Expect(!below_minimum.Initialize(),
+         "sample rates below the supported device range should fail");
+  Expect(!above_maximum.Initialize(),
+         "sample rates above the supported device range should fail");
+}
+
 void TestRenderHasNoAllocations() {
   PixelAudioEngine engine(kReferenceSampleRate);
   Expect(engine.Initialize(),
@@ -432,6 +458,7 @@ int main() {
   TestJadeCueAbi();
   TestDeterministicReferencePcm();
   TestBoundedSaturatedOutput();
+  TestDeviceSampleRates();
   TestRenderHasNoAllocations();
   std::cout << "pixel_audio tests passed\n";
   return EXIT_SUCCESS;

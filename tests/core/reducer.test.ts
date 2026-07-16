@@ -158,6 +158,44 @@ describe("safe extraction and Shelf movement", () => {
     expect(placed.nextState.shelf.gemIds).toEqual(["A", "C", "D", "E", "F", "G", "H"]);
     expect(placed.events.map((event) => event.type)).toEqual(["gem-placed", "shelf-compacted"]);
   });
+
+  test("uses the configured sixteen-slot Shelf width with expanded colors", () => {
+    const initial = createGameState({
+      schemaVersion: 1,
+      id: "configured-shelf",
+      rows: 1,
+      cols: 2,
+      shelfCapacity: 16,
+      cells: [
+        {
+          row: 0,
+          col: 0,
+          targetColor: "obsidian",
+          gem: { id: "pearl-gem", color: "pearl" },
+        },
+        {
+          row: 0,
+          col: 1,
+          targetColor: "pearl",
+          gem: { id: "obsidian-gem", color: "obsidian" },
+        },
+      ],
+    });
+    const selected = reduce(
+      initial,
+      { type: "select-board-gem", coord: { row: 0, col: 0 } },
+      initial,
+    );
+    const stored = reduce(selected.nextState, { type: "place-selection-in-shelf" }, initial);
+
+    expect(initial.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
+    expect(stored.rejection).toBeUndefined();
+    expect(stored.nextState.shelf).toEqual({
+      width: 16,
+      capacity: 16,
+      gemIds: ["pearl-gem"],
+    });
+  });
 });
 
 describe("selection and target rejection", () => {

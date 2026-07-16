@@ -1,0 +1,4923 @@
+{
+  "schemaVersion": 1,
+  "id": "tux-01",
+  "rows": 32,
+  "cols": 24,
+  "shelfCapacity": 16,
+  "cells": [
+    {
+      "row": 0,
+      "col": 9,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 0,
+      "col": 10,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 0,
+      "col": 11,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 0,
+      "col": 12,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 0,
+      "col": 13,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 0,
+      "col": 14,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r00-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 7,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 8,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 9,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 10,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 11,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 12,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 13,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 14,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 15,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 1,
+      "col": 16,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r01-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 2,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r02-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 2,
+      "col": 7,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r02-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 2,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r02-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 2,
+      "col": 16,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r02-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 2,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r02-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 3,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r03-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r03-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 3,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r03-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 3,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r03-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 3,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r03-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 4,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r04-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 4,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r04-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 4,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r04-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 4,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r04-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 4,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r04-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 5,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r05-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 5,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r05-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 8,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r05-c08",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 5,
+      "col": 9,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r05-c09",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 5,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 14,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r05-c14",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 5,
+      "col": 15,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r05-c15",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 5,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r05-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 5,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r05-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 5,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r05-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r06-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 6,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r06-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 6,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 8,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r06-c08",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 6,
+      "col": 9,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r06-c09",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 6,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 14,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r06-c14",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 6,
+      "col": 15,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r06-c15",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 6,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r06-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 6,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r06-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 6,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r06-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c03",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 7,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r07-c07",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 7,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 16,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r07-c16",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 7,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r07-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 7,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 7,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r07-c20",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c03",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 7,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r08-c07",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 8,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r08-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 8,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r08-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 8,
+      "col": 10,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r08-c10",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 8,
+      "col": 11,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r08-c11",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 8,
+      "col": 12,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r08-c12",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 8,
+      "col": 13,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r08-c13",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 8,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r08-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 8,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r08-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 8,
+      "col": 16,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r08-c16",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 8,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 8,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r08-c20",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c03",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 7,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r09-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 9,
+      "col": 9,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c09",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 10,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c10",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 11,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c11",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 12,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c12",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 13,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c13",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 14,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r09-c14",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 9,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r09-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 9,
+      "col": 16,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 9,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r09-c20",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c04",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c05",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 10,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r10-c10",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 10,
+      "col": 11,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r10-c11",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 10,
+      "col": 12,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r10-c12",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 10,
+      "col": 13,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r10-c13",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 10,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r10-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 10,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c18",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c19",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 10,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r10-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r11-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r11-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c04",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c05",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 6,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r11-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 11,
+      "col": 17,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c18",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r11-c19",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r11-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 11,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r11-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r12-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c04",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c05",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 6,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r12-c06",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 12,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r12-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 12,
+      "col": 17,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r12-c17",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 12,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c18",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 12,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 12,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r12-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 12,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r12-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 13,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r13-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 13,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c03",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r13-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 13,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r13-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 13,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r13-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 14,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r14-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 14,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r14-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 14,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r14-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 14,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r14-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 14,
+      "col": 6,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r14-c06",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 14,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r14-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 14,
+      "col": 17,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r14-c17",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 14,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r14-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 14,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r14-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 14,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r14-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 14,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r14-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 15,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r15-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 15,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r15-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 15,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 6,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c06",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c09",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c14",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r15-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 15,
+      "col": 17,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c17",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r15-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 15,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r15-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 15,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r15-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 16,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r16-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 16,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c03",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 6,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r16-c06",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 16,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c07",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c08",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c09",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c10",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c11",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c12",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c13",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c14",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c15",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r16-c16",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 17,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r16-c17",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 16,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r16-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 16,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r16-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r17-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c03",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r17-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 17,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r17-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 17,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r17-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r18-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r18-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r18-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 18,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r18-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 18,
+      "col": 6,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r18-c06",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 18,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r18-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 17,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r18-c17",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 18,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r18-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 18,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r18-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 18,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r18-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 18,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r18-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r19-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r19-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 6,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c06",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r19-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 17,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c17",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r19-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 19,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r19-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 19,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r19-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r20-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c03",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 6,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r20-c06",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 20,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r20-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 20,
+      "col": 17,
+      "targetColor": "ice",
+      "gem": {
+        "id": "tux-01-r20-c17",
+        "color": "ice"
+      }
+    },
+    {
+      "row": 20,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r20-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 20,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r20-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r21-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 3,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c03",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 4,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c04",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 5,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c05",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r21-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 21,
+      "col": 18,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c18",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 19,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c19",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 20,
+      "targetColor": "navy",
+      "gem": {
+        "id": "tux-01-r21-c20",
+        "color": "navy"
+      }
+    },
+    {
+      "row": 21,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r21-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c04",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c05",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r22-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c18",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c19",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 22,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r22-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c02",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c03",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c04",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c05",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 6,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c06",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 17,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r23-c17",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c18",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c19",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c20",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 23,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r23-c21",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c03",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r24-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 24,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 24,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r24-c20",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 3,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c03",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 7,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c07",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 16,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r25-c16",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 25,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 25,
+      "col": 20,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r25-c20",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 4,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c04",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 7,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 8,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c08",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 15,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r26-c15",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 26,
+      "col": 16,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 26,
+      "col": 19,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r26-c19",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 5,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c05",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 6,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c06",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 7,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c07",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 8,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 9,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c09",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 10,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c10",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 11,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c11",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 12,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c12",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 13,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c13",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 14,
+      "targetColor": "pearl",
+      "gem": {
+        "id": "tux-01-r27-c14",
+        "color": "pearl"
+      }
+    },
+    {
+      "row": 27,
+      "col": 15,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 16,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c16",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 17,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c17",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 27,
+      "col": 18,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r27-c18",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 28,
+      "col": 6,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c06",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 7,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c07",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 8,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c08",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 9,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c09",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 10,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r28-c10",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 28,
+      "col": 11,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r28-c11",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 28,
+      "col": 12,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r28-c12",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 28,
+      "col": 13,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r28-c13",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 28,
+      "col": 14,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c14",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 15,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c15",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 16,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c16",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 28,
+      "col": 17,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r28-c17",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 1,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r29-c01",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 29,
+      "col": 2,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c02",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 3,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c03",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 4,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c04",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 5,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c05",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 6,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c06",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 7,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c07",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 8,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r29-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 29,
+      "col": 15,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r29-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 29,
+      "col": 16,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c16",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 17,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c17",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 18,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c18",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 19,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c19",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 20,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c20",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 21,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r29-c21",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 29,
+      "col": 22,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r29-c22",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 30,
+      "col": 1,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r30-c01",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 30,
+      "col": 2,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c02",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 3,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c03",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 4,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c04",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 5,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c05",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 6,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c06",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 7,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c07",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 8,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r30-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 30,
+      "col": 15,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r30-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 30,
+      "col": 16,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c16",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 17,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c17",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 18,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c18",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 19,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c19",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 20,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c20",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 21,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r30-c21",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 30,
+      "col": 22,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r30-c22",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 31,
+      "col": 2,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r31-c02",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 31,
+      "col": 3,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r31-c03",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 31,
+      "col": 4,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c04",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 5,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c05",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 6,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c06",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 7,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c07",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 8,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r31-c08",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 31,
+      "col": 15,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r31-c15",
+        "color": "obsidian"
+      }
+    },
+    {
+      "row": 31,
+      "col": 16,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c16",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 17,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c17",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 18,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c18",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 19,
+      "targetColor": "amber",
+      "gem": {
+        "id": "tux-01-r31-c19",
+        "color": "amber"
+      }
+    },
+    {
+      "row": 31,
+      "col": 20,
+      "targetColor": "coral",
+      "gem": {
+        "id": "tux-01-r31-c20",
+        "color": "coral"
+      }
+    },
+    {
+      "row": 31,
+      "col": 21,
+      "targetColor": "obsidian",
+      "gem": {
+        "id": "tux-01-r31-c21",
+        "color": "obsidian"
+      }
+    }
+  ]
+}

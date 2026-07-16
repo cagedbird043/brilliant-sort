@@ -14,6 +14,8 @@ set(BRILLIANT_SORT_CORE_SOURCES
 function(brilliant_sort_enable_warnings target)
     target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -pedantic)
 endfunction()
+include(CTest)
+include(cmake/PixelAudio.cmake)
 
 if(NOT EMSCRIPTEN)
     add_library(brilliant_sort_core STATIC ${BRILLIANT_SORT_CORE_SOURCES})
@@ -32,11 +34,11 @@ if(NOT EMSCRIPTEN)
     target_link_libraries(brilliant_sort_core_cli PRIVATE brilliant_sort_core)
     brilliant_sort_enable_warnings(brilliant_sort_core_cli)
 
-    include(CTest)
     if(BUILD_TESTING)
         add_test(NAME connected_gems COMMAND connected_gems_test)
         add_test(NAME game_core COMMAND game_core_test)
     endif()
+    pixel_audio_add_native_targets()
 endif()
 
 if(EMSCRIPTEN)
@@ -45,6 +47,11 @@ if(EMSCRIPTEN)
         "${CMAKE_BINARY_DIR}/wasm"
         CACHE PATH
         "Directory for Emscripten JavaScript and WebAssembly output")
+    set(
+        BRILLIANT_SORT_AUDIO_OUTPUT_DIR
+        "${CMAKE_BINARY_DIR}/audio"
+        CACHE PATH
+        "Directory for Emscripten audio module output")
 
     add_executable(brilliant_sort_wasm ${BRILLIANT_SORT_CORE_SOURCES})
     target_include_directories(brilliant_sort_wasm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
@@ -67,4 +74,9 @@ if(EMSCRIPTEN)
             OUTPUT_NAME "brilliant-sort-core"
             SUFFIX ".mjs"
             RUNTIME_OUTPUT_DIRECTORY "${BRILLIANT_SORT_WASM_OUTPUT_DIR}")
+
+    pixel_audio_add_emscripten_target()
+    set_target_properties(
+        brilliant_sort_audio
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${BRILLIANT_SORT_AUDIO_OUTPUT_DIR}")
 endif()

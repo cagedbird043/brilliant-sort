@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { canonicalDump } from "../../src/core";
-import { prismLevel, prismWinningTrace } from "../../src/fixtures";
+import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../../src/fixtures";
 import { diffSnapshots, replayCommandLog } from "../../src/harness";
 import { GameCoreFactory } from "../../src/wasm/game-core";
 
@@ -13,6 +13,22 @@ test("the committed prism trace reaches victory through the WASM core", async ()
     expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
     expect(replay.finalState.status).toBe("won");
     expect(replay.finalState.shelf.gemIds).toHaveLength(0);
+    expect(replay.finalState.selection).toBeNull();
+  } finally {
+    core.destroy();
+  }
+});
+
+test("the committed Tux trace reaches victory through the WASM core", async () => {
+  const core = await GameCoreFactory.load(tuxLevel);
+  try {
+    const replay = replayCommandLog(core, tuxWinningTrace);
+
+    expect(replay.transitions).toHaveLength(48);
+    expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
+    expect(replay.finalState.status).toBe("won");
+    expect(replay.finalState.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
+    expect(Object.keys(replay.finalState.board.cells)).toHaveLength(546);
     expect(replay.finalState.selection).toBeNull();
   } finally {
     core.destroy();

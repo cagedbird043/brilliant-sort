@@ -11,6 +11,14 @@
     "specular": { "source": "#FFF8E8", "fixed": true }
   },
   "variants": {
+    "neutral": {
+      "shadow": "#283246",
+      "darkFacet": "#3B4A64",
+      "midFacet": "#52647D",
+      "lightFacet": "#768BA7",
+      "mainFacet": "#B9C7DA",
+      "colorHighlight": "#DDE7F3"
+    },
     "obsidian": {
       "shadow": "#070A16",
       "darkFacet": "#0D1426",
@@ -58,6 +66,14 @@
       "lightFacet": "#E0715E",
       "mainFacet": "#F59272",
       "colorHighlight": "#FFC0A4"
+    },
+    "jade": {
+      "shadow": "#11633E",
+      "darkFacet": "#158553",
+      "midFacet": "#1BB76D",
+      "lightFacet": "#33DD8A",
+      "mainFacet": "#64EBAA",
+      "colorHighlight": "#B8F8D9"
     }
   }
 }

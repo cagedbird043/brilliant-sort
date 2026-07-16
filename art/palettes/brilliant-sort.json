@@ -42,6 +42,30 @@
       "lightFacet": "#21BA73",
       "mainFacet": "#36DE87",
       "colorHighlight": "#9FFFCA"
+    },
+    "obsidian": {
+      "shadow": "#070A16",
+      "darkFacet": "#0D1426",
+      "midFacet": "#16203A",
+      "lightFacet": "#273654",
+      "mainFacet": "#3A4A68",
+      "colorHighlight": "#7E91B3"
+    },
+    "pearl": {
+      "shadow": "#68738A",
+      "darkFacet": "#8994A8",
+      "midFacet": "#AEB7C7",
+      "lightFacet": "#D1D7E1",
+      "mainFacet": "#EEF1F5",
+      "colorHighlight": "#FFFFFF"
+    },
+    "amber": {
+      "shadow": "#6C2D0A",
+      "darkFacet": "#8C420E",
+      "midFacet": "#B85F12",
+      "lightFacet": "#E37D18",
+      "mainFacet": "#FFA329",
+      "colorHighlight": "#FFD477"
     }
   }
 }

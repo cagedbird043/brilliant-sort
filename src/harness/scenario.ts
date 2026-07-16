@@ -1,9 +1,10 @@
 import { createGameState } from "../core/level";
 import type { GameState, LevelSpec } from "../core/types";
-import { prismLevel } from "../fixtures";
+import { prismLevel, tuxLevel } from "../fixtures";
 
 const FIXTURES: Record<string, LevelSpec> = {
   [prismLevel.id]: prismLevel,
+  [tuxLevel.id]: tuxLevel,
 };
 
 export function loadScenario(name: string): { readonly initialState: GameState; readonly level: LevelSpec } {

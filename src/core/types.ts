@@ -1,4 +1,4 @@
-export const COLORS = ["navy", "ice", "coral", "jade"] as const;
+export const COLORS = ["navy", "ice", "coral", "jade", "obsidian", "pearl", "amber"] as const;
 
 export type Color = (typeof COLORS)[number];
 export type GemId = string;
@@ -25,7 +25,7 @@ export interface Board {
 }
 
 export interface Shelf {
-  readonly width: 12;
+  readonly width: number;
   readonly capacity: number;
   readonly gemIds: readonly GemId[];
 }

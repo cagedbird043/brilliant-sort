@@ -1,11 +1,17 @@
 import { canonicalDump } from "../core";
-import { prismLevel, prismWinningTrace } from "../fixtures";
+import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../fixtures";
 import { GameCoreFactory } from "../wasm/game-core";
 import { replayDifferential } from "./differential";
 import { replayCommandLog } from "./replay";
 import { listScenarioNames, loadScenario } from "./scenario";
 
 const [operation = "list", scenarioName = "prism-01"] = Bun.argv.slice(2);
+const replayFixture =
+  scenarioName === prismLevel.id
+    ? { level: prismLevel, commands: prismWinningTrace }
+    : scenarioName === tuxLevel.id
+      ? { level: tuxLevel, commands: tuxWinningTrace }
+      : null;
 
 switch (operation) {
   case "list":
@@ -17,12 +23,12 @@ switch (operation) {
     break;
   }
   case "replay": {
-    if (scenarioName !== "prism-01") {
+    if (replayFixture === null) {
       throw new Error(`No committed replay trace for scenario: ${scenarioName}`);
     }
-    const core = await GameCoreFactory.load(prismLevel);
+    const core = await GameCoreFactory.load(replayFixture.level);
     try {
-      const replay = replayCommandLog(core, prismWinningTrace);
+      const replay = replayCommandLog(core, replayFixture.commands);
       console.log(
         JSON.stringify(
           {
@@ -42,13 +48,13 @@ switch (operation) {
     break;
   }
   case "differential": {
-    if (scenarioName !== "prism-01") {
+    if (replayFixture === null) {
       throw new Error(`No committed differential trace for scenario: ${scenarioName}`);
     }
     const replay = await replayDifferential({
       name: scenarioName,
-      level: prismLevel,
-      commands: prismWinningTrace,
+      level: replayFixture.level,
+      commands: replayFixture.commands,
     });
     console.log(
       JSON.stringify(

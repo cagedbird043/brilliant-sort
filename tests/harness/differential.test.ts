@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Color, LevelCellSpec, LevelSpec } from "../../src/core";
-import { prismLevel, prismWinningTrace } from "../../src/fixtures";
+import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../../src/fixtures";
 import {
   replayDifferential,
   type DifferentialScenario,
@@ -111,6 +111,11 @@ const scenarios: readonly DifferentialScenario[] = [
       { type: "restart-level" },
     ],
   },
+  {
+    name: "tux-01-winning-trace",
+    level: tuxLevel,
+    commands: tuxWinningTrace,
+  },
 ];
 
 describe("differential core replay", () => {
@@ -128,5 +133,8 @@ describe("differential core replay", () => {
     const partial = JSON.parse(results[4]!.final);
     expect(partial.selection.gemIds).toEqual(["i-1", "i-2"]);
     expect(JSON.parse(results[5]!.final).status).toBe("playing");
+    const tux = JSON.parse(results[6]!.final);
+    expect(tux.status).toBe("won");
+    expect(tux.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
   });
 });

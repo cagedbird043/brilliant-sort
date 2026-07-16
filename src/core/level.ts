@@ -34,7 +34,7 @@ export function createGameState(spec: LevelSpec): GameState {
     },
     gems,
     shelf: {
-      width: 12,
+      width: spec.shelfCapacity,
       capacity: spec.shelfCapacity,
       gemIds: [],
     },
@@ -52,8 +52,8 @@ export function validateLevelSpec(spec: LevelSpec): void {
   if (spec.rows <= 0 || spec.cols <= 0) {
     throw new LevelValidationError("Level dimensions must be positive");
   }
-  if (spec.shelfCapacity <= 0 || spec.shelfCapacity % 12 !== 0) {
-    throw new LevelValidationError("Shelf capacity must be a positive multiple of 12");
+  if (!Number.isInteger(spec.shelfCapacity) || spec.shelfCapacity <= 0) {
+    throw new LevelValidationError("Shelf capacity must be a positive integer");
   }
 
   const occupiedCoordinates = new Set<string>();
