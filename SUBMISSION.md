@@ -1,9 +1,9 @@
 # Brilliant Sort：确定性核心、Harness 与 AI Agent 验证方案
 
 > **对应题目**：`游戏研发基础设施 / AI Agent 方向笔试：Brilliant Sort`  
-> **代码版本**：[`e5dab87`](https://github.com/cagedbird043/brilliant-sort/commit/e5dab87bcf48174a9c921e065e47515276913951)（2026-07-16）  
+> **代码版本**：[`23ae899`](https://github.com/cagedbird043/brilliant-sort/commit/23ae899832c1085f058356aacd41d34f0e2b2ae0)（2026-07-16）  
 > **线上 Demo**：[Hong Kong](https://brilliant-sort.cagedbird.cn/) · [GitHub Pages](https://cagedbird043.github.io/brilliant-sort/)  
-> **CI 证据**：[Actions #29488358577](https://github.com/cagedbird043/brilliant-sort/actions/runs/29488358577)（`verify`、`publish-hk`、`deploy` 全部成功）
+> **CI 证据**：[Actions #29492121811](https://github.com/cagedbird043/brilliant-sort/actions/runs/29492121811)（`verify`、`publish-hk`、`deploy` 全部成功）
 
 ## 摘要
 
@@ -186,7 +186,7 @@ bun run harness differential tux-01
 bun run level:check:tux
 ```
 
-作为复现成本参考，[GitHub Actions run #29488358577](https://github.com/cagedbird043/brilliant-sort/actions/runs/29488358577) 的 `verify` 在 Ubuntu runner 上用时 2 分 13 秒，其中包括安装固定版本的 Emscripten 和 Chromium、编译三个后端并运行全部自动化检查。本地已有依赖和浏览器缓存时通常更快；第一次运行主要看下载速度。
+作为复现成本参考，[GitHub Actions run #29492121811](https://github.com/cagedbird043/brilliant-sort/actions/runs/29492121811) 的 `verify` 在 Ubuntu runner 上用时 1 分 58 秒，其中包括安装固定版本的 Emscripten 和 Chromium、编译三个后端并运行全部自动化检查。本地已有依赖和浏览器缓存时通常更快；第一次运行主要看下载速度。
 
 在本答卷工作站上，四项并行 pre-commit 门禁用时 1.27 秒，完整 pre-push 门禁用时 20.91 秒；这是实测值，不是对其它机器的固定承诺。
 
