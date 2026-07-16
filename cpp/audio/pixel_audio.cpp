@@ -17,7 +17,6 @@ constexpr std::uint32_t kMasterRampMilliseconds = 10;
 constexpr std::size_t kMaxCuesPerRender = 16;
 constexpr std::uint64_t kOneSampleQ32 = std::uint64_t{1} << 32U;
 constexpr std::uint32_t kLfsrSeed = 0xace1U;
-constexpr std::uint32_t kLfsrMask = 0xffffU;
 constexpr std::array<std::int16_t, 16> kSineQuarter{
     0,      3'212,  6'393,  9'512,  12'539, 15'446, 18'204, 20'787,
     23'170, 25'329, 27'245, 28'898, 30'273, 31'356, 32'137, 32'610,

@@ -104,7 +104,7 @@ export function writeAudioCue(
     throw new RangeError("Audio cue packet does not fit in target DataView");
   }
 
-  let color = audioCueColors.none;
+  let color: number = audioCueColors.none;
   let primary = 0;
   let secondary = 0;
   switch (cue.kind) {
