@@ -1149,12 +1149,78 @@ void MoveSelectionGemToShelf(State &state, const Selection &selection,
   return ResolveStatus(state, std::move(transition));
 }
 
+[[nodiscard]] Transition ApplyGlobalWand(State &state) {
+  constexpr std::size_t kColorCount = static_cast<std::size_t>(Color::kCount);
+  std::array<std::vector<std::string>, kColorCount> gem_ids_by_color;
+  std::array<std::vector<Coord>, kColorCount> targets_by_color;
+  std::size_t moved_count = 0;
+
+  for (int row = 0; row < state.rows; ++row) {
+    for (int col = 0; col < state.cols; ++col) {
+      BoardCell *cell = BoardCellAt(state, {row, col});
+      if (cell == nullptr || IsLocked(state, *cell)) {
+        continue;
+      }
+      targets_by_color[static_cast<std::size_t>(cell->target_color)].push_back(
+          {row, col});
+      if (cell->gem_id.has_value()) {
+        const Gem *gem = GemForId(state, *cell->gem_id);
+        if (gem == nullptr) {
+          throw std::runtime_error("global wand cannot locate Board gem " +
+                                   *cell->gem_id);
+        }
+        gem_ids_by_color[static_cast<std::size_t>(gem->color)].push_back(
+            gem->id);
+        ++moved_count;
+      }
+      cell->gem_id.reset();
+    }
+  }
+
+  for (const std::string &gem_id : state.shelf_gem_ids) {
+    const Gem *gem = GemForId(state, gem_id);
+    if (gem == nullptr) {
+      throw std::runtime_error("global wand cannot locate Shelf gem " + gem_id);
+    }
+    gem_ids_by_color[static_cast<std::size_t>(gem->color)].push_back(gem_id);
+    ++moved_count;
+  }
+
+  for (std::size_t color_index = 0; color_index < kColorCount; ++color_index) {
+    std::vector<std::string> &gem_ids = gem_ids_by_color[color_index];
+    const std::vector<Coord> &targets = targets_by_color[color_index];
+    std::sort(gem_ids.begin(), gem_ids.end());
+    if (gem_ids.size() != targets.size()) {
+      throw std::runtime_error(
+          "global wand color conservation failed for " +
+          std::string(ColorName(static_cast<Color>(color_index))) + ": " +
+          std::to_string(gem_ids.size()) + " gems for " +
+          std::to_string(targets.size()) + " targets");
+    }
+    for (std::size_t index = 0; index < targets.size(); ++index) {
+      BoardCell *cell = BoardCellAt(state, targets[index]);
+      if (cell == nullptr) {
+        throw std::runtime_error(
+            "global wand target disappeared during assignment");
+      }
+      cell->gem_id = gem_ids[index];
+    }
+  }
+
+  state.shelf_gem_ids.clear();
+  state.selection.reset();
+  return ResolveStatus(
+      state, Transition{{{"global-wand-applied", std::to_string(moved_count)}},
+                        std::nullopt});
+}
+
 enum class CommandType {
   kSelectBoardGem,
   kSelectShelfGem,
   kCancelSelection,
   kPlaceSelectionAtTarget,
   kPlaceSelectionInShelf,
+  kApplyGlobalWand,
   kRestartLevel,
 };
 
@@ -1195,6 +1261,9 @@ struct Command {
   if (type == "place-selection-in-shelf") {
     return {CommandType::kPlaceSelectionInShelf, {}, 0};
   }
+  if (type == "apply-global-wand") {
+    return {CommandType::kApplyGlobalWand, {}, 0};
+  }
   if (type == "restart-level") {
     return {CommandType::kRestartLevel, {}, 0};
   }
@@ -1228,6 +1297,8 @@ struct Command {
     return PlaceSelectionAtTarget(state, command.coord);
   case CommandType::kPlaceSelectionInShelf:
     return PlaceSelectionInShelf(state);
+  case CommandType::kApplyGlobalWand:
+    return ApplyGlobalWand(state);
   case CommandType::kRestartLevel:
     break;
   }

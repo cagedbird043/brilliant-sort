@@ -19,10 +19,10 @@
 4. 部分提取只允许移走边界上的安全成员，剩余选择分量必须继续八方向连通。
 5. Shelf 是一个紧凑、有序、可配置容量的序列；旗舰关卡使用 16 槽，表现为两个各 8 槽的 Bank。
 6. 只能把选择中的宝石放入同色且为空的目标连通分量；目标不足时保留未放置选择。
-7. 所有有效格均颜色匹配、选择为空且 Shelf 为空时胜利；本 Demo 没有失败、计时或步数状态。
-8. 关卡由固定 JSON 夹具提供；随机生成、付费扩容、Power-up、LiveOps 和账号状态明确延期。
+7. 所有有效格均颜色匹配、选择为空且 Shelf 为空时胜利；`apply-global-wand` 按颜色、宝石 ID 和行优先目标确定性地完成同一胜利谓词。
+8. 本 Demo 没有失败、计时或步数状态；关卡由固定 JSON 提供，随机生成、商业 Power-up、LiveOps 和账号状态明确延期。
 
-这些假设来自已归档的核心、Tux 舞台和渲染规格；视频未能观察到的商业功能没有被伪造为规则事实。
+这些假设来自已归档的核心、Tux 舞台和渲染规格，以及等待人工表现验收的 Demo 辅助终章规格；视频未能观察到的商业功能没有被伪造为规则事实。
 
 ## 2. 核心状态与所有权
 
@@ -55,13 +55,13 @@ interface GameCorePort {
 
 ### 规则核心
 
-`cpp/game_core.*` 的 `BrilliantSortCore` 拥有关卡加载与验证、八方向连通、锁定判定、安全提取、目标放置、Shelf 压缩、拒绝、胜利和 canonical 序列化。它不拥有 DOM、CSS、PNG、ARIA、输入命中、动画时钟、音频时钟或布局。
+`cpp/game_core.*` 的 `BrilliantSortCore` 拥有关卡加载与验证、八方向连通、锁定判定、安全提取、目标放置、确定性全局修复、Shelf 压缩、拒绝、胜利和 canonical 序列化。它不拥有 DOM、CSS、PNG、ARIA、输入命中、动画时钟、音频时钟或布局。
 
 C++ 对外只暴露窄 JSON v1 / C ABI；`src/wasm/game-core.ts` 把它封装为 `GameCorePort`。这样未来接入 Cocos 或其它游戏引擎时，只需替换表现适配器，不需要复制规则或改动回放协议。
 
 ### 表现、音频与规则的关系
 
-React 根据 `CoreTransition` 渲染像素素材、无障碍语义、键盘/触摸输入和临时 WAAPI 动画。动画只测量已提交状态的来源/目标矩形，不能修改 canonical state。`PixelAudioEngine` 也只消费 post-dispatch `AudioCue`；AudioContext 生命周期、设备采样率、静音偏好、音乐进度均不进入 `GameState` 或 replay。
+React 根据 `CoreTransition` 渲染像素素材、无障碍语义、键盘/触摸输入、一次性提示和临时 WAAPI/SVG 动画。普通移动和魔法棒全图波次都只测量已提交状态的来源/目标矩形，弧光与三组固定像素烟花也不修改 canonical state。`PixelAudioEngine` 只消费 post-dispatch `AudioCue`；AudioContext 生命周期、设备采样率、静音偏好、音乐进度均不进入 `GameState` 或 replay。
 
 ### TypeScript 的定位
 
@@ -77,9 +77,9 @@ TypeScript reducer 保留为差分 Oracle，而不是浏览器生产回退。生
 
 对当前选择集合 `S`，核心只接受 `Frontier(S) ∩ SafeToRemove(S)` 中的成员；`SafeToRemove` 通过重新检查 `S - {v}` 的八方向连通性保证剩余分量不会裂开。放入 Shelf 时取 `min(selection.size, freeSlots)` 个稳定优先级成员追加到紧凑序列；不足容量不是静默丢失，而是保留剩余选择。
 
-### 4.3 放置、拒绝与胜利
+### 4.3 放置、全局修复、拒绝与胜利
 
-`PlaceSelectionAtTarget(coord)` 只接受同色、有效、空的目标格，查找同色空目标连通分量，并按 anchor 距离、行、列的总序排序逐个落子。错误目标、满 Shelf、锁定宝石和无可选宝石都返回稳定 `Rejection` 且逻辑状态不变。胜利谓词为：Shelf 空、选择空、全部有效格有宝石且颜色匹配。
+`PlaceSelectionAtTarget(coord)` 只接受同色、有效、空的目标格，查找同色空目标连通分量，并按 anchor 距离、行、列的总序排序逐个落子。`apply-global-wand` 保留已匹配锁定宝石，按颜色收集 Board/Shelf 中其余身份，再将字典序 Gem ID 配对到行优先同色空目标；它清空 Shelf/选择，只发出一个 `global-wand-applied` 和一个 `won`。错误目标、满 Shelf、锁定宝石和无可选宝石都返回稳定 `Rejection` 且逻辑状态不变。胜利谓词仍为：Shelf 空、选择空、全部有效格有宝石且颜色匹配。
 
 ## 5. Harness 与自动化验收
 
@@ -101,6 +101,7 @@ scenario.load(LevelSpec) → command.apply(GameCommand) → CoreTransition
 | 部分入 Shelf 与压缩 | 选择大于剩余容量的分量，再从 Shelf 放回目标 | 仅安全成员进入 Shelf；剩余选择连通；移除后 row-major 紧凑 | Shelf 序列、剩余 component、容量、首个不连通点 |
 | 拒绝不变性 | 点击锁定/空格/错误颜色目标/满 Shelf | 收到指定 `Rejection`，状态 dump 保持字节相同 | 命令、rejection code、before/after dump 的首个差异 |
 | `tux-01` 胜利回放 | 24×32、546 有效格、16 槽 Shelf；回放提交的 48 条命令 | 三后端逐 transition 一致，最终 `Won`、Shelf 空、546 格匹配 | command index、backend、前后 dump、events、rejection、首个 JSON 路径 |
+| `tux-01` 全局修复 | 分别从初始状态和 Shelf 已占用的中途状态发送 `apply-global-wand` | 锁定身份不动、136 个可移动身份守恒、Shelf/选择清空；三后端 canonical dump 一致，事件严格为聚合事件后接 `won` | backend、事件序列、首个 identity/location 或 canonical JSON 差异 |
 
 `src/harness/differential.ts` 让这套诊断成为真实实现，而不是设计口号；`bun run harness differential tux-01` 可重放旗舰关卡的三后端证明。
 
@@ -108,11 +109,11 @@ scenario.load(LevelSpec) → command.apply(GameCommand) → CoreTransition
 
 ### 让 Agent 做什么
 
-Agent 可承担限定范围内的模块拆解、接口审查、实现、测试补充、审查生成的像素资产、读取差分日志和提出修复。它不应自行发明未观察到的商业规则、Power-up、随机模式或支付流程。
+Agent 可承担限定范围内的模块拆解、接口审查、实现、测试补充、审查生成的像素资产、读取差分日志和提出修复。它不应自行发明未观察到的商业规则、随机模式或支付流程；内置魔法棒则是经规格化、三后端验证的确定性 Demo 辅助，不是商业 Power-up。
 
 ### 给 Agent 的上下文与可执行反馈
 
-归档 OpenSpec 提供题目事实、假设、非目标、模块边界、接受标准和迁移顺序。`src/agent/context.ts` 会拒绝请求中包含明确延期的能力；`src/agent/audit.ts` 将规格版本、改动文件、验证命令、验证结果、下一决策和时间戳序列化为审计记录。
+已归档和活动中的 OpenSpec 提供题目事实、假设、非目标、模块边界、接受标准和人工验收门。`src/agent/context.ts` 会拒绝请求中包含明确延期的能力；`src/agent/audit.ts` 将规格版本、改动文件、验证命令、验证结果、下一决策和时间戳序列化为审计记录。
 
 Agent 的可执行反馈不是自然语言“看起来不对”，而是：固定 fixture、命令日志、canonical dump、事件、rejection、Harness 首个 JSON 差异、原生/WASM 差分、浏览器 E2E 以及人工视觉/听觉 review。
 
@@ -145,7 +146,7 @@ std::vector<std::pair<int, int>> FindConnectedMovableGems(
 
 | 易于扩展 | 需要协议升级或重构 |
 | --- | --- |
-| 新固定关卡、颜色、像素素材、音效/音乐、Harness 场景 | 新命令类型、多个逻辑 Shelf、失败/计时状态、Power-up 改变占用规则 |
+| 新固定关卡、颜色、像素素材、音效/音乐、Harness 场景；全后端同步的加法型确定性命令 | 破坏现有命令形状、多个逻辑 Shelf、失败/计时状态、商业 Power-up 改变占用规则 |
 | 新 React/Cocos 表现适配器、更多无障碍展示、纯表现动画 | 运行时随机生成进入 replay、持久化档案/货币、联机或非确定性物理 |
 | 新的 fixture 验证器与赢局 trace | `LevelSpec` 语义版本变更、JSON ABI 破坏性改动、跨平台协议迁移 |
 
@@ -162,14 +163,15 @@ bun run harness differential tux-01
 bun run level:check:tux
 ```
 
-对应版本的本地验证包括 31 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希）、16 个 desktop/mobile Chromium E2E，以及 48 命令 Tux 三后端逐 transition parity。最新 CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
+对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition parity。最新 CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
 
-详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。已归档 OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事：
+详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事；已归档规格和仍待人工视觉批准的活动规格分别为：
 
 - [`2026-07-15-add-brilliant-sort-core`](openspec/changes/archive/2026-07-15-add-brilliant-sort-core/)
 - [`2026-07-16-add-pixel-crystal-renderer`](openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/)
 - [`2026-07-16-rebuild-tux-mosaic-stage`](openspec/changes/archive/2026-07-16-rebuild-tux-mosaic-stage/)
 - [`2026-07-16-add-cpp-pixel-audio-engine`](openspec/changes/archive/2026-07-16-add-cpp-pixel-audio-engine/)
+- [`add-demo-assist-and-victory-finale`](openspec/changes/add-demo-assist-and-victory-finale/)（实现与自动验证完成；保留活动状态等待人工视觉/产品验收）
 
 ## 结论
 

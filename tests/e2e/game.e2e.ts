@@ -17,6 +17,7 @@ async function clickCommand(page: Page, command: GameCommand): Promise<void> {
     case "place-selection-in-shelf":
       await page.getByTestId("shelf-slot-0").click();
       break;
+    case "apply-global-wand":
     case "cancel-selection":
     case "restart-level":
       throw new Error(`The Tux browser trace does not use ${command.type}`);
@@ -28,30 +29,49 @@ async function readFlightSnapshot(page: Page) {
     const clones = [...document.querySelectorAll<HTMLElement>(".gem-flight-clone")];
     const flightIds = clones.map((clone) => clone.dataset.flightGemId ?? "");
     const scales: number[] = [];
-    const aligned = clones.every((clone) => {
+    const durations: number[] = [];
+    const keyframeCounts: number[] = [];
+    let curvedMidpoints = 0;
+    let maxAlignmentError = 0;
+    for (const clone of clones) {
       const gemId = clone.dataset.flightGemId;
       const destination = gemId
         ? document.querySelector<HTMLElement>(`[data-gem-id="${CSS.escape(gemId)}"]`)
         : null;
-      const frames =
-        (clone.getAnimations()[0]?.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
-      const matrix = new DOMMatrix(String(frames.at(-1)?.transform ?? "none"));
+      const effect = clone.getAnimations()[0]?.effect as KeyframeEffect | null;
+      const frames = effect?.getKeyframes() ?? [];
+      const finalMatrix = new DOMMatrix(String(frames.at(-1)?.transform ?? "none"));
+      const midpointMatrix = new DOMMatrix(String(frames.at(1)?.transform ?? "none"));
       const destinationRect = destination?.getBoundingClientRect();
       const sourceWidth = Number.parseFloat(clone.style.width);
       const sourceHeight = Number.parseFloat(clone.style.height);
-      scales.push(matrix.a, matrix.d);
-      return Boolean(
-        destinationRect &&
-          Math.abs(Number.parseFloat(clone.style.left) + matrix.e - destinationRect.left) <= 1 &&
-          Math.abs(Number.parseFloat(clone.style.top) + matrix.f - destinationRect.top) <= 1 &&
-          Math.abs(sourceWidth * matrix.a - destinationRect.width) <= 1 &&
-          Math.abs(sourceHeight * matrix.d - destinationRect.height) <= 1,
-      );
-    });
+      scales.push(finalMatrix.a, finalMatrix.d);
+      durations.push(Number(effect?.getTiming().duration ?? 0));
+      keyframeCounts.push(frames.length);
+      if (
+        frames.length === 3 &&
+        (Math.abs(midpointMatrix.e - finalMatrix.e * 0.54) > 0.5 ||
+          Math.abs(midpointMatrix.f - finalMatrix.f * 0.54) > 0.5)
+      ) {
+        curvedMidpoints += 1;
+      }
+      const alignmentErrors = destinationRect
+        ? [
+            Math.abs(Number.parseFloat(clone.style.left) + finalMatrix.e - destinationRect.left),
+            Math.abs(Number.parseFloat(clone.style.top) + finalMatrix.f - destinationRect.top),
+            Math.abs(sourceWidth * finalMatrix.a - destinationRect.width),
+            Math.abs(sourceHeight * finalMatrix.d - destinationRect.height),
+          ]
+        : [Number.POSITIVE_INFINITY];
+      maxAlignmentError = Math.max(maxAlignmentError, ...alignmentErrors);
+    }
+    const aligned = maxAlignmentError <= 1;
+    const waveDelays = clones.map((clone) => Number(clone.dataset.waveDelay ?? 0));
     return {
       count: clones.length,
       unique: new Set(flightIds).size,
       aligned,
+      maxAlignmentError,
       opaque: clones.every(
         (clone) =>
           getComputedStyle(clone).opacity === "1" &&
@@ -62,6 +82,7 @@ async function readFlightSnapshot(page: Page) {
         (clone) => Number.parseFloat(clone.style.left) > 0 && Number.parseFloat(clone.style.top) > 0,
       ),
       hiddenDestinations: document.querySelectorAll('[data-motion-destination="hidden"]').length,
+      flightKinds: [...new Set(clones.map((clone) => clone.dataset.flightKind))],
       familyTransitions: [
         ...new Set(
           clones.map(
@@ -71,6 +92,12 @@ async function readFlightSnapshot(page: Page) {
         ),
       ],
       lodLayerCounts: [...new Set(clones.map((clone) => clone.querySelectorAll(".gem-flight-layer").length))],
+      durationValues: [...new Set(durations)],
+      keyframeCounts: [...new Set(keyframeCounts)],
+      curvedMidpoints,
+      minWaveDelay: Math.min(...waveDelays),
+      maxWaveDelay: Math.max(...waveDelays),
+      waveDelayVariants: new Set(waveDelays).size,
       minScale: Math.min(...scales),
       maxScale: Math.max(...scales),
     };
@@ -91,11 +118,10 @@ test("a player can complete the committed Tux level in the browser", async ({ pa
   await expect(page.locator(".activity-announcer")).toHaveText("所有宝石都已归位。");
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(0);
-  expect(
-    await page.locator(".board-camera").evaluate((element) =>
-      getComputedStyle(element, "::after").animationName,
-    ),
-  ).toBe("tux-victory-shimmer");
+  await expect(page.getByTestId("victory-finale")).toHaveCount(1);
+  await expect(page.locator(".victory-arc path")).toHaveCount(1);
+  await expect(page.locator(".pixel-firework")).toHaveCount(3);
+  await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
 });
 
 test("the playable surface stays wordless while the mute crystal remains external and accessible", async ({
@@ -107,6 +133,7 @@ test("the playable surface stays wordless while the mute crystal remains externa
   const surface = await page.evaluate(() => {
     const workbench = document.querySelector(".crystal-workbench");
     const audioControl = document.querySelector(".audio-crystal-control");
+    const wandControl = document.querySelector(".global-wand-control");
     const clone = workbench?.cloneNode(true) as HTMLElement | undefined;
     clone?.querySelector(".activity-announcer")?.remove();
     return {
@@ -114,17 +141,153 @@ test("the playable surface stays wordless while the mute crystal remains externa
       auxiliaryControls:
         workbench?.querySelectorAll("button:not(.board-cell):not(.shelf-slot)").length ?? 0,
       audioOutsideStage: Boolean(audioControl && workbench && !workbench.contains(audioControl)),
+      wandOutsideStage: Boolean(wandControl && workbench && !workbench.contains(wandControl)),
     };
   });
 
-  expect(surface).toEqual({ visibleCopy: "", auxiliaryControls: 0, audioOutsideStage: true });
+  expect(surface).toEqual({
+    visibleCopy: "",
+    auxiliaryControls: 0,
+    audioOutsideStage: true,
+    wandOutsideStage: true,
+  });
   await expect(page.locator(".audio-crystal-control")).toHaveAttribute(
     "aria-label",
     "静音像素音乐",
   );
   await expect(page.locator(".audio-crystal-control")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByTestId("global-wand")).toHaveAttribute("aria-label", "一键完成关卡");
   await expect(page.locator(".shelf-bank.bank-a")).toHaveAttribute("aria-label", "缓冲 Shelf A");
   await expect(page.locator(".shelf-bank.bank-b")).toHaveAttribute("aria-label", "缓冲 Shelf B");
+});
+test("onboarding persists only after an accepted keyboard wand and the global flight stays bounded", async ({
+  page,
+}) => {
+  const copy = "点击同色宝石，经缓冲槽放回同色空位；也可以点魔法棒一键修复整幅 Tux。";
+  await page.goto("/");
+  const hint = page.getByRole("note");
+  await expect(hint).toHaveText(copy);
+
+  await page.getByTestId("shelf-slot-0").click();
+  await expect(hint).toHaveText(copy);
+  expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:onboarding:v1"))).toBeNull();
+  await page.reload();
+  await expect(hint).toHaveText(copy);
+
+  const wand = page.getByTestId("global-wand");
+  await wand.focus();
+  await wand.press("Enter");
+  await expect(hint).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:onboarding:v1"))).toBe(
+    "seen",
+  );
+  await expect.poll(() => page.locator(".gem-flight-clone").count(), { timeout: 800 }).toBe(136);
+  await page.locator(".gem-flight-clone").evaluateAll((clones) => {
+    for (const clone of clones) {
+      clone.getAnimations().forEach((animation) => animation.pause());
+    }
+  });
+
+  await expect(wand).toBeDisabled();
+  await expect(page.getByTestId("victory-finale")).toHaveCount(1);
+  await expect(page.locator(".victory-arc path")).toHaveCount(1);
+  await expect(page.locator(".pixel-firework")).toHaveCount(3);
+  await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
+  const flight = await readFlightSnapshot(page);
+  expect(flight).toMatchObject({
+    count: 136,
+    unique: 136,
+    aligned: true,
+    opaque: true,
+    avoidsPageOrigin: true,
+    hiddenDestinations: 136,
+    flightKinds: ["global-wand"],
+    familyTransitions: ["micro->micro"],
+    lodLayerCounts: [1],
+    durationValues: [460],
+    keyframeCounts: [3],
+    curvedMidpoints: 136,
+    minWaveDelay: 0,
+    maxWaveDelay: 520,
+  });
+  expect(flight.waveDelayVariants).toBeGreaterThan(2);
+
+  await page.locator(".gem-flight-clone").evaluateAll((clones) => {
+    for (const clone of clones) {
+      clone.getAnimations().forEach((animation) => animation.play());
+    }
+  });
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 2_000 });
+  await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
+
+  await page.reload();
+  await expect(page.getByRole("note")).toHaveCount(0);
+});
+
+test("unavailable storage keeps onboarding and the reduced-motion wand playable", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    const unavailable = () => {
+      throw new DOMException("Storage unavailable", "SecurityError");
+    };
+    Object.defineProperties(Storage.prototype, {
+      getItem: { configurable: true, value: unavailable },
+      setItem: { configurable: true, value: unavailable },
+    });
+  });
+  await page.goto("/");
+
+  const hint = page.getByRole("note");
+  await expect(hint).toBeVisible();
+  const hintAnimationDuration = await hint.evaluate((element) => {
+    const value = getComputedStyle(element).animationDuration;
+    return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1_000;
+  });
+  expect(hintAnimationDuration).toBeLessThanOrEqual(1);
+  await page.getByTestId("shelf-slot-0").click();
+  await expect(hint).toBeVisible();
+
+  await page.getByTestId("global-wand").click();
+  await expect(hint).toHaveCount(0);
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0);
+});
+
+test("a mid-game wand morphs Shelf gems back to Micro destinations", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 768 });
+  await page.goto("/");
+  await page.getByTestId("board-cell-10-7").click();
+  const shelfSlot = page.getByTestId("shelf-slot-0");
+  await shelfSlot.click();
+  await expect(shelfSlot).toBeEnabled({ timeout: 1_000 });
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(16);
+
+  await page.getByTestId("global-wand").click();
+  await expect.poll(() => page.locator(".gem-flight-clone").count(), { timeout: 800 }).toBe(136);
+  await page.locator(".gem-flight-clone").evaluateAll((clones) => {
+    for (const clone of clones) {
+      clone.getAnimations().forEach((animation) => animation.pause());
+    }
+  });
+  const flight = await readFlightSnapshot(page);
+  expect(flight.flightKinds).toEqual(["global-wand"]);
+  expect(flight.familyTransitions).toEqual(expect.arrayContaining(["large->micro"]));
+  expect(flight.lodLayerCounts).toEqual(expect.arrayContaining([2]));
+  expect(flight.minScale).toBeLessThan(1);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(1);
+
+  await page.locator(".gem-flight-clone").evaluateAll((clones) => {
+    for (const clone of clones) {
+      clone.getAnimations().forEach((animation) => animation.play());
+    }
+  });
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 2_000 });
+  await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
 });
 
 test("authoritative movement morphs one opaque gem between Micro and Large rectangles", async ({
@@ -282,6 +445,11 @@ test("reduced motion commits the authoritative state immediately without flight 
     return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1_000;
   });
   expect(transitionDuration).toBeLessThanOrEqual(1);
+  await page.getByTestId("global-wand").click();
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0);
 });
 
 test("audio starts on a puzzle gesture, reports suspension, resumes, and persists mute", async ({ page }) => {

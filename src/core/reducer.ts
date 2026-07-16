@@ -8,14 +8,16 @@ import {
   type GemLocation,
 } from "./selectors";
 import { isConnected8 } from "./topology";
-import type {
-  GameCommand,
-  GameEvent,
-  GameState,
-  GemId,
-  RejectionCode,
-  ReduceResult,
-  Selection,
+import {
+  COLORS,
+  type Color,
+  type GameCommand,
+  type GameEvent,
+  type GameState,
+  type GemId,
+  type RejectionCode,
+  type ReduceResult,
+  type Selection,
 } from "./types";
 
 function reject(
@@ -314,6 +316,72 @@ function placeSelectionInShelf(state: GameState): ReduceResult {
   return resolveStatus(state, nextState, events);
 }
 
+function applyGlobalWand(state: GameState): ReduceResult {
+  const cells = { ...state.board.cells };
+  const gemIdsByColor = Object.fromEntries(
+    COLORS.map((color) => [color, [] as GemId[]]),
+  ) as Record<Color, GemId[]>;
+  const targetKeysByColor = Object.fromEntries(
+    COLORS.map((color) => [color, [] as string[]]),
+  ) as Record<Color, string[]>;
+  let movedCount = 0;
+
+  for (let row = 0; row < state.board.rows; row += 1) {
+    for (let col = 0; col < state.board.cols; col += 1) {
+      const cellKey = keyOf({ row, col });
+      const cell = state.board.cells[cellKey];
+      if (cell === undefined) {
+        continue;
+      }
+      const gem = cell.gemId === null ? undefined : state.gems[cell.gemId];
+      if (gem !== undefined && gem.color === cell.targetColor) {
+        continue;
+      }
+
+      targetKeysByColor[cell.targetColor].push(cellKey);
+      if (gem !== undefined) {
+        gemIdsByColor[gem.color].push(gem.id);
+        movedCount += 1;
+      }
+      cells[cellKey] = { ...cell, gemId: null };
+    }
+  }
+
+  for (const gemId of state.shelf.gemIds) {
+    const gem = state.gems[gemId];
+    if (gem === undefined) {
+      throw new Error(`Global wand cannot locate Shelf gem ${gemId}`);
+    }
+    gemIdsByColor[gem.color].push(gemId);
+    movedCount += 1;
+  }
+
+  for (const color of COLORS) {
+    const gemIds = gemIdsByColor[color].sort();
+    const targetKeys = targetKeysByColor[color];
+    if (gemIds.length !== targetKeys.length) {
+      throw new Error(
+        `Global wand color conservation failed for ${color}: ${gemIds.length} gems for ${targetKeys.length} targets`,
+      );
+    }
+    targetKeys.forEach((cellKey, index) => {
+      const cell = cells[cellKey]!;
+      cells[cellKey] = { ...cell, gemId: gemIds[index]! };
+    });
+  }
+
+  return resolveStatus(
+    state,
+    {
+      ...state,
+      board: { ...state.board, cells },
+      shelf: { ...state.shelf, gemIds: [] },
+      selection: null,
+    },
+    [{ type: "global-wand-applied", detail: String(movedCount) }],
+  );
+}
+
 /**
  * Applies one deterministic command without mutating its input state. The
  * supplied initial state is used only by restart, so callers can replay safely.
@@ -346,5 +414,7 @@ export function reduce(
       return placeSelectionAtTarget(state, command);
     case "place-selection-in-shelf":
       return placeSelectionInShelf(state);
+    case "apply-global-wand":
+      return applyGlobalWand(state);
   }
 }

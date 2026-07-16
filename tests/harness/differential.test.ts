@@ -116,6 +116,20 @@ const scenarios: readonly DifferentialScenario[] = [
     level: tuxLevel,
     commands: tuxWinningTrace,
   },
+  {
+    name: "tux-01-global-wand",
+    level: tuxLevel,
+    commands: [{ type: "apply-global-wand" }],
+  },
+  {
+    name: "tux-01-mid-game-global-wand",
+    level: tuxLevel,
+    commands: [
+      { type: "select-board-gem", coord: { row: 10, col: 7 } },
+      { type: "place-selection-in-shelf" },
+      { type: "apply-global-wand" },
+    ],
+  },
 ];
 
 describe("differential core replay", () => {
@@ -136,5 +150,11 @@ describe("differential core replay", () => {
     const tux = JSON.parse(results[6]!.final);
     expect(tux.status).toBe("won");
     expect(tux.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
+    const wand = JSON.parse(results[7]!.final);
+    expect(wand.status).toBe("won");
+    expect(wand.shelf.gemIds).toEqual([]);
+    const midGameWand = JSON.parse(results[8]!.final);
+    expect(midGameWand.status).toBe("won");
+    expect(midGameWand.shelf.gemIds).toEqual([]);
   });
 });

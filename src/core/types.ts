@@ -73,6 +73,7 @@ export type GameCommand =
   | { readonly type: "cancel-selection" }
   | { readonly type: "place-selection-at-target"; readonly coord: Coord }
   | { readonly type: "place-selection-in-shelf" }
+  | { readonly type: "apply-global-wand" }
   | { readonly type: "restart-level" };
 
 export type RejectionCode =
@@ -92,6 +93,7 @@ export interface GameEvent {
     | "selection-cleared"
     | "gem-placed"
     | "shelf-compacted"
+    | "global-wand-applied"
     | "won";
   readonly detail?: string;
 }

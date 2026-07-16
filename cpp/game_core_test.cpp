@@ -160,6 +160,45 @@ void TestExpandedPaletteAndConfiguredShelf() {
                  "configured Shelf should accept the selected gem");
 }
 
+void TestGlobalWand() {
+  std::string error;
+  std::unique_ptr<BrilliantSortCore> core =
+      BrilliantSortCore::Create(kSwapLevel, &error);
+  Expect(core != nullptr, "global wand fixture should create a core");
+
+  const CoreDispatchResult solved =
+      core->DispatchJson(R"json({"type":"apply-global-wand"})json");
+  Expect(!solved.protocol_error, "global wand command should parse");
+  ExpectContains(solved.json,
+                 "\"events\":[{\"type\":\"global-wand-applied\",\"detail\":"
+                 "\"2\"},{\"type\":\"won\"}]",
+                 "global wand should emit one aggregate event before won");
+  Expect(core->CanonicalDump() == kExpectedWonDump,
+         "global wand should reach the exact deterministic won dump");
+  const CoreDispatchResult repeated =
+      core->DispatchJson(R"json({"type":"apply-global-wand"})json");
+  ExpectContains(repeated.json, "\"code\":\"game-won\"",
+                 "a completed level should reject a duplicate global wand");
+
+  core = BrilliantSortCore::Create(kSwapLevel, &error);
+  const CoreDispatchResult mid_game_selected = core->DispatchJson(
+      R"json({"type":"select-board-gem","coord":{"row":0,"col":0}})json");
+  Expect(!mid_game_selected.protocol_error,
+         "mid-game global wand setup should select a gem");
+  const CoreDispatchResult mid_game_stored =
+      core->DispatchJson(R"json({"type":"place-selection-in-shelf"})json");
+  Expect(!mid_game_stored.protocol_error,
+         "mid-game global wand setup should populate Shelf");
+  const CoreDispatchResult mid_game =
+      core->DispatchJson(R"json({"type":"apply-global-wand"})json");
+  ExpectContains(mid_game.json, "\"gemIds\":[]",
+                 "global wand should empty a populated Shelf");
+  ExpectContains(mid_game.json, "\"selection\":null",
+                 "global wand should clear a mid-game selection");
+  ExpectContains(mid_game.json, "\"status\":\"won\"",
+                 "global wand should win from a mid-game state");
+}
+
 void TestCAbiSession() {
   const std::uintptr_t session =
       bs_core_create(kSwapLevel.data(), kSwapLevel.size());
@@ -192,6 +231,7 @@ int main() {
   TestWinningTraceAndCanonicalDump();
   TestLockedRejectionAndProtocolError();
   TestExpandedPaletteAndConfiguredShelf();
+  TestGlobalWand();
   TestCAbiSession();
   TestInvalidLevel();
   std::cout << "game_core tests passed\n";

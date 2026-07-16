@@ -56,6 +56,16 @@ test("post-dispatch facts derive stable selection, Shelf, progress, and rejectio
   });
 });
 
+test("the global wand emits one victory cue without per-gem audio flooding", () => {
+  const command = { type: "apply-global-wand" } as const;
+  const transition = dispatch(initial, command);
+
+  expect(deriveAudioCues(transition, command, 41)).toEqual({
+    cues: [{ kind: "won", sequence: 41 }],
+    nextSequence: 42,
+  });
+});
+
 test("the full Tux trace emits every successful cue in strict sequence with victory last", () => {
   let state = initial;
   let sequence = 0;

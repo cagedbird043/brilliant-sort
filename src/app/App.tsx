@@ -21,7 +21,9 @@ import { tuxLevel } from "../fixtures";
 import { GameCoreFactory } from "../wasm/game-core";
 import { BoardCamera } from "./BoardCamera";
 import { calculateStageLayout } from "./stage-layout";
+import { VictoryFinale } from "./VictoryFinale";
 import audioCrystal from "../assets/pixel/audio-crystal.svg";
+import globalWand from "../assets/pixel/global-wand.svg";
 import largeAmber from "../assets/pixel/gems/amber.png";
 import largeCoral from "../assets/pixel/gems/coral.png";
 import largeIce from "../assets/pixel/gems/ice.png";
@@ -54,6 +56,7 @@ interface MotionSource {
 }
 
 interface PendingMotion {
+  readonly kind: "standard" | "global-wand";
   readonly token: number;
   readonly movedGemIds: readonly string[];
   readonly sources: ReadonlyMap<string, MotionSource>;
@@ -62,7 +65,12 @@ interface PendingMotion {
 }
 
 const MOTION_DURATION_MS = 280;
+const GLOBAL_MOTION_DURATION_MS = 460;
+const GLOBAL_WAVE_DELAY_MS = 520;
 const FLIGHT_LOD_SWITCH = 0.58;
+const ONBOARDING_KEY = "brilliant-sort:onboarding:v1";
+const ONBOARDING_COPY =
+  "点击同色宝石，经缓冲槽放回同色空位；也可以点魔法棒一键修复整幅 Tux。";
 
 const COLOR_LABEL: Record<Color, string> = {
   navy: "深蓝",
@@ -187,6 +195,36 @@ function movedGemIds(result: CoreTransition): readonly string[] {
     const [gemId] = event.detail.split("->", 1);
     return gemId ? [gemId] : [];
   });
+}
+
+function gemLocations(state: GameState): ReadonlyMap<string, string> {
+  const locations = new Map<string, string>();
+  for (const [cellKey, cell] of Object.entries(state.board.cells)) {
+    if (cell.gemId !== null) {
+      locations.set(cell.gemId, `board:${cellKey}`);
+    }
+  }
+  state.shelf.gemIds.forEach((gemId, index) => {
+    locations.set(gemId, `shelf:${index}`);
+  });
+  return locations;
+}
+
+function globallyMovedGemIds(beforeState: GameState, afterState: GameState): readonly string[] {
+  const before = gemLocations(beforeState);
+  const after = gemLocations(afterState);
+  return Object.keys(afterState.gems)
+    .sort()
+    .filter((gemId) => before.get(gemId) !== after.get(gemId));
+}
+
+function stableMotionHash(gemId: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < gemId.length; index += 1) {
+    hash ^= gemId.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
 
 function IconReset() {
@@ -337,6 +375,15 @@ export function App() {
   const [inputLocked, setInputLocked] = useState(false);
   const [rejectedCell, setRejectedCell] = useState<string | null>(null);
   const [rejectedShelf, setRejectedShelf] = useState<number | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try {
+      return window.localStorage.getItem(ONBOARDING_KEY) !== "seen";
+    } catch {
+      return true;
+    }
+  });
+  const [finaleToken, setFinaleToken] = useState(0);
+  const [finaleVisible, setFinaleVisible] = useState(false);
   const reducedMotion = useReducedMotion();
   const [audioSnapshot, setAudioSnapshot] = useState<PixelAudioSnapshot>({
     status: "loading",
@@ -346,6 +393,17 @@ export function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   }));
+
+  const dismissOnboarding = useCallback(() => {
+    setShowOnboarding(false);
+    try {
+      window.localStorage.setItem(ONBOARDING_KEY, "seen");
+    } catch {
+      // Page-lifetime dismissal remains authoritative when storage is unavailable.
+    }
+  }, []);
+
+  const finishFinale = useCallback(() => setFinaleVisible(false), []);
 
   useEffect(() => {
     const port = getBrowserPixelAudioPort();
@@ -362,6 +420,7 @@ export function App() {
     let cancelled = false;
     setState(null);
     setBootError(null);
+    setFinaleVisible(false);
     void GameCoreFactory.load(tuxLevel)
       .then((core) => {
         if (cancelled) {
@@ -438,6 +497,16 @@ export function App() {
     const hiddenDestinations: HTMLElement[] = [];
     const clones: HTMLElement[] = [];
     const animations: Animation[] = [];
+    const fragment = document.createDocumentFragment();
+    const flights: Array<{
+      readonly gemId: string;
+      readonly source: MotionSource;
+      readonly destination: HTMLElement;
+      readonly to: MotionRect;
+      readonly clone: HTMLElement;
+      readonly sourceLayer: HTMLElement;
+      readonly destinationLayer: HTMLElement | null;
+    }> = [];
 
     for (const gemId of plan.movedGemIds) {
       const source = plan.sources.get(gemId);
@@ -460,8 +529,9 @@ export function App() {
       hiddenDestinations.push(destination);
 
       const clone = document.createElement("div");
-      clone.className = "gem-flight-clone";
+      clone.className = `gem-flight-clone${plan.kind === "global-wand" ? " is-global-wand" : ""}`;
       clone.dataset.flightGemId = gemId;
+      clone.dataset.flightKind = plan.kind;
       clone.dataset.flightSourceFamily = sourceFamily;
       clone.dataset.flightDestinationFamily = destinationFamily;
       clone.setAttribute("aria-hidden", "true");
@@ -478,27 +548,79 @@ export function App() {
       if (destinationLayer !== null) {
         clone.append(destinationLayer);
       }
-      document.body.append(clone);
+      fragment.append(clone);
       clones.push(clone);
+      flights.push({
+        gemId,
+        source,
+        destination,
+        to,
+        clone,
+        sourceLayer,
+        destinationLayer,
+      });
+    }
+    document.body.append(fragment);
 
+    const diagonals = flights.map((flight) => flight.to.left - flight.to.top);
+    const minimumDiagonal = diagonals.length === 0 ? 0 : Math.min(...diagonals);
+    const diagonalRange =
+      diagonals.length === 0 ? 1 : Math.max(1, Math.max(...diagonals) - minimumDiagonal);
+
+    flights.forEach((flight, index) => {
+      const { gemId, source, to, clone, sourceLayer, destinationLayer } = flight;
+      const globalMotion = plan.kind === "global-wand";
+      const duration = globalMotion ? GLOBAL_MOTION_DURATION_MS : MOTION_DURATION_MS;
+      const delay = globalMotion
+        ? ((diagonals[index]! - minimumDiagonal) / diagonalRange) * GLOBAL_WAVE_DELAY_MS
+        : 0;
+      clone.dataset.waveDelay = String(Math.round(delay));
+
+      const deltaX = to.left - source.rect.left;
+      const deltaY = to.top - source.rect.top;
       const scaleX = to.width / source.rect.width;
       const scaleY = to.height / source.rect.height;
-      animations.push(
-        clone.animate(
-          [
-            { transform: "translate3d(0, 0, 0) scale(1, 1)" },
-            {
-              transform: `translate3d(${to.left - source.rect.left}px, ${to.top - source.rect.top}px, 0) scale(${scaleX}, ${scaleY})`,
-            },
-          ],
+      let keyframes: Keyframe[];
+      if (globalMotion) {
+        const hash = stableMotionHash(gemId);
+        const direction = (hash & 1) === 0 ? 1 : -1;
+        const distance = Math.max(1, Math.hypot(deltaX, deltaY));
+        const bend = 10 + (hash % 13);
+        const normalX = (-deltaY / distance) * bend * direction;
+        const normalY = (deltaX / distance) * bend * direction;
+        keyframes = [
+          { offset: 0, transform: "translate3d(0, 0, 0) scale(1, 1)" },
           {
-            duration: MOTION_DURATION_MS,
-            easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
-            fill: "forwards",
+            offset: 0.54,
+            transform: `translate3d(${deltaX * 0.54 + normalX}px, ${deltaY * 0.54 + normalY}px, 0) scale(${1 + (scaleX - 1) * 0.54}, ${1 + (scaleY - 1) * 0.54})`,
           },
-        ),
+          {
+            offset: 1,
+            transform: `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scaleX}, ${scaleY})`,
+          },
+        ];
+      } else {
+        keyframes = [
+          { transform: "translate3d(0, 0, 0) scale(1, 1)" },
+          {
+            transform: `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scaleX}, ${scaleY})`,
+          },
+        ];
+      }
+      animations.push(
+        clone.animate(keyframes, {
+          duration,
+          delay,
+          easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
+          fill: "forwards",
+        }),
       );
       if (destinationLayer !== null) {
+        const layerOptions: KeyframeAnimationOptions = {
+          duration,
+          delay,
+          fill: "forwards",
+        };
         animations.push(
           sourceLayer.animate(
             [
@@ -507,7 +629,7 @@ export function App() {
               { offset: FLIGHT_LOD_SWITCH, opacity: 0 },
               { offset: 1, opacity: 0 },
             ],
-            { duration: MOTION_DURATION_MS, fill: "forwards" },
+            layerOptions,
           ),
           destinationLayer.animate(
             [
@@ -516,39 +638,41 @@ export function App() {
               { offset: FLIGHT_LOD_SWITCH, opacity: 1 },
               { offset: 1, opacity: 1 },
             ],
-            { duration: MOTION_DURATION_MS, fill: "forwards" },
+            layerOptions,
           ),
         );
       }
-    }
+    });
 
-    for (const gemId of plan.previousShelfIds) {
-      if (movedIds.has(gemId) || !plan.nextShelfIds.has(gemId)) {
-        continue;
+    if (plan.kind === "standard") {
+      for (const gemId of plan.previousShelfIds) {
+        if (movedIds.has(gemId) || !plan.nextShelfIds.has(gemId)) {
+          continue;
+        }
+        const source = plan.sources.get(gemId);
+        const destination = findGemElement(gemId);
+        if (source === undefined || destination === null) {
+          continue;
+        }
+        const to = rectOf(destination);
+        const deltaX = source.rect.left - to.left;
+        const deltaY = source.rect.top - to.top;
+        if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
+          continue;
+        }
+        animations.push(
+          destination.animate(
+            [
+              { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+              { transform: "translate3d(0, 0, 0)" },
+            ],
+            {
+              duration: MOTION_DURATION_MS,
+              easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
+            },
+          ),
+        );
       }
-      const source = plan.sources.get(gemId);
-      const destination = findGemElement(gemId);
-      if (source === undefined || destination === null) {
-        continue;
-      }
-      const to = rectOf(destination);
-      const deltaX = source.rect.left - to.left;
-      const deltaY = source.rect.top - to.top;
-      if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
-        continue;
-      }
-      animations.push(
-        destination.animate(
-          [
-            { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
-            { transform: "translate3d(0, 0, 0)" },
-          ],
-          {
-            duration: MOTION_DURATION_MS,
-            easing: "cubic-bezier(0.22, 0.78, 0.2, 1)",
-          },
-        ),
-      );
     }
 
     let cleaned = false;
@@ -577,7 +701,11 @@ export function App() {
       }
     };
     activeMotionCleanupRef.current = cleanup;
-    safetyTimer = window.setTimeout(cleanup, MOTION_DURATION_MS + 400);
+    const motionWindow =
+      plan.kind === "global-wand"
+        ? GLOBAL_WAVE_DELAY_MS + GLOBAL_MOTION_DURATION_MS
+        : MOTION_DURATION_MS;
+    safetyTimer = window.setTimeout(cleanup, motionWindow + 400);
     if (animations.length === 0) {
       cleanup();
     } else {
@@ -640,10 +768,19 @@ export function App() {
         audioPortRef.current?.pushCue(cue);
       }
       const feedback = describeTransition(result, command);
-      const movedIds = result.rejection === null ? movedGemIds(result) : [];
+      const globalWandAccepted = result.events.some(
+        (event) => event.type === "global-wand-applied",
+      );
+      const movedIds =
+        result.rejection !== null
+          ? []
+          : globalWandAccepted
+            ? globallyMovedGemIds(beforeState, result.state)
+            : movedGemIds(result);
       if (!reducedMotion && movedIds.length > 0) {
         const token = ++motionTokenRef.current;
         pendingMotionRef.current = {
+          kind: globalWandAccepted ? "global-wand" : "standard",
           token,
           movedGemIds: movedIds,
           sources: motionSources,
@@ -656,11 +793,22 @@ export function App() {
       setState(result.state);
       setActivity(feedback.message);
       setFeedbackTone(feedback.tone);
+      if (
+        result.rejection === null &&
+        command.type !== "restart-level" &&
+        command.type !== "cancel-selection"
+      ) {
+        dismissOnboarding();
+      }
+      if (result.events.some((event) => event.type === "won")) {
+        setFinaleToken((token) => token + 1);
+        setFinaleVisible(!reducedMotion);
+      }
       if (result.rejection) {
         showRejection(command);
       }
     },
-    [inputLocked, reducedMotion, showRejection],
+    [dismissOnboarding, inputLocked, reducedMotion, showRejection],
   );
 
   const handleBoardClick = useCallback(
@@ -721,7 +869,11 @@ export function App() {
   } as CSSProperties;
 
   return (
-    <main className="workbench-shell" data-feedback={feedbackTone} ref={shellRef}>
+    <main
+      className="workbench-shell"
+      data-feedback={feedbackTone}
+      ref={shellRef}
+    >
       <button
         className={`audio-crystal-control${audioSnapshot.muted ? " is-muted" : ""}${audioSnapshot.status === "failed" ? " is-unavailable" : ""}`}
         type="button"
@@ -737,6 +889,21 @@ export function App() {
       >
         <img src={audioCrystal} alt="" aria-hidden="true" />
       </button>
+      <button
+        className="global-wand-control"
+        type="button"
+        data-testid="global-wand"
+        aria-label="一键完成关卡"
+        disabled={inputLocked || state.status === "won"}
+        onClick={() => applyCommand({ type: "apply-global-wand" })}
+      >
+        <img src={globalWand} alt="" aria-hidden="true" />
+      </button>
+      {showOnboarding ? (
+        <p className="onboarding-hint" role="note">
+          {ONBOARDING_COPY}
+        </p>
+      ) : null}
       <section
         className={`crystal-workbench stage-${stageLayout.orientation}${state.status === "won" ? " is-won" : ""}`}
         style={stageStyle}
@@ -800,6 +967,9 @@ export function App() {
               })}
             </div>
           </BoardCamera>
+          {finaleVisible ? (
+            <VictoryFinale key={finaleToken} onFinished={finishFinale} />
+          ) : null}
         </section>
 
         <ShelfBank
