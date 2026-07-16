@@ -1,4 +1,5 @@
-import type { Coord, GameState, GemId } from "../core/types";
+import type { CoreTransition } from "../core/port";
+import type { Coord, GameCommand, GameState, GemId } from "../core/types";
 
 export type DioramaLayoutMode = "landscape" | "portrait";
 
@@ -68,6 +69,33 @@ export interface DioramaDiagnostics {
   readonly levelId: string | null;
   readonly status: GameState["status"] | null;
 }
+
+export interface DioramaRendererPort {
+  renderState(state: GameState): void;
+  playTransition(
+    before: GameState,
+    transition: CoreTransition,
+    command: GameCommand,
+  ): Promise<void>;
+  pick(clientX: number, clientY: number): DioramaPick | null;
+  focus(target: DioramaTarget | null): void;
+  reject(target: DioramaTarget | null): void;
+  resetCamera(): void;
+  setReducedMotion(reduced: boolean): void;
+  snapshotDiagnostics(): DioramaDiagnostics;
+  projectTarget(target: DioramaTarget): { readonly x: number; readonly y: number } | null;
+  setPresentationTimeForTest(timeMs: number | null): void;
+  dispose(): void;
+}
+
+export interface DioramaRendererOptions {
+  readonly onContextLost: (message: string) => void;
+}
+
+export type DioramaRendererFactory = (
+  canvas: HTMLCanvasElement,
+  options: DioramaRendererOptions,
+) => DioramaRendererPort;
 
 export interface DioramaTestBridge {
   snapshot(): DioramaDiagnostics;
