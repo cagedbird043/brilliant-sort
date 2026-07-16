@@ -17,6 +17,7 @@ Assessment submission: [`SUBMISSION.md`](./SUBMISSION.md) · [`PDF`](./submissio
 - Matching target-component placement, compact configured Shelf storage, and ordered two-bank presentation.
 - A deterministic `apply-global-wand` demo assist shared by TypeScript, native C++, and WASM: locked gems stay fixed while every remaining identity is paired to its target, the Shelf is cleared, and victory is emitted once.
 - Responsive desktop/square/portrait Tux staging with integer fit, bounded zoom/pan, ordinary WAAPI flight, a diagonal full-board wand wave, and a shared SVG arc-light plus three pixel-firework victory finale.
+- A contextual post-finale replay control that dispatches the canonical restart command, restores the initial Board and camera, and keeps onboarding/audio preferences without reloading the page.
 - A separate deterministic C++20 pixel-audio engine compiled to AudioWorklet WASM, with gameplay cues, first-gesture resume, persisted in-world mute, and silent failure fallback.
 - Canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
 - One-sentence, versioned onboarding that disappears only after an accepted puzzle or wand command and remains non-blocking when browser storage is unavailable.
@@ -156,6 +157,7 @@ The deployed artifact is `dist/`; production does not require a Bun daemon or ba
 - 匹配目标组件放置、紧凑且可配置容量的 Shelf 存储，以及有序的双 Bank 表现。
 - 确定性的 `apply-global-wand` Demo 辅助命令由 TypeScript、原生 C++ 和 WASM 共同实现：锁定宝石保持不动，其余宝石身份全局配对到目标，Shelf 清空，并且只产生一次胜利。
 - 自适应桌面/方屏/竖屏 Tux 舞台：整数尺寸拟合、受限缩放/平移、普通 WAAPI 飞行、对角线全图魔法棒波次，以及手动/魔法棒通关共用的 SVG 弧光与三组像素烟花终章。
+- 终章结束后，右上角魔法棒会换成重玩按钮；它走 canonical 重开命令，复原初始棋盘和相机，同时保留新手提示与音频偏好，不刷新页面。
 - 独立的确定性 C++20 像素音频引擎，编译到 AudioWorklet WASM，支持玩法 Cue、首次交互恢复、场景内静音持久化和静默失败降级。
 - Canonical replay、浏览器 E2E，以及 TypeScript ↔ 原生 C++ ↔ WebAssembly 的逐字节差分验证。
 - 版本化的一句话新手提示：仅在首次接受的棋盘/Shelf/魔法棒命令后消失；浏览器存储不可用时仍不阻塞游戏。

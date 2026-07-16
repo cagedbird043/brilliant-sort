@@ -22,7 +22,7 @@
 7. 所有有效格均颜色匹配、选择为空且 Shelf 为空时胜利；`apply-global-wand` 按颜色、宝石 ID 和行优先目标确定性地完成同一胜利谓词。
 8. 本 Demo 没有失败、计时或步数状态；关卡由固定 JSON 提供，随机生成、商业 Power-up、LiveOps 和账号状态明确延期。
 
-这些假设来自已归档的核心、Tux 舞台、渲染和 Demo 辅助终章规格；视频里没有出现的商业功能，也没有被擅自补成规则。
+这些假设来自已归档的核心、Tux 舞台、渲染和 Demo 辅助终章规格。新加的重玩按钮只调用既有 `restart-level` 命令，不改玩法规则；视频里没有出现的商业功能，也没有被擅自补成规则。
 
 ## 2. 核心状态与所有权
 
@@ -63,7 +63,7 @@ C++ 对外只暴露窄 JSON v1 / C ABI；`src/wasm/game-core.ts` 把它封装为
 
 ### 表现、音频与规则的关系
 
-React 根据 `CoreTransition` 渲染像素素材、无障碍语义、键盘/触摸输入、一次性提示和临时 WAAPI/SVG 动画。普通移动和魔法棒全图波次都只测量已提交状态的来源/目标矩形，弧光与三组固定像素烟花也不修改 canonical state。`PixelAudioEngine` 只消费 post-dispatch `AudioCue`；AudioContext 生命周期、设备采样率、静音偏好、音乐进度均不进入 `GameState` 或 replay。
+React 根据 `CoreTransition` 渲染像素素材、无障碍语义、键盘/触摸输入、一次性提示和临时 WAAPI/SVG 动画。普通移动和魔法棒全图波次都只测量已提交状态的来源/目标矩形，弧光、固定烟花和胜利后的重玩按钮也不修改 canonical state。重玩通过 `restart-level` 回到初始状态，表现层只递增相机 reset key；新手提示和静音偏好不跟着清空。`PixelAudioEngine` 只消费 post-dispatch `AudioCue`；AudioContext 生命周期、设备采样率、静音偏好、音乐进度均不进入 `GameState` 或 replay。
 
 ### TypeScript 的定位
 
@@ -79,9 +79,9 @@ TypeScript reducer 保留为差分 Oracle，而不是浏览器生产回退。生
 
 对当前选择集合 `S`，核心只接受 `Frontier(S) ∩ SafeToRemove(S)` 中的成员；`SafeToRemove` 会重新检查 `S - {v}` 的八方向连通性。候选先按到 `selection.anchor` 的 Chebyshev 距离排序，距离相同再比较行、列。放入 Shelf 时最多取 `min(selection.size, freeSlots)` 个成员；容量不够就保留剩余选择，不会悄悄丢掉宝石。
 
-### 4.3 放置、全局修复、拒绝与胜利
+### 4.3 放置、全局修复、重玩、拒绝与胜利
 
-`PlaceSelectionAtTarget(coord)` 只接受同色、有效、空的目标格。核心从点击位置找出同色空目标分量，以点击格为 anchor，按 Chebyshev 距离、行、列排序；每放一颗宝石都会重新计算安全来源，再与下一个目标配对。`apply-global-wand` 保留已匹配锁定宝石，按颜色收集 Board/Shelf 中其余身份，再将字典序 Gem ID 配对到行优先同色空目标；它清空 Shelf/选择，只发出一个 `global-wand-applied` 和一个 `won`。错误目标、满 Shelf、锁定宝石和无可选宝石都返回稳定 `Rejection`，逻辑状态不变。胜利条件仍是：Shelf 空、选择空、全部有效格有宝石且颜色匹配。
+`PlaceSelectionAtTarget(coord)` 只接受同色、有效、空的目标格。核心从点击位置找出同色空目标分量，以点击格为 anchor，按 Chebyshev 距离、行、列排序；每放一颗宝石都会重新计算安全来源，再与下一个目标配对。`apply-global-wand` 保留已匹配锁定宝石，按颜色收集 Board/Shelf 中其余身份，再将字典序 Gem ID 配对到行优先同色空目标；它清空 Shelf/选择，只发出一个 `global-wand-applied` 和一个 `won`。终章和宝石飞行结束后，右上角重玩按钮才出现；它 dispatch 既有 `restart-level`，恢复初始 Board、空 Shelf、空选择和默认相机，不刷新页面。错误目标、满 Shelf、锁定宝石和无可选宝石都返回稳定 `Rejection`，逻辑状态不变。胜利条件仍是：Shelf 空、选择空、全部有效格有宝石且颜色匹配。
 
 ## 5. Harness 与自动化验收
 
@@ -183,15 +183,16 @@ bun run level:check:tux
 
 作为复现成本参考，[GitHub Actions run #29484985369](https://github.com/cagedbird043/brilliant-sort/actions/runs/29484985369) 的 `verify` 在 Ubuntu runner 上用时 1 分 46 秒，其中包括安装固定版本的 Emscripten 和 Chromium、编译三个后端并运行全部自动化检查。本地已有依赖和浏览器缓存时通常更快；第一次运行主要看下载速度。
 
-对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition parity。最新 CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
+对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition parity。浏览器回归还覆盖手动/魔法棒通关后的重玩时机、键盘操作、canonical 重开、相机复位、偏好保留、移动布局和 reduced motion。CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
 
-详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事；以下规格均已通过自动验证与人工产品验收并归档：
+详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是需求来源和验收记录，不是事后补写的故事。已验收功能均已归档；重玩功能的活动规格保留到人工视觉验收：
 
 - [`2026-07-15-add-brilliant-sort-core`](openspec/changes/archive/2026-07-15-add-brilliant-sort-core/)
 - [`2026-07-16-add-pixel-crystal-renderer`](openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/)
 - [`2026-07-16-rebuild-tux-mosaic-stage`](openspec/changes/archive/2026-07-16-rebuild-tux-mosaic-stage/)
 - [`2026-07-16-add-cpp-pixel-audio-engine`](openspec/changes/archive/2026-07-16-add-cpp-pixel-audio-engine/)
 - [`2026-07-16-add-demo-assist-and-victory-finale`](openspec/changes/archive/2026-07-16-add-demo-assist-and-victory-finale/)
+- [`add-win-replay-control`](openspec/changes/add-win-replay-control/)（实现与自动验证完成，等待人工视觉/产品验收）
 
 ## 结论
 

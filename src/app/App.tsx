@@ -24,6 +24,7 @@ import { calculateStageLayout } from "./stage-layout";
 import { VictoryFinale } from "./VictoryFinale";
 import audioCrystal from "../assets/pixel/audio-crystal.svg";
 import globalWand from "../assets/pixel/global-wand.svg";
+import replayLevel from "../assets/pixel/replay-level.svg";
 import largeAmber from "../assets/pixel/gems/amber.png";
 import largeCoral from "../assets/pixel/gems/coral.png";
 import largeIce from "../assets/pixel/gems/ice.png";
@@ -384,6 +385,7 @@ export function App() {
   });
   const [finaleToken, setFinaleToken] = useState(0);
   const [finaleVisible, setFinaleVisible] = useState(false);
+  const [runToken, setRunToken] = useState(0);
   const reducedMotion = useReducedMotion();
   const [audioSnapshot, setAudioSnapshot] = useState<PixelAudioSnapshot>({
     status: "loading",
@@ -793,6 +795,10 @@ export function App() {
       setState(result.state);
       setActivity(feedback.message);
       setFeedbackTone(feedback.tone);
+      if (result.rejection === null && command.type === "restart-level") {
+        setFinaleVisible(false);
+        setRunToken((token) => token + 1);
+      }
       if (
         result.rejection === null &&
         command.type !== "restart-level" &&
@@ -889,16 +895,28 @@ export function App() {
       >
         <img src={audioCrystal} alt="" aria-hidden="true" />
       </button>
-      <button
-        className="global-wand-control"
-        type="button"
-        data-testid="global-wand"
-        aria-label="一键完成关卡"
-        disabled={inputLocked || state.status === "won"}
-        onClick={() => applyCommand({ type: "apply-global-wand" })}
-      >
-        <img src={globalWand} alt="" aria-hidden="true" />
-      </button>
+      {state.status === "won" && !finaleVisible && !inputLocked ? (
+        <button
+          className="global-wand-control replay-level-control"
+          type="button"
+          data-testid="replay-level"
+          aria-label="重新玩这一关"
+          onClick={() => applyCommand({ type: "restart-level" })}
+        >
+          <img src={replayLevel} alt="" aria-hidden="true" />
+        </button>
+      ) : (
+        <button
+          className="global-wand-control"
+          type="button"
+          data-testid="global-wand"
+          aria-label="一键完成关卡"
+          disabled={inputLocked || state.status === "won"}
+          onClick={() => applyCommand({ type: "apply-global-wand" })}
+        >
+          <img src={globalWand} alt="" aria-hidden="true" />
+        </button>
+      )}
       {showOnboarding ? (
         <p className="onboarding-hint" role="note">
           {ONBOARDING_COPY}
@@ -922,7 +940,7 @@ export function App() {
           <BoardCamera
             enabled={!stageLayout.directTouch}
             maxZoom={stageLayout.maxZoom}
-            resetKey={`${state.levelId}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
+            resetKey={`${state.levelId}:${runToken}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
             width={boardWidth}
             height={boardHeight}
           >

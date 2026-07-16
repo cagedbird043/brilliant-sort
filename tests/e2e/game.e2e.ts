@@ -122,6 +122,12 @@ test("a player can complete the committed Tux level in the browser", async ({ pa
   await expect(page.locator(".victory-arc path")).toHaveCount(1);
   await expect(page.locator(".pixel-firework")).toHaveCount(3);
   await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
+  await expect(page.getByTestId("replay-level")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
+  await expect(page.getByTestId("replay-level")).toHaveAttribute(
+    "aria-label",
+    "重新玩这一关",
+  );
 });
 
 test("the playable surface stays wordless while the mute crystal remains external and accessible", async ({
@@ -157,6 +163,7 @@ test("the playable surface stays wordless while the mute crystal remains externa
   );
   await expect(page.locator(".audio-crystal-control")).toHaveAttribute("aria-pressed", "false");
   await expect(page.getByTestId("global-wand")).toHaveAttribute("aria-label", "一键完成关卡");
+  await expect(page.getByTestId("replay-level")).toHaveCount(0);
   await expect(page.locator(".shelf-bank.bank-a")).toHaveAttribute("aria-label", "缓冲 Shelf A");
   await expect(page.locator(".shelf-bank.bank-b")).toHaveAttribute("aria-label", "缓冲 Shelf B");
 });
@@ -173,6 +180,13 @@ test("onboarding persists only after an accepted keyboard wand and the global fl
   expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:onboarding:v1"))).toBeNull();
   await page.reload();
   await expect(hint).toHaveText(copy);
+  const audioControl = page.locator(".audio-crystal-control");
+  await expect(audioControl).toHaveAttribute("data-audio-status", "ready");
+  await audioControl.click();
+  await expect(audioControl).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:audio-muted"))).toBe(
+    "true",
+  );
 
   const wand = page.getByTestId("global-wand");
   await wand.focus();
@@ -190,6 +204,7 @@ test("onboarding persists only after an accepted keyboard wand and the global fl
 
   await expect(wand).toBeDisabled();
   await expect(page.getByTestId("victory-finale")).toHaveCount(1);
+  await expect(page.getByTestId("replay-level")).toHaveCount(0);
   await expect(page.locator(".victory-arc path")).toHaveCount(1);
   await expect(page.locator(".pixel-firework")).toHaveCount(3);
   await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
@@ -222,9 +237,26 @@ test("onboarding persists only after an accepted keyboard wand and the global fl
   await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toHaveAttribute("aria-label", "重新玩这一关");
+  await replay.focus();
+  await replay.press("Enter");
+  await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(page.locator(".activity-announcer")).toHaveText("校准台已重置。");
+  await expect(page.locator(".board-cell")).toHaveCount(546);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(136);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.getByTestId("global-wand")).toBeVisible();
+  await expect(replay).toHaveCount(0);
+  await expect(audioControl).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:onboarding:v1"))).toBe(
+    "seen",
+  );
 
   await page.reload();
   await expect(page.getByRole("note")).toHaveCount(0);
+  await expect(page.locator(".audio-crystal-control")).toHaveAttribute("aria-pressed", "true");
 });
 
 test("unavailable storage keeps onboarding and the reduced-motion wand playable", async ({ page }) => {
@@ -255,6 +287,12 @@ test("unavailable storage keeps onboarding and the reduced-motion wand playable"
   await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
   await expect(page.getByTestId("victory-finale")).toHaveCount(0);
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toBeVisible();
+  await replay.click();
+  await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(hint).toHaveCount(0);
+  await expect(page.getByTestId("global-wand")).toBeVisible();
 });
 
 test("a mid-game wand morphs Shelf gems back to Micro destinations", async ({ page }) => {
@@ -426,6 +464,22 @@ test("portrait camera exposes bounded keyboard zoom, pan, and reset semantics", 
   await camera.press("Escape");
   await expect(camera).not.toHaveClass(/is-zoomed/);
   await expect(camera).toHaveAttribute("aria-label", "Tux 棋盘视图，当前 1 倍缩放");
+  await camera.focus();
+  await camera.press("Equal");
+  await camera.press("ArrowRight");
+  await camera.press("ArrowDown");
+  await expect(camera).toHaveClass(/is-zoomed/);
+
+  await page.getByTestId("global-wand").click();
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toBeVisible();
+  await replay.click();
+  await expect(camera).not.toHaveClass(/is-zoomed/);
+  await expect(camera).toHaveAttribute("aria-label", "Tux 棋盘视图，当前 1 倍缩放");
+  await expect(camera.locator(".board-camera-content")).toHaveCSS(
+    "transform",
+    "matrix(1, 0, 0, 1, 0, 0)",
+  );
 });
 
 test("reduced motion commits the authoritative state immediately without flight clones", async ({ page }) => {
@@ -450,6 +504,12 @@ test("reduced motion commits the authoritative state immediately without flight 
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
   await expect(page.getByTestId("victory-finale")).toHaveCount(0);
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toBeVisible();
+  await replay.click();
+  await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
+  await expect(page.getByTestId("global-wand")).toBeVisible();
 });
 
 test("audio starts on a puzzle gesture, reports suspension, resumes, and persists mute", async ({ page }) => {
