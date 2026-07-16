@@ -130,6 +130,60 @@ test("a player can complete the committed Tux level in the browser", async ({ pa
   );
 });
 
+test("the victory shimmer crosses the completed pixel art", async ({ page }) => {
+  await page.goto("/");
+  const camera = page.locator(".board-camera");
+  await expect(camera).toBeVisible();
+
+  await page.getByTestId("global-wand").click();
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+
+  const shimmer = await camera.evaluate((element) => {
+    const animation = element
+      .getAnimations({ subtree: true })
+      .find(
+        (candidate) =>
+          (candidate as Animation & { readonly animationName?: string }).animationName ===
+          "tux-victory-shimmer",
+      );
+    if (!animation || !(animation.effect instanceof KeyframeEffect)) {
+      return null;
+    }
+
+    animation.pause();
+    animation.currentTime = 570;
+    const style = getComputedStyle(element, "::after");
+    return {
+      animationName: (animation as Animation & { readonly animationName: string }).animationName,
+      currentTime: Number(animation.currentTime),
+      playState: animation.playState,
+      progress: animation.effect.getComputedTiming().progress,
+      opacity: Number(style.opacity),
+      backgroundImage: style.backgroundImage,
+      mixBlendMode: style.mixBlendMode,
+    };
+  });
+
+  expect(shimmer).toMatchObject({
+    animationName: "tux-victory-shimmer",
+    currentTime: 570,
+    playState: "paused",
+    opacity: 1,
+    mixBlendMode: "screen",
+  });
+  expect(shimmer?.progress).toBeCloseTo(0.5, 5);
+  expect(shimmer?.backgroundImage).toContain("linear-gradient");
+
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 2_000 });
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
+  await expect(camera).toHaveScreenshot("victory-shimmer.png", {
+    animations: "allow",
+    caret: "hide",
+    maxDiffPixelRatio: 0.002,
+    scale: "css",
+  });
+});
+
 test("the playable surface stays wordless while the mute crystal remains external and accessible", async ({
   page,
 }) => {
