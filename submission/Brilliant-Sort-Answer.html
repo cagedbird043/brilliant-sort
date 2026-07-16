@@ -226,11 +226,11 @@ background: #ffffff;
 Sort：确定性核心、Harness 与 AI Agent 验证方案</h1>
 <blockquote>
 <p><strong>对应题目</strong>：<code>游戏研发基础设施 / AI Agent 方向笔试：Brilliant Sort</code><br />
-<strong>代码版本</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/commit/ed885e136581c5fc13798f577717454e67671050"><code>ed885e1</code></a>（2026-07-16）<br />
+<strong>代码版本</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/commit/e5dab87bcf48174a9c921e065e47515276913951"><code>e5dab87</code></a>（2026-07-16）<br />
 <strong>线上 Demo</strong>：<a href="https://brilliant-sort.cagedbird.cn/">Hong Kong</a> · <a href="https://cagedbird043.github.io/brilliant-sort/">GitHub
 Pages</a><br />
-<strong>CI 证据</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29484985369">Actions
-#29484985369</a>（<code>verify</code>、<code>publish-hk</code>、<code>deploy</code>
+<strong>CI 证据</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29488358577">Actions
+#29488358577</a>（<code>verify</code>、<code>publish-hk</code>、<code>deploy</code>
 全部成功）</p>
 </blockquote>
 <h2 id="摘要">摘要</h2>
@@ -558,9 +558,9 @@ Shelf
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness replay tux-01</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness differential tux-01</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run level:check:tux</span></code></pre></div>
-<p>作为复现成本参考，<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29484985369">GitHub
-Actions run #29484985369</a> 的 <code>verify</code> 在 Ubuntu runner
-上用时 1 分 46 秒，其中包括安装固定版本的 Emscripten 和
+<p>作为复现成本参考，<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29488358577">GitHub
+Actions run #29488358577</a> 的 <code>verify</code> 在 Ubuntu runner
+上用时 2 分 13 秒，其中包括安装固定版本的 Emscripten 和
 Chromium、编译三个后端并运行全部自动化检查。本地已有依赖和浏览器缓存时通常更快；第一次运行主要看下载速度。</p>
 <p>对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48
 kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux
