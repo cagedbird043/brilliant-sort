@@ -61,7 +61,8 @@ interface PendingMotion {
   readonly nextShelfIds: ReadonlySet<string>;
 }
 
-const MOTION_DURATION_MS = 240;
+const MOTION_DURATION_MS = 280;
+const FLIGHT_LOD_SWITCH = 0.58;
 
 const COLOR_LABEL: Record<Color, string> = {
   navy: "深蓝",
@@ -212,6 +213,8 @@ function GemSprite({ gemId, color, selected, locked, family }: GemSpriteProps) {
     <span
       className={`gem family-${family} gem-${color}${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}`}
       data-gem-id={gemId}
+      data-gem-family={family}
+      data-gem-color={color}
       aria-hidden="true"
     >
       <span className="gem-shadow" />
@@ -222,6 +225,21 @@ function GemSprite({ gemId, color, selected, locked, family }: GemSpriteProps) {
       />
     </span>
   );
+}
+
+function createFlightLayer(
+  element: HTMLElement,
+  role: "source" | "destination",
+): HTMLElement {
+  const layer = element.cloneNode(true) as HTMLElement;
+  layer.classList.remove("is-selected", "is-locked", "is-landing");
+  layer.classList.add("gem-flight-layer");
+  layer.removeAttribute("data-gem-id");
+  layer.removeAttribute("data-motion-destination");
+  layer.dataset.flightLayer = role;
+  layer.style.removeProperty("visibility");
+  layer.style.opacity = role === "source" ? "1" : "0";
+  return layer;
 }
 
 interface ShelfBankProps {
@@ -429,34 +447,48 @@ export function App() {
       }
 
       const to = rectOf(destination);
+      const sourceFamily = source.element.dataset.gemFamily ?? "unknown";
+      const destinationFamily = destination.dataset.gemFamily ?? "unknown";
+      const sourceLayer = createFlightLayer(source.element, "source");
+      const destinationLayer =
+        sourceFamily === destinationFamily
+          ? null
+          : createFlightLayer(destination, "destination");
+
       destination.style.visibility = "hidden";
       destination.dataset.motionDestination = "hidden";
       hiddenDestinations.push(destination);
 
-      const clone = source.element.cloneNode(true) as HTMLElement;
-      clone.classList.remove("is-selected", "is-locked", "is-landing");
-      clone.classList.add("gem-flight-clone");
-      clone.removeAttribute("data-gem-id");
+      const clone = document.createElement("div");
+      clone.className = "gem-flight-clone";
       clone.dataset.flightGemId = gemId;
+      clone.dataset.flightSourceFamily = sourceFamily;
+      clone.dataset.flightDestinationFamily = destinationFamily;
+      clone.setAttribute("aria-hidden", "true");
       Object.assign(clone.style, {
-        position: "fixed",
         left: `${source.rect.left}px`,
         top: `${source.rect.top}px`,
         width: `${source.rect.width}px`,
         height: `${source.rect.height}px`,
         margin: "0",
-        pointerEvents: "none",
-        transform: "translate3d(0, 0, 0)",
+        transform: "translate3d(0, 0, 0) scale(1, 1)",
         zIndex: "1000",
       });
+      clone.append(sourceLayer);
+      if (destinationLayer !== null) {
+        clone.append(destinationLayer);
+      }
       document.body.append(clone);
       clones.push(clone);
+
+      const scaleX = to.width / source.rect.width;
+      const scaleY = to.height / source.rect.height;
       animations.push(
         clone.animate(
           [
-            { transform: "translate3d(0, 0, 0)" },
+            { transform: "translate3d(0, 0, 0) scale(1, 1)" },
             {
-              transform: `translate3d(${to.left - source.rect.left}px, ${to.top - source.rect.top}px, 0)`,
+              transform: `translate3d(${to.left - source.rect.left}px, ${to.top - source.rect.top}px, 0) scale(${scaleX}, ${scaleY})`,
             },
           ],
           {
@@ -466,6 +498,28 @@ export function App() {
           },
         ),
       );
+      if (destinationLayer !== null) {
+        animations.push(
+          sourceLayer.animate(
+            [
+              { offset: 0, opacity: 1 },
+              { offset: FLIGHT_LOD_SWITCH, opacity: 1 },
+              { offset: FLIGHT_LOD_SWITCH, opacity: 0 },
+              { offset: 1, opacity: 0 },
+            ],
+            { duration: MOTION_DURATION_MS, fill: "forwards" },
+          ),
+          destinationLayer.animate(
+            [
+              { offset: 0, opacity: 0 },
+              { offset: FLIGHT_LOD_SWITCH, opacity: 0 },
+              { offset: FLIGHT_LOD_SWITCH, opacity: 1 },
+              { offset: 1, opacity: 1 },
+            ],
+            { duration: MOTION_DURATION_MS, fill: "forwards" },
+          ),
+        );
+      }
     }
 
     for (const gemId of plan.previousShelfIds) {
@@ -505,15 +559,15 @@ export function App() {
       }
       cleaned = true;
       window.clearTimeout(safetyTimer);
+      for (const destination of hiddenDestinations) {
+        destination.style.removeProperty("visibility");
+        delete destination.dataset.motionDestination;
+      }
       for (const animation of animations) {
         animation.cancel();
       }
       for (const clone of clones) {
         clone.remove();
-      }
-      for (const destination of hiddenDestinations) {
-        destination.style.removeProperty("visibility");
-        delete destination.dataset.motionDestination;
       }
       if (activeMotionCleanupRef.current === cleanup) {
         activeMotionCleanupRef.current = null;
@@ -721,7 +775,7 @@ export function App() {
                 const rejected = rejectedCell === keyOf(coord);
                 return (
                   <button
-                    className={`board-cell target-${cell.targetColor}${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}${rejected ? " is-rejected" : ""}`}
+                    className={`board-cell target-${cell.targetColor}${gem ? "" : " is-empty"}${selected ? " is-selected" : ""}${locked ? " is-locked" : ""}${rejected ? " is-rejected" : ""}`}
                     data-testid={`board-cell-${coord.row}-${coord.col}`}
                     type="button"
                     key={keyOf(coord)}
@@ -740,9 +794,7 @@ export function App() {
                         locked={locked}
                         family="micro"
                       />
-                    ) : (
-                      <span className="empty-socket-mark" aria-hidden="true" />
-                    )}
+                    ) : null}
                   </button>
                 );
               })}

@@ -348,18 +348,18 @@ button:focus-visible {
   pointer-events: none;
 }
 
+.board-cell.is-empty .target-underlay {
+  opacity: 0.42;
+}
+
+.board-cell.is-empty .socket-sprite {
+  opacity: 0.38;
+}
+
 .board-cell:hover:not(:disabled) .target-underlay {
   opacity: 0.94;
 }
 
-.empty-socket-mark {
-  z-index: 4;
-  width: 20%;
-  height: 20%;
-  border: 1px solid rgba(225, 236, 255, 0.44);
-  background: rgba(7, 11, 25, 0.35);
-  pointer-events: none;
-}
 
 .gem {
   position: relative;
@@ -507,17 +507,17 @@ button:focus-visible {
 .shelf-sprite {
   position: absolute;
   z-index: 0;
-  width: 116%;
+  width: 92%;
   max-width: none;
-  height: 116%;
+  height: 92%;
   opacity: 0.86;
   pointer-events: none;
 }
 
 .shelf-slot .gem {
   z-index: 2;
-  width: 76%;
-  height: 76%;
+  width: 56%;
+  height: 56%;
 }
 
 .shelf-slot:hover:not(:disabled) .shelf-sprite {
@@ -525,12 +525,31 @@ button:focus-visible {
 }
 
 .gem-flight-clone {
-  display: grid;
+  position: fixed;
+  display: block;
   contain: layout style paint;
+  isolation: isolate;
   opacity: 1;
   filter: none;
+  pointer-events: none;
+  transform-origin: 0 0;
   transition: none;
   will-change: transform;
+}
+
+.gem-flight-layer {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 1;
+  transform: none !important;
+  transition: none !important;
+  will-change: opacity;
+}
+
+.gem-flight-layer .gem-shadow {
+  transition: none;
 }
 
 

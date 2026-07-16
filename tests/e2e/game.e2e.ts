@@ -23,6 +23,60 @@ async function clickCommand(page: Page, command: GameCommand): Promise<void> {
   }
 }
 
+async function readFlightSnapshot(page: Page) {
+  return page.evaluate(() => {
+    const clones = [...document.querySelectorAll<HTMLElement>(".gem-flight-clone")];
+    const flightIds = clones.map((clone) => clone.dataset.flightGemId ?? "");
+    const scales: number[] = [];
+    const aligned = clones.every((clone) => {
+      const gemId = clone.dataset.flightGemId;
+      const destination = gemId
+        ? document.querySelector<HTMLElement>(`[data-gem-id="${CSS.escape(gemId)}"]`)
+        : null;
+      const frames =
+        (clone.getAnimations()[0]?.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
+      const matrix = new DOMMatrix(String(frames.at(-1)?.transform ?? "none"));
+      const destinationRect = destination?.getBoundingClientRect();
+      const sourceWidth = Number.parseFloat(clone.style.width);
+      const sourceHeight = Number.parseFloat(clone.style.height);
+      scales.push(matrix.a, matrix.d);
+      return Boolean(
+        destinationRect &&
+          Math.abs(Number.parseFloat(clone.style.left) + matrix.e - destinationRect.left) <= 1 &&
+          Math.abs(Number.parseFloat(clone.style.top) + matrix.f - destinationRect.top) <= 1 &&
+          Math.abs(sourceWidth * matrix.a - destinationRect.width) <= 1 &&
+          Math.abs(sourceHeight * matrix.d - destinationRect.height) <= 1,
+      );
+    });
+    return {
+      count: clones.length,
+      unique: new Set(flightIds).size,
+      aligned,
+      opaque: clones.every(
+        (clone) =>
+          getComputedStyle(clone).opacity === "1" &&
+          ((clone.getAnimations()[0]?.effect as KeyframeEffect | null)?.getKeyframes() ?? [])
+            .every((frame) => frame.opacity === undefined),
+      ),
+      avoidsPageOrigin: clones.every(
+        (clone) => Number.parseFloat(clone.style.left) > 0 && Number.parseFloat(clone.style.top) > 0,
+      ),
+      hiddenDestinations: document.querySelectorAll('[data-motion-destination="hidden"]').length,
+      familyTransitions: [
+        ...new Set(
+          clones.map(
+            (clone) =>
+              `${clone.dataset.flightSourceFamily}->${clone.dataset.flightDestinationFamily}`,
+          ),
+        ),
+      ],
+      lodLayerCounts: [...new Set(clones.map((clone) => clone.querySelectorAll(".gem-flight-layer").length))],
+      minScale: Math.min(...scales),
+      maxScale: Math.max(...scales),
+    };
+  });
+}
+
 test("a player can complete the committed Tux level in the browser", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".game-board")).toBeVisible();
@@ -73,7 +127,7 @@ test("the playable surface stays wordless while the mute crystal remains externa
   await expect(page.locator(".shelf-bank.bank-b")).toHaveAttribute("aria-label", "缓冲 Shelf B");
 });
 
-test("authoritative movement uses one opaque aligned clone per moved gem and locks input until settlement", async ({
+test("authoritative movement morphs one opaque gem between Micro and Large rectangles", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 768, height: 768 });
@@ -82,53 +136,63 @@ test("authoritative movement uses one opaque aligned clone per moved gem and loc
   const shelfSlot = page.getByTestId("shelf-slot-0");
   await shelfSlot.click();
 
-  await expect.poll(() => page.locator(".gem-flight-clone").count(), { timeout: 500 }).toBe(16);
+  await expect.poll(() => page.locator(".gem-flight-clone").count(), { timeout: 800 }).toBe(16);
   await expect(shelfSlot).toBeDisabled();
-  const motion = await page.evaluate(() => {
-    const clones = [...document.querySelectorAll<HTMLElement>(".gem-flight-clone")];
-    const flightIds = clones.map((clone) => clone.dataset.flightGemId ?? "");
-    const aligned = clones.every((clone) => {
-      const gemId = clone.dataset.flightGemId;
-      const destination = gemId
-        ? document.querySelector<HTMLElement>(`[data-gem-id="${CSS.escape(gemId)}"]`)
-        : null;
-      const animation = clone.getAnimations()[0];
-      const frames = (animation?.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
-      const finalTransform = String(frames.at(-1)?.transform ?? "none");
-      const matrix = new DOMMatrix(finalTransform);
-      const destinationRect = destination?.getBoundingClientRect();
-      return Boolean(
-        destinationRect &&
-          Math.abs(Number.parseFloat(clone.style.left) + matrix.e - destinationRect.left) <= 1 &&
-          Math.abs(Number.parseFloat(clone.style.top) + matrix.f - destinationRect.top) <= 1,
-      );
-    });
-    return {
-      count: clones.length,
-      unique: new Set(flightIds).size,
-      aligned,
-      opaque: clones.every(
-        (clone) =>
-          getComputedStyle(clone).opacity === "1" &&
-          (clone.getAnimations()[0]?.effect as KeyframeEffect | null)
-            ?.getKeyframes()
-            .every((frame) => frame.opacity === undefined),
-      ),
-      avoidsPageOrigin: clones.every(
-        (clone) => Number.parseFloat(clone.style.left) > 0 && Number.parseFloat(clone.style.top) > 0,
-      ),
-      hiddenDestinations: document.querySelectorAll('[data-motion-destination="hidden"]').length,
-    };
-  });
-
-  expect(motion).toEqual({
+  const boardToShelf = await readFlightSnapshot(page);
+  expect(boardToShelf).toMatchObject({
     count: 16,
     unique: 16,
     aligned: true,
     opaque: true,
     avoidsPageOrigin: true,
     hiddenDestinations: 16,
+    familyTransitions: ["micro->large"],
+    lodLayerCounts: [2],
   });
+  expect(boardToShelf.minScale).toBeGreaterThan(1);
+
+  await expect(shelfSlot).toBeEnabled({ timeout: 1_000 });
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
+  await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
+  const shelfVisual = await shelfSlot.evaluate((slot) => {
+    const slotRect = slot.getBoundingClientRect();
+    const trayRect = slot.querySelector(".shelf-sprite")!.getBoundingClientRect();
+    const gemRect = slot.querySelector(".gem")!.getBoundingClientRect();
+    return {
+      trayRatio: trayRect.width / slotRect.width,
+      gemRatio: gemRect.width / slotRect.width,
+    };
+  });
+  expect(shelfVisual.trayRatio).toBeCloseTo(0.92, 2);
+  expect(shelfVisual.gemRatio).toBeCloseTo(0.56, 2);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(16);
+  await expect(page.locator(".empty-socket-mark")).toHaveCount(0);
+  await expect(page.locator(".board-cell.is-empty .socket-sprite").first()).toHaveCSS(
+    "opacity",
+    "0.38",
+  );
+
+  await page.getByTestId("board-cell-10-2").click();
+  await page.getByTestId("board-cell-10-7").click();
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 1_000 });
+  await shelfSlot.click();
+  await page.getByTestId("board-cell-10-2").click();
+
+  await expect.poll(() => page.locator(".gem-flight-clone").count(), { timeout: 800 }).toBe(10);
+  await expect(shelfSlot).toBeDisabled();
+  const shelfToBoard = await readFlightSnapshot(page);
+  expect(shelfToBoard).toMatchObject({
+    count: 10,
+    unique: 10,
+    aligned: true,
+    opaque: true,
+    avoidsPageOrigin: true,
+    hiddenDestinations: 10,
+    familyTransitions: ["large->micro"],
+    lodLayerCounts: [2],
+  });
+  expect(shelfToBoard.maxScale).toBeLessThan(1);
+
   await expect(shelfSlot).toBeEnabled({ timeout: 1_000 });
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
   await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
@@ -211,6 +275,8 @@ test("reduced motion commits the authoritative state immediately without flight 
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(16);
   await expect(shelfSlot).toBeEnabled();
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(16);
+  await expect(page.locator(".empty-socket-mark")).toHaveCount(0);
   const transitionDuration = await page.locator(".gem").first().evaluate((element) => {
     const value = getComputedStyle(element).transitionDuration;
     return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1_000;
