@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "roles": {
+    "outline": { "source": "#141A26", "fixed": true },
+    "shadow": { "source": "#283246" },
+    "darkFacet": { "source": "#3B4A64" },
+    "midFacet": { "source": "#52647D" },
+    "lightFacet": { "source": "#768BA7" },
+    "mainFacet": { "source": "#B9C7DA" },
+    "colorHighlight": { "source": "#DDE7F3" },
+    "specular": { "source": "#FFF8E8", "fixed": true }
+  },
+  "variants": {
+    "obsidian": {
+      "shadow": "#070A16",
+      "darkFacet": "#0D1426",
+      "midFacet": "#16203A",
+      "lightFacet": "#273654",
+      "mainFacet": "#3A4A68",
+      "colorHighlight": "#7E91B3"
+    },
+    "pearl": {
+      "shadow": "#68738A",
+      "darkFacet": "#8994A8",
+      "midFacet": "#AEB7C7",
+      "lightFacet": "#D1D7E1",
+      "mainFacet": "#EEF1F5",
+      "colorHighlight": "#FFFFFF"
+    },
+    "amber": {
+      "shadow": "#6C2D0A",
+      "darkFacet": "#8C420E",
+      "midFacet": "#B85F12",
+      "lightFacet": "#E37D18",
+      "mainFacet": "#FFA329",
+      "colorHighlight": "#FFD477"
+    },
+    "navy": {
+      "shadow": "#162C55",
+      "darkFacet": "#214277",
+      "midFacet": "#2D5AA0",
+      "lightFacet": "#4479C7",
+      "mainFacet": "#74A8EF",
+      "colorHighlight": "#BEDAFF"
+    },
+    "ice": {
+      "shadow": "#0E5A70",
+      "darkFacet": "#087E98",
+      "midFacet": "#0A9FBB",
+      "lightFacet": "#30C6D8",
+      "mainFacet": "#7AE7EE",
+      "colorHighlight": "#C6FCFA"
+    },
+    "coral": {
+      "shadow": "#763141",
+      "darkFacet": "#9A3F4A",
+      "midFacet": "#C05552",
+      "lightFacet": "#E0715E",
+      "mainFacet": "#F59272",
+      "colorHighlight": "#FFC0A4"
+    }
+  }
+}

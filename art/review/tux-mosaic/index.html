@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tux mosaic · Micro art review</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #e9edf4;
+        --muted: #aab4c6;
+        --cavern: #0c111b;
+        --slate: #172131;
+        --slate-2: #202d42;
+        --line: #3a4a63;
+        --accent: #ffc15a;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; padding: clamp(1rem, 4vw, 3rem); background: var(--cavern); color: var(--ink); }
+      main { width: min(100%, 76rem); margin: 0 auto; }
+      header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .75rem 2rem; margin-bottom: 1.5rem; }
+      h1 { margin: 0; font-size: clamp(1.15rem, 3vw, 1.8rem); letter-spacing: .06em; }
+      h2 { margin: 0 0 .75rem; font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; }
+      h3 { margin: 0; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+      p { max-width: 62rem; margin: .5rem 0 0; color: var(--muted); line-height: 1.6; font-size: .8rem; }
+      section { margin-top: 1.75rem; }
+      .proof { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; color: var(--muted); font-size: .72rem; }
+      .proof strong { color: var(--accent); }
+      .count { padding: .25rem .5rem; border: 1px solid var(--line); border-radius: .25rem; background: var(--slate); }
+      .map-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+      .map-card, .variant-card, .source-card { margin: 0; padding: .8rem; border: 1px solid var(--line); background: var(--slate); }
+      .map-card figcaption, .source-card figcaption { margin-top: .65rem; color: var(--muted); font-size: .72rem; line-height: 1.45; }
+      .map-stage { display: grid; place-items: center; overflow: auto; padding: .5rem; background: repeating-conic-gradient(#202d42 0 25%, #172131 0 50%) 50% / 1rem 1rem; }
+      .map-stage img { display: block; width: min(100%, 25rem); height: auto; image-rendering: pixelated; }
+      .legend { display: flex; flex-wrap: wrap; gap: .65rem 1rem; margin-top: .8rem; color: var(--muted); font-size: .7rem; }
+      .legend-item { display: inline-flex; align-items: center; gap: .35rem; }
+      .swatch { width: .85rem; height: .85rem; border: 2px solid #141a26; background: #b9c7da; }
+      .swatch.movable { box-shadow: inset 0 0 0 2px #f59272; background: #3a4a68; }
+      .variant-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+      .variant-samples { display: flex; align-items: end; gap: 1rem; margin-top: .65rem; }
+      .variant-samples figure { display: grid; justify-items: center; gap: .3rem; margin: 0; color: var(--muted); font-size: .68rem; }
+      .variant-samples img { width: 32px; height: 32px; image-rendering: pixelated; }
+      .variant-samples img.double { width: 64px; height: 64px; }
+      .source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+      .source-row img { width: 64px; height: 64px; image-rendering: pixelated; background: repeating-conic-gradient(#202d42 0 25%, #172131 0 50%) 50% / .75rem .75rem; }
+      code { color: #dce6f6; }
+      @media (max-width: 720px) { .map-grid { grid-template-columns: 1fr; } .variant-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 390px) { body { padding: 1rem .75rem; } .variant-grid { grid-template-columns: 1fr 1fr; gap: .5rem; } .variant-card { padding: .6rem; } .variant-samples { gap: .5rem; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>TUX-01 · MICRO MOSAIC REVIEW</h1>
+          <p>24×32 target sockets with a deterministic opening permutation. Transparent Micro geometry is kept under review until the art is approved for promotion.</p>
+        </div>
+        <div class="proof"><strong>546 active</strong><span>·</span><strong>75.09% locked</strong><span>·</span><strong>136 movable</strong><span>·</span><strong>shelf 16</strong></div>
+      </header>
+      <section aria-labelledby="maps-title">
+        <h2 id="maps-title">Target and opening state</h2>
+        <div class="map-grid">
+          <figure class="map-card">
+            <div class="map-stage"><img src="target-map.png" alt="Target Tux mosaic with final socket colors" /></div>
+            <figcaption><b>Target sockets</b> · the final Tux silhouette. Every active coordinate is a real color-matching destination; voids remain transparent.</figcaption>
+          </figure>
+          <figure class="map-card">
+            <div class="map-stage"><img src="opening-map.png" alt="Opening Tux mosaic with locked and movable gems" /></div>
+            <figcaption><b>Opening permutation</b> · matching gems are locked flush; inset gems with a coral edge are mismatched and movable.</figcaption>
+          </figure>
+        </div>
+        <div class="legend" aria-label="Locked and movable legend">
+          <span class="legend-item"><i class="swatch" aria-hidden="true"></i> locked / matched</span>
+          <span class="legend-item"><i class="swatch movable" aria-hidden="true"></i> movable / mismatched</span>
+          <span class="legend-item">transparent void · no socket</span>
+        </div>
+        <div class="proof" aria-label="Target color counts"><span class="count"><b>obsidian</b> 166</span><span class="count"><b>pearl</b> 240</span><span class="count"><b>amber</b> 54</span><span class="count"><b>navy</b> 66</span><span class="count"><b>ice</b> 14</span><span class="count"><b>coral</b> 6</span></div>
+      </section>
+      <section aria-labelledby="variants-title">
+        <h2 id="variants-title">Micro socket / gem variants · one and two times scale</h2>
+        <div class="variant-grid">
+        <article class="variant-card">
+          <h3>obsidian</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/obsidian.png" width="32" height="32" alt="obsidian Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/obsidian.png" width="64" height="64" alt="obsidian Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        <article class="variant-card">
+          <h3>pearl</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/pearl.png" width="32" height="32" alt="pearl Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/pearl.png" width="64" height="64" alt="pearl Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        <article class="variant-card">
+          <h3>amber</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/amber.png" width="32" height="32" alt="amber Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/amber.png" width="64" height="64" alt="amber Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        <article class="variant-card">
+          <h3>navy</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/navy.png" width="32" height="32" alt="navy Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/navy.png" width="64" height="64" alt="navy Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        <article class="variant-card">
+          <h3>ice</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/ice.png" width="32" height="32" alt="ice Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/ice.png" width="64" height="64" alt="ice Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        <article class="variant-card">
+          <h3>coral</h3>
+          <div class="variant-samples">
+            <figure><img src="micro/coral.png" width="32" height="32" alt="coral Micro gem at one times scale" /><figcaption>1×</figcaption></figure>
+            <figure><img class="double" src="micro/coral.png" width="64" height="64" alt="coral Micro gem at two times scale" /><figcaption>2×</figcaption></figure>
+          </div>
+        </article>
+        </div>
+      </section>
+      <section aria-labelledby="source-title">
+        <h2 id="source-title">Validated master geometry</h2>
+        <figure class="source-card">
+          <div class="source-row"><img src="../../inbox/tux-mosaic/micro-master.png" alt="32 by 32 transparent Micro master geometry" /><figcaption><b>micro-master.png</b> · 32×32, binary Alpha, finite semantic source palette. Derived variants preserve this Alpha mask.</figcaption></div>
+        </figure>
+      </section>
+    </main>
+  </body>
+</html>
