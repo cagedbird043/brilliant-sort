@@ -4,7 +4,7 @@
 
 | 题目要求 | 设计/实现结论 | 主要源码 | 自动化或上线证据 |
 | --- | --- | --- | --- |
-| 不超过 8 行的玩法假设 | 规则事实、延期能力和胜利边界被显式记录；不会把视频未展示的商业规则伪造为事实 | [`SUBMISSION.md#1-玩法假设`](../SUBMISSION.md#1-玩法假设)；[核心归档 proposal](../openspec/changes/archive/2026-07-15-add-brilliant-sort-core/proposal.md) | `tests/core/reducer.test.ts`、固定 fixture 验证 |
+| 不超过 8 行的玩法假设 | 八条均明确标为 Demo 建模假设；题目明示、视频理解、确定性实现选择和延期能力分开记录，不声称还原未展示的原产品规则 | [`SUBMISSION.md#1-玩法假设（8-行）`](../SUBMISSION.md#1-玩法假设8-行)；[核心归档 proposal](../openspec/changes/archive/2026-07-15-add-brilliant-sort-core/proposal.md) | `tests/core/reducer.test.ts`、固定 fixture 验证 |
 | 棋盘、格子、宝石、槽位、颜色、坐标和状态 | `LevelSpec` / `GameState` / `BoardCell` / `Gem` / `Shelf` / `Selection` 是版本化 TypeScript/C++ JSON 协议 | [`src/core/types.ts`](../src/core/types.ts)；[`src/core/level.ts`](../src/core/level.ts)；[`cpp/game_core.hpp`](../cpp/game_core.hpp) | `tests/core/reducer.test.ts`；`cpp/game_core_test.cpp` |
 | 模块职责、输入输出与状态所有权 | C++ `BrilliantSortCore` 是生产规则权威；`GameCorePort` 只暴露 load/dispatch/snapshot/restart/destroy；UI 不直接写 state | [`src/core/port.ts`](../src/core/port.ts)；[`cpp/game_core.cpp`](../cpp/game_core.cpp)；[WASM 归档设计](../openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/design.md) | TypeScript ↔ native C++ ↔ WASM 差分回放 |
 | 选择、放置、Shelf、全局修复与胜利流程 | 八方向最大分量、安全边界提取、同色目标批量放置、紧凑 Shelf 压缩、确定性全局身份配对、`Won` 谓词 | [`src/core/topology.ts`](../src/core/topology.ts)；[`src/core/reducer.ts`](../src/core/reducer.ts)；[`cpp/game_core.cpp`](../cpp/game_core.cpp) | `tests/core/reducer.test.ts`；`tests/core/global-wand.test.ts`；`cpp/game_core_test.cpp`；`tux-01.win.json` |
