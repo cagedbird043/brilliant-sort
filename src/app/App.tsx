@@ -157,21 +157,6 @@ function IconReset() {
   );
 }
 
-function IconStore() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="M8 1v8M5 6l3 3 3-3M2 11h12v3H2z" />
-    </svg>
-  );
-}
-
-function IconClear() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="m4 4 8 8M12 4 4 12" />
-    </svg>
-  );
-}
 
 interface GemSpriteProps {
   readonly gemId: string;
@@ -440,8 +425,6 @@ export function App() {
     return <BootPanel error={bootError} onRetry={() => setBootAttempt((attempt) => attempt + 1)} />;
   }
 
-  const selectedCount = state.selection?.gemIds.length ?? 0;
-  const shelfFreeSlots = state.shelf.capacity - state.shelf.gemIds.length;
   const boardSlots = Array.from({ length: state.board.rows * state.board.cols }, (_, index) => {
     const coord = { row: Math.floor(index / state.board.cols), col: index % state.board.cols };
     return { coord, cell: state.board.cells[keyOf(coord)] };
@@ -450,42 +433,8 @@ export function App() {
   return (
     <main className="workbench-shell" data-feedback={feedbackTone}>
       <section className="crystal-workbench" aria-label="Brilliant Sort 游戏">
-        <header className="workbench-header" aria-label="关卡状态">
-          <div className="brand-lockup">
-            <span className="brand-sigil" aria-hidden="true" />
-            <div>
-              <p>BRILLIANT SORT / CRYSTAL REPAIR</p>
-              <h1>关卡 01</h1>
-            </div>
-          </div>
-          <div className="header-tools">
-            <div className="run-status" aria-live="polite">
-              <span className="status-indicator" aria-hidden="true" />
-              <span>{state.status === "won" ? "已完成" : "整理中"}</span>
-            </div>
-            <button
-              className="icon-control"
-              type="button"
-              onClick={() => applyCommand({ type: "restart-level" })}
-              disabled={inputLocked}
-              aria-label="重新开始关卡"
-              title="重新开始关卡"
-            >
-              <IconReset />
-            </button>
-          </div>
-        </header>
 
         <section className="calibration-bay" aria-label="宝石棋盘">
-          <div className="bay-caption">
-            <div>
-              <p>棱镜校准阵列</p>
-              <span>把每颗宝石送回对应光谱槽。</span>
-            </div>
-            <span className={`selection-readout${selectedCount ? " is-active" : ""}`}>
-              {selectedCount ? `锁定 ${selectedCount}` : "待命"}
-            </span>
-          </div>
 
           <div className="board-chassis">
             <div
@@ -534,66 +483,18 @@ export function App() {
               })}
             </div>
 
-            {state.status === "won" ? (
-              <aside className="completion-plaque" role="status" aria-live="assertive">
-                <span className="completion-sigil" aria-hidden="true" />
-                <div>
-                  <p>CALIBRATION COMPLETE</p>
-                  <h2>棱镜已归位</h2>
-                  <span>缓冲槽已清空。</span>
-                </div>
-                <button
-                  className="icon-control completion-replay"
-                  type="button"
-                  onClick={() => applyCommand({ type: "restart-level" })}
-                  disabled={inputLocked}
-                  aria-label="再玩一次"
-                  title="再玩一次"
-                >
-                  <IconReset />
-                </button>
-              </aside>
-            ) : null}
           </div>
 
-          <p className="activity-log" data-tone={feedbackTone} aria-live="polite">
+          <p
+            className="activity-announcer"
+            role="status"
+            aria-live={feedbackTone === "won" ? "assertive" : "polite"}
+          >
             {activity}
           </p>
         </section>
 
         <section className="shelf-dock" aria-label="缓冲 Shelf">
-          <div className="shelf-heading">
-            <div>
-              <p>缓冲导轨</p>
-              <span>{shelfFreeSlots} 个空位 / 12 槽</span>
-            </div>
-            <div className="shelf-actions">
-              {state.selection?.container === "board" ? (
-                <button
-                  className="icon-control store-control"
-                  type="button"
-                  onClick={() => applyCommand({ type: "place-selection-in-shelf" })}
-                  disabled={inputLocked}
-                  aria-label="暂存选中的宝石"
-                  title="暂存选中的宝石"
-                >
-                  <IconStore />
-                </button>
-              ) : null}
-              {state.selection ? (
-                <button
-                  className="icon-control clear-control"
-                  type="button"
-                  onClick={() => applyCommand({ type: "cancel-selection" })}
-                  disabled={inputLocked}
-                  aria-label="取消当前选择"
-                  title="取消当前选择"
-                >
-                  <IconClear />
-                </button>
-              ) : null}
-            </div>
-          </div>
           <div className="shelf-rail">
             <div
               className="shelf-grid"
@@ -623,9 +524,7 @@ export function App() {
                         locked={false}
                         landing={landing}
                       />
-                    ) : (
-                      <span className="slot-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                    )}
+                    ) : null}
                   </button>
                 );
               })}

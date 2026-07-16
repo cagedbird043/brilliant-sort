@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("a player can complete the fixed prism level in the browser", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "关卡 01" })).toBeVisible();
+  await expect(page.locator(".game-board")).toBeVisible();
   await expect(page.getByTestId("board-cell-0-0")).toHaveAttribute("aria-label", /冰蓝宝石/);
 
   await page.getByTestId("board-cell-0-0").click();
@@ -21,25 +21,28 @@ test("a player can complete the fixed prism level in the browser", async ({ page
   await page.getByTestId("shelf-slot-0").click();
   await page.getByTestId("board-cell-0-3").click();
 
-  await expect(page.getByRole("heading", { name: "棱镜已归位" })).toBeVisible();
-  await expect(page.getByText("已完成")).toBeVisible();
-
-  await page.getByRole("button", { name: "再玩一次" }).click();
-  await expect(page.getByRole("heading", { name: "棱镜已归位" })).toBeHidden();
-  await expect(page.getByTestId("board-cell-0-0")).toHaveAttribute("aria-label", /冰蓝宝石/);
+  await expect(page.locator(".activity-announcer")).toHaveText("所有宝石都已归位。");
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(0);
 });
 
-test("restart restores the deterministic initial board", async ({ page }) => {
+test("the playable surface stays wordless and chrome-free", async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator(".game-board")).toBeVisible();
 
-  await page.getByTestId("board-cell-0-0").click();
-  await page.getByTestId("shelf-slot-0").click();
-  await expect(page.getByTestId("shelf-slot-0")).toHaveClass(/has-gem/);
+  const surface = await page.evaluate(() => {
+    const workbench = document.querySelector(".crystal-workbench");
+    const clone = workbench?.cloneNode(true) as HTMLElement | undefined;
+    clone?.querySelector(".activity-announcer")?.remove();
+    return {
+      visibleCopy: clone?.textContent?.trim() ?? "",
+      auxiliaryControls:
+        workbench?.querySelectorAll("button:not(.board-cell):not(.shelf-slot)").length ?? 0,
+    };
+  });
 
-  await page.getByRole("button", { name: "重新开始关卡" }).click();
-
-  await expect(page.getByTestId("shelf-slot-0")).not.toHaveClass(/has-gem/);
-  await expect(page.getByTestId("board-cell-0-0")).toHaveAttribute("aria-label", /冰蓝宝石/);
+  expect(surface.visibleCopy).toBe("");
+  expect(surface.auxiliaryControls).toBe(0);
 });
 
 test("accepted spatial moves briefly serialize input before the next command", async ({ page }) => {
@@ -56,7 +59,7 @@ test("accepted spatial moves briefly serialize input before the next command", a
 test("wide workbench docks the Shelf as a first-viewport vertical rail", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "重新开始关卡" })).toBeVisible();
+  await expect(page.locator(".game-board")).toBeVisible();
 
   const layout = await page.evaluate(() => {
     const board = document.querySelector(".calibration-bay")?.getBoundingClientRect().toJSON() ?? null;
@@ -81,7 +84,7 @@ test("wide workbench docks the Shelf as a first-viewport vertical rail", async (
 test("narrow workbench preserves the horizontal twelve-slot Shelf", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "重新开始关卡" })).toBeVisible();
+  await expect(page.locator(".game-board")).toBeVisible();
 
   const layout = await page.evaluate(() => {
     const board = document.querySelector(".calibration-bay")?.getBoundingClientRect().toJSON() ?? null;
@@ -111,6 +114,6 @@ test("reduced-motion preference keeps the puzzle state readable", async ({ page 
     return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1000;
   });
 
-  await expect(page.getByRole("button", { name: "重新开始关卡" })).toBeVisible();
+  await expect(page.locator(".game-board")).toBeVisible();
   expect(transitionDuration).toBeLessThanOrEqual(1);
 });
