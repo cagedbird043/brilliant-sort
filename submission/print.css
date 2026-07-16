@@ -1,0 +1,153 @@
+@page {
+  size: A4;
+  margin: 15mm 15mm 17mm;
+}
+
+:root {
+  color: #172331;
+  background: #ffffff;
+  font-family: "Noto Sans CJK SC", "Noto Sans CJK", "WenQuanYi Zen Hei", system-ui, sans-serif;
+  font-size: 10.2pt;
+  line-height: 1.58;
+}
+
+body {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 180mm;
+}
+
+h1,
+h2,
+h3 {
+  color: #102a43;
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+
+h1 {
+  margin: 0 0 7mm;
+  padding: 0 0 5mm;
+  border-bottom: 2px solid #176b87;
+  font-size: 25pt;
+  line-height: 1.18;
+}
+
+h2 {
+  margin: 9mm 0 3mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 1px solid #c7d8e4;
+  font-size: 16pt;
+}
+
+h3 {
+  margin: 5mm 0 2mm;
+  color: #176b87;
+  font-size: 12pt;
+}
+
+p,
+ul,
+ol,
+table,
+pre,
+blockquote,
+figure {
+  margin: 0 0 3.2mm;
+}
+
+ol,
+ul {
+  padding-left: 5.5mm;
+}
+
+li + li {
+  margin-top: 1mm;
+}
+
+blockquote {
+  margin-left: 0;
+  padding: 3mm 4mm;
+  border-left: 3px solid #3e8da8;
+  background: #eff7fb;
+  color: #334e68;
+}
+
+code {
+  padding: 0.15em 0.34em;
+  border-radius: 3px;
+  background: #edf2f7;
+  color: #8a3800;
+  font-family: "Noto Sans Mono CJK SC", "JetBrains Mono", monospace;
+  font-size: 0.88em;
+}
+
+pre {
+  overflow-wrap: anywhere;
+  padding: 3mm;
+  border: 1px solid #ccd9e2;
+  border-radius: 4px;
+  background: #f8fbfd;
+  white-space: pre-wrap;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+  color: #172331;
+}
+
+a {
+  color: #076b93;
+  text-decoration: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.7pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+th,
+td {
+  padding: 2.1mm;
+  border: 1px solid #bdcddb;
+  vertical-align: top;
+  text-align: left;
+}
+
+th {
+  background: #173b5e;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+tbody tr:nth-child(even) {
+  background: #f4f8fb;
+}
+
+img {
+  display: block;
+  width: 100%;
+  max-height: 122mm;
+  margin: 4mm auto 5mm;
+  object-fit: contain;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #c7d8e4;
+}
+
+@media screen {
+  body {
+    padding: 14mm;
+    background: #ffffff;
+  }
+}

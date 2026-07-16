@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="790" viewBox="0 0 1400 790" role="img" aria-labelledby="title desc">
+  <title id="title">Brilliant Sort 确定性核心与验证边界</title>
+  <desc id="desc">固定关卡、命令和 C++ 核心产生规范状态转移；浏览器表现、音频与 Harness 都消费该边界。TypeScript reducer 仅作为差分 Oracle。</desc>
+  <defs>
+    <linearGradient id="core" x1="0" x2="1">
+      <stop stop-color="#163257"/>
+      <stop offset="1" stop-color="#204b74"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" x2="1">
+      <stop stop-color="#172f3d"/>
+      <stop offset="1" stop-color="#203e4c"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#09101e" flood-opacity=".35"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7cc9e9"/>
+    </marker>
+    <style>
+      .canvas { fill: #0b1324; }
+      .title { fill: #edf7ff; font: 700 27px sans-serif; }
+      .subtitle { fill: #a6c0d6; font: 16px sans-serif; }
+      .box { fill: #13243c; stroke: #426681; stroke-width: 2; rx: 18; filter: url(#shadow); }
+      .core { fill: url(#core); stroke: #78cfef; stroke-width: 3; rx: 22; filter: url(#shadow); }
+      .support { fill: url(#edge); stroke: #6093a9; stroke-width: 2; rx: 18; filter: url(#shadow); }
+      .accent { fill: #f4b95e; }
+      .box-title { fill: #f4fbff; font: 700 20px sans-serif; text-anchor: middle; }
+      .box-copy { fill: #c5d8e5; font: 15px sans-serif; text-anchor: middle; }
+      .link { fill: none; stroke: #7cc9e9; stroke-width: 3; marker-end: url(#arrow); }
+      .dashed { fill: none; stroke: #f4b95e; stroke-width: 3; stroke-dasharray: 9 8; marker-end: url(#arrow); }
+      .label { fill: #9ecde0; font: 14px sans-serif; text-anchor: middle; }
+      .note { fill: #f7ca7a; font: 14px sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect class="canvas" width="1400" height="790"/>
+  <text class="title" x="70" y="72">Brilliant Sort：规则唯一性、表现解耦与可执行验证</text>
+  <text class="subtitle" x="70" y="104">生产规则由同一份 C++20 Core 负责；TypeScript reducer 仅作为独立差分 Oracle。</text>
+
+  <rect class="box" x="74" y="202" width="245" height="164"/>
+  <text class="box-title" x="196" y="247">版本化 LevelSpec</text>
+  <text class="box-copy" x="196" y="281">固定 JSON 关卡</text>
+  <text class="box-copy" x="196" y="309">颜色守恒 · 稳定 Gem ID</text>
+  <text class="box-copy" x="196" y="337">Tux-01 / replay trace</text>
+
+  <rect class="box" x="74" y="461" width="245" height="164"/>
+  <text class="box-title" x="196" y="506">GameCommand</text>
+  <text class="box-copy" x="196" y="540">选择 · 放入 Shelf</text>
+  <text class="box-copy" x="196" y="568">放入目标 · 取消 · 重开</text>
+  <text class="box-copy" x="196" y="596">可序列化、可重放</text>
+
+  <rect class="core" x="520" y="267" width="365" height="272"/>
+  <circle class="accent" cx="570" cy="319" r="8"/>
+  <text class="box-title" x="702" y="326">BrilliantSortCore（C++20）</text>
+  <text class="box-copy" x="702" y="370">八方向连通 · 安全提取 · 目标放置</text>
+  <text class="box-copy" x="702" y="401">紧凑 Shelf · 拒绝原因 · 胜利条件</text>
+  <text class="box-copy" x="702" y="432">CoreTransition + Canonical Dump</text>
+  <text class="box-copy" x="702" y="476">Native CMake 与 WebAssembly 共同编译</text>
+
+  <rect class="support" x="1080" y="119" width="245" height="148"/>
+  <text class="box-title" x="1202" y="163">React 表现层</text>
+  <text class="box-copy" x="1202" y="197">GameCorePort</text>
+  <text class="box-copy" x="1202" y="225">DOM / ARIA / 像素图 / 动画</text>
+
+  <rect class="support" x="1080" y="322" width="245" height="148"/>
+  <text class="box-title" x="1202" y="366">PixelAudioEngine</text>
+  <text class="box-copy" x="1202" y="400">AudioCue 消费 transition facts</text>
+  <text class="box-copy" x="1202" y="428">独立 AudioWorklet WASM</text>
+
+  <rect class="support" x="1080" y="529" width="245" height="148"/>
+  <text class="box-title" x="1202" y="573">Harness / Agent</text>
+  <text class="box-copy" x="1202" y="607">TS Oracle · Native · WASM</text>
+  <text class="box-copy" x="1202" y="635">Replay · Dump · Diff · 审计</text>
+
+  <path class="link" d="M319 284 C392 284 435 336 520 348"/>
+  <path class="link" d="M319 542 C394 542 444 480 520 462"/>
+  <path class="link" d="M885 333 C962 271 1015 215 1080 200"/>
+  <path class="link" d="M885 406 C955 406 1012 395 1080 396"/>
+  <path class="link" d="M885 481 C952 547 1015 592 1080 604"/>
+  <path class="dashed" d="M1078 651 C971 737 690 741 609 544"/>
+  <text class="note" x="845" y="740">逐命令比较 canonicalDump / events / rejection；首个 JSON 路径差异可诊断</text>
+  <text class="label" x="977" y="258">状态 + 事件</text>
+  <text class="label" x="985" y="384">展示事实，不写入规则</text>
+  <text class="label" x="972" y="535">测试 / 修复反馈</text>
+</svg>

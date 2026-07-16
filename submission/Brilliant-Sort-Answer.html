@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Brilliant Sort 笔试答卷</title>
+  <base href="../" />
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">@page {
+size: A4;
+margin: 15mm 15mm 17mm;
+}
+:root {
+color: #172331;
+background: #ffffff;
+font-family: "Noto Sans CJK SC", "Noto Sans CJK", "WenQuanYi Zen Hei", system-ui, sans-serif;
+font-size: 10.2pt;
+line-height: 1.58;
+}
+body {
+box-sizing: border-box;
+margin: 0 auto;
+max-width: 180mm;
+}
+h1,
+h2,
+h3 {
+color: #102a43;
+break-after: avoid-page;
+page-break-after: avoid;
+}
+h1 {
+margin: 0 0 7mm;
+padding: 0 0 5mm;
+border-bottom: 2px solid #176b87;
+font-size: 25pt;
+line-height: 1.18;
+}
+h2 {
+margin: 9mm 0 3mm;
+padding-bottom: 1.5mm;
+border-bottom: 1px solid #c7d8e4;
+font-size: 16pt;
+}
+h3 {
+margin: 5mm 0 2mm;
+color: #176b87;
+font-size: 12pt;
+}
+p,
+ul,
+ol,
+table,
+pre,
+blockquote,
+figure {
+margin: 0 0 3.2mm;
+}
+ol,
+ul {
+padding-left: 5.5mm;
+}
+li + li {
+margin-top: 1mm;
+}
+blockquote {
+margin-left: 0;
+padding: 3mm 4mm;
+border-left: 3px solid #3e8da8;
+background: #eff7fb;
+color: #334e68;
+}
+code {
+padding: 0.15em 0.34em;
+border-radius: 3px;
+background: #edf2f7;
+color: #8a3800;
+font-family: "Noto Sans Mono CJK SC", "JetBrains Mono", monospace;
+font-size: 0.88em;
+}
+pre {
+overflow-wrap: anywhere;
+padding: 3mm;
+border: 1px solid #ccd9e2;
+border-radius: 4px;
+background: #f8fbfd;
+white-space: pre-wrap;
+break-inside: avoid;
+page-break-inside: avoid;
+}
+pre code {
+padding: 0;
+background: transparent;
+color: #172331;
+}
+a {
+color: #076b93;
+text-decoration: none;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+font-size: 8.7pt;
+break-inside: avoid;
+page-break-inside: avoid;
+}
+th,
+td {
+padding: 2.1mm;
+border: 1px solid #bdcddb;
+vertical-align: top;
+text-align: left;
+}
+th {
+background: #173b5e;
+color: #ffffff;
+font-weight: 700;
+}
+tbody tr:nth-child(even) {
+background: #f4f8fb;
+}
+img {
+display: block;
+width: 100%;
+max-height: 122mm;
+margin: 4mm auto 5mm;
+object-fit: contain;
+break-inside: avoid;
+page-break-inside: avoid;
+}
+hr {
+border: 0;
+border-top: 1px solid #c7d8e4;
+}
+@media screen {
+body {
+padding: 14mm;
+background: #ffffff;
+}
+}
+</style>
+</head>
+<body>
+<h1 id="brilliant-sort确定性核心harness-与-ai-agent-验证方案">Brilliant
+Sort：确定性核心、Harness 与 AI Agent 验证方案</h1>
+<blockquote>
+<p><strong>对应题目</strong>：<code>游戏研发基础设施 / AI Agent 方向笔试：Brilliant Sort</code><br />
+<strong>代码版本</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/commit/53caf03fda0958c4b1bff3c91b44ed5766413ac2"><code>53caf03</code></a>（2026-07-16）<br />
+<strong>线上 Demo</strong>：<a href="https://brilliant-sort.cagedbird.cn/">Hong Kong</a> · <a href="https://cagedbird043.github.io/brilliant-sort/">GitHub
+Pages</a><br />
+<strong>CI 证据</strong>：<a href="https://github.com/cagedbird043/brilliant-sort/actions/runs/29478518729">Actions
+#29478518729</a>（<code>verify</code>、<code>publish-hk</code>、<code>deploy</code>
+全部成功）</p>
+</blockquote>
+<h2 id="摘要">摘要</h2>
+<p>本提交把 Brilliant Sort 建模为一个与
+UI、动画、音频和具体引擎无关的确定性状态机。生产规则由 headless C++20
+<code>BrilliantSortCore</code> 实现，并编译为浏览器 WASM；React 只经由
+<code>GameCorePort</code> 消费状态转移，TypeScript reducer
+仅保留为独立差分 Oracle。固定
+<code>LevelSpec</code>、命令回放、canonical dump、原生/WASM 三后端差分
+Harness、浏览器 E2E 与人工视觉/听觉验收共同构成可执行证据链。</p>
+<p>题目要求的是 Demo
+的核心逻辑与工程结构；仓库额外实现了一个可在线游玩的 Tux
+旗舰关卡、确定性像素资产管线、独立 C++ AudioWorklet
+合成器和双站静态部署。这些额外部分不改变核心论点：<strong>规则唯一、边界可驱动、状态可序列化、失败可定位、AI
+输出可验证。</strong></p>
+<h2 id="玩法假设8-行">1. 玩法假设（8 行）</h2>
+<ol type="1">
+<li>每个有效棋盘格具有目标颜色，且至多容纳一颗具有独立当前颜色的宝石。</li>
+<li>宝石仅在当前颜色与目标颜色不同的时候可移动；匹配宝石永久锁定。</li>
+<li>点击可移动宝石会选择同色、可移动、八方向连通的最大分量。</li>
+<li>部分提取只允许移走边界上的安全成员，剩余选择分量必须继续八方向连通。</li>
+<li>Shelf 是一个紧凑、有序、可配置容量的序列；旗舰关卡使用 16
+槽，表现为两个各 8 槽的 Bank。</li>
+<li>只能把选择中的宝石放入同色且为空的目标连通分量；目标不足时保留未放置选择。</li>
+<li>所有有效格均颜色匹配、选择为空且 Shelf 为空时胜利；本 Demo
+没有失败、计时或步数状态。</li>
+<li>关卡由固定 JSON 夹具提供；随机生成、付费扩容、Power-up、LiveOps
+和账号状态明确延期。</li>
+</ol>
+<p>这些假设来自已归档的核心、Tux
+舞台和渲染规格；视频未能观察到的商业功能没有被伪造为规则事实。</p>
+<h2 id="核心状态与所有权">2. 核心状态与所有权</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>概念</th>
+<th>表示</th>
+<th>所有权与约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LevelSpec</code></td>
+<td>版本化 JSON：行列、有效格、目标颜色、初始宝石、Shelf 容量</td>
+<td>固定内容源；验证唯一 Gem ID、有效 mask、颜色守恒和容量</td>
+</tr>
+<tr>
+<td><code>GameState</code></td>
+<td>稀疏棋盘、Gem 映射、Shelf、选择、<code>Playing/Won</code></td>
+<td>仅规则核心可以写入</td>
+</tr>
+<tr>
+<td><code>BoardCell</code> / <code>Gem</code></td>
+<td>目标颜色与宝石 ID 分离；Gem 自带颜色</td>
+<td>使“正确锁定”和“错误可移动”成为导出谓词</td>
+</tr>
+<tr>
+<td><code>Shelf</code></td>
+<td>紧凑 <code>gemIds[]</code> 序列，带宽度与容量</td>
+<td>移除即语义性向前压缩；两个 Bank 不会成为两个逻辑 Shelf</td>
+</tr>
+<tr>
+<td><code>Selection</code></td>
+<td>来源容器、不可变 anchor、颜色、有序 Gem ID 集</td>
+<td>不是复制出来的新宝石；剩余成员必须保持连通</td>
+</tr>
+<tr>
+<td><code>GameCommand</code></td>
+<td>选棋盘、选 Shelf、放入目标、放入 Shelf、取消、重开</td>
+<td>UI、Harness、Agent 都只通过命令驱动</td>
+</tr>
+<tr>
+<td><code>CoreTransition</code></td>
+<td>新状态、有序事件、结构化拒绝、canonical dump</td>
+<td>每次 <code>dispatch</code> 产生一个完整、可断言的转移</td>
+</tr>
+</tbody>
+</table>
+<p>核心接口很小：</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> GameCorePort {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dispatch</span>(command<span class="op">:</span> GameCommand)<span class="op">:</span> CoreTransition<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">snapshot</span>()<span class="op">:</span> GameState<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">restart</span>()<span class="op">:</span> CoreTransition<span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">destroy</span>()<span class="op">:</span> <span class="dt">void</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><code>GameCorePort</code> 是表现层、Harness 和 Agent
+的共同边界；<code>canonicalDump</code> 稳定排序棋盘坐标、Gem ID、Shelf
+序列与选择成员，因此不会混入 DOM、对象地址、动画时间或设备状态。</p>
+<h2 id="模块边界与运行架构">3. 模块边界与运行架构</h2>
+<figure>
+<img role="img" aria-label="Brilliant Sort 架构图" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAwIiBoZWlnaHQ9Ijc5MCIgdmlld0JveD0iMCAwIDE0MDAgNzkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+QnJpbGxpYW50IFNvcnQg56Gu5a6a5oCn5qC45b+D5LiO6aqM6K+B6L6555WMPC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+5Zu65a6a5YWz5Y2h44CB5ZG95Luk5ZKMIEMrKyDmoLjlv4PkuqfnlJ/op4TojIPnirbmgIHovaznp7vvvJvmtY/op4jlmajooajnjrDjgIHpn7PpopHkuI4gSGFybmVzcyDpg73mtojotLnor6XovrnnlYzjgIJUeXBlU2NyaXB0IHJlZHVjZXIg5LuF5L2c5Li65beu5YiGIE9yYWNsZeOAgjwvZGVzYz4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iY29yZSIgeDE9IjAiIHgyPSIxIj4KICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iIzE2MzI1NyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyMDRiNzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImVkZ2UiIHgxPSIwIiB4Mj0iMSI+CiAgICAgIDxzdG9wIHN0b3AtY29sb3I9IiMxNzJmM2QiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMjAzZTRjIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGZpbHRlciBpZD0ic2hhZG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjciIHN0ZERldmlhdGlvbj0iNyIgZmxvb2QtY29sb3I9IiMwOTEwMWUiIGZsb29kLW9wYWNpdHk9Ii4zNSIvPgogICAgPC9maWx0ZXI+CiAgICA8bWFya2VyIGlkPSJhcnJvdyIgdmlld0JveD0iMCAwIDEwIDEwIiByZWZYPSI5IiByZWZZPSI1IiBtYXJrZXJXaWR0aD0iOCIgbWFya2VySGVpZ2h0PSI4IiBvcmllbnQ9ImF1dG8tc3RhcnQtcmV2ZXJzZSI+CiAgICAgIDxwYXRoIGQ9Ik0gMCAwIEwgMTAgNSBMIDAgMTAgeiIgZmlsbD0iIzdjYzllOSIvPgogICAgPC9tYXJrZXI+CiAgICA8c3R5bGU+CiAgICAgIC5jYW52YXMgeyBmaWxsOiAjMGIxMzI0OyB9CiAgICAgIC50aXRsZSB7IGZpbGw6ICNlZGY3ZmY7IGZvbnQ6IDcwMCAyN3B4IHNhbnMtc2VyaWY7IH0KICAgICAgLnN1YnRpdGxlIHsgZmlsbDogI2E2YzBkNjsgZm9udDogMTZweCBzYW5zLXNlcmlmOyB9CiAgICAgIC5ib3ggeyBmaWxsOiAjMTMyNDNjOyBzdHJva2U6ICM0MjY2ODE7IHN0cm9rZS13aWR0aDogMjsgcng6IDE4OyBmaWx0ZXI6IHVybCgjc2hhZG93KTsgfQogICAgICAuY29yZSB7IGZpbGw6IHVybCgjY29yZSk7IHN0cm9rZTogIzc4Y2ZlZjsgc3Ryb2tlLXdpZHRoOiAzOyByeDogMjI7IGZpbHRlcjogdXJsKCNzaGFkb3cpOyB9CiAgICAgIC5zdXBwb3J0IHsgZmlsbDogdXJsKCNlZGdlKTsgc3Ryb2tlOiAjNjA5M2E5OyBzdHJva2Utd2lkdGg6IDI7IHJ4OiAxODsgZmlsdGVyOiB1cmwoI3NoYWRvdyk7IH0KICAgICAgLmFjY2VudCB7IGZpbGw6ICNmNGI5NWU7IH0KICAgICAgLmJveC10aXRsZSB7IGZpbGw6ICNmNGZiZmY7IGZvbnQ6IDcwMCAyMHB4IHNhbnMtc2VyaWY7IHRleHQtYW5jaG9yOiBtaWRkbGU7IH0KICAgICAgLmJveC1jb3B5IHsgZmlsbDogI2M1ZDhlNTsgZm9udDogMTVweCBzYW5zLXNlcmlmOyB0ZXh0LWFuY2hvcjogbWlkZGxlOyB9CiAgICAgIC5saW5rIHsgZmlsbDogbm9uZTsgc3Ryb2tlOiAjN2NjOWU5OyBzdHJva2Utd2lkdGg6IDM7IG1hcmtlci1lbmQ6IHVybCgjYXJyb3cpOyB9CiAgICAgIC5kYXNoZWQgeyBmaWxsOiBub25lOyBzdHJva2U6ICNmNGI5NWU7IHN0cm9rZS13aWR0aDogMzsgc3Ryb2tlLWRhc2hhcnJheTogOSA4OyBtYXJrZXItZW5kOiB1cmwoI2Fycm93KTsgfQogICAgICAubGFiZWwgeyBmaWxsOiAjOWVjZGUwOyBmb250OiAxNHB4IHNhbnMtc2VyaWY7IHRleHQtYW5jaG9yOiBtaWRkbGU7IH0KICAgICAgLm5vdGUgeyBmaWxsOiAjZjdjYTdhOyBmb250OiAxNHB4IHNhbnMtc2VyaWY7IHRleHQtYW5jaG9yOiBtaWRkbGU7IH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJjYW52YXMiIHdpZHRoPSIxNDAwIiBoZWlnaHQ9Ijc5MCIvPgogIDx0ZXh0IGNsYXNzPSJ0aXRsZSIgeD0iNzAiIHk9IjcyIj5CcmlsbGlhbnQgU29ydO+8muinhOWImeWUr+S4gOaAp+OAgeihqOeOsOino+iApuS4juWPr+aJp+ihjOmqjOivgTwvdGV4dD4KICA8dGV4dCBjbGFzcz0ic3VidGl0bGUiIHg9IjcwIiB5PSIxMDQiPueUn+S6p+inhOWImeeUseWQjOS4gOS7vSBDKysyMCBDb3JlIOi0n+i0o++8m1R5cGVTY3JpcHQgcmVkdWNlciDku4XkvZzkuLrni6znq4vlt67liIYgT3JhY2xl44CCPC90ZXh0PgoKICA8cmVjdCBjbGFzcz0iYm94IiB4PSI3NCIgeT0iMjAyIiB3aWR0aD0iMjQ1IiBoZWlnaHQ9IjE2NCIvPgogIDx0ZXh0IGNsYXNzPSJib3gtdGl0bGUiIHg9IjE5NiIgeT0iMjQ3Ij7niYjmnKzljJYgTGV2ZWxTcGVjPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJib3gtY29weSIgeD0iMTk2IiB5PSIyODEiPuWbuuWumiBKU09OIOWFs+WNoTwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjE5NiIgeT0iMzA5Ij7popzoibLlrojmgZIgwrcg56iz5a6aIEdlbSBJRDwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjE5NiIgeT0iMzM3Ij5UdXgtMDEgLyByZXBsYXkgdHJhY2U8L3RleHQ+CgogIDxyZWN0IGNsYXNzPSJib3giIHg9Ijc0IiB5PSI0NjEiIHdpZHRoPSIyNDUiIGhlaWdodD0iMTY0Ii8+CiAgPHRleHQgY2xhc3M9ImJveC10aXRsZSIgeD0iMTk2IiB5PSI1MDYiPkdhbWVDb21tYW5kPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJib3gtY29weSIgeD0iMTk2IiB5PSI1NDAiPumAieaLqSDCtyDmlL7lhaUgU2hlbGY8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSIxOTYiIHk9IjU2OCI+5pS+5YWl55uu5qCHIMK3IOWPlua2iCDCtyDph43lvIA8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSIxOTYiIHk9IjU5NiI+5Y+v5bqP5YiX5YyW44CB5Y+v6YeN5pS+PC90ZXh0PgoKICA8cmVjdCBjbGFzcz0iY29yZSIgeD0iNTIwIiB5PSIyNjciIHdpZHRoPSIzNjUiIGhlaWdodD0iMjcyIi8+CiAgPGNpcmNsZSBjbGFzcz0iYWNjZW50IiBjeD0iNTcwIiBjeT0iMzE5IiByPSI4Ii8+CiAgPHRleHQgY2xhc3M9ImJveC10aXRsZSIgeD0iNzAyIiB5PSIzMjYiPkJyaWxsaWFudFNvcnRDb3Jl77yIQysrMjDvvIk8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSI3MDIiIHk9IjM3MCI+5YWr5pa55ZCR6L+e6YCaIMK3IOWuieWFqOaPkOWPliDCtyDnm67moIfmlL7nva48L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSI3MDIiIHk9IjQwMSI+57Sn5YeRIFNoZWxmIMK3IOaLkue7neWOn+WboCDCtyDog5zliKnmnaHku7Y8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSI3MDIiIHk9IjQzMiI+Q29yZVRyYW5zaXRpb24gKyBDYW5vbmljYWwgRHVtcDwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjcwMiIgeT0iNDc2Ij5OYXRpdmUgQ01ha2Ug5LiOIFdlYkFzc2VtYmx5IOWFseWQjOe8luivkTwvdGV4dD4KCiAgPHJlY3QgY2xhc3M9InN1cHBvcnQiIHg9IjEwODAiIHk9IjExOSIgd2lkdGg9IjI0NSIgaGVpZ2h0PSIxNDgiLz4KICA8dGV4dCBjbGFzcz0iYm94LXRpdGxlIiB4PSIxMjAyIiB5PSIxNjMiPlJlYWN0IOihqOeOsOWxgjwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjEyMDIiIHk9IjE5NyI+R2FtZUNvcmVQb3J0PC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJib3gtY29weSIgeD0iMTIwMiIgeT0iMjI1Ij5ET00gLyBBUklBIC8g5YOP57Sg5Zu+IC8g5Yqo55S7PC90ZXh0PgoKICA8cmVjdCBjbGFzcz0ic3VwcG9ydCIgeD0iMTA4MCIgeT0iMzIyIiB3aWR0aD0iMjQ1IiBoZWlnaHQ9IjE0OCIvPgogIDx0ZXh0IGNsYXNzPSJib3gtdGl0bGUiIHg9IjEyMDIiIHk9IjM2NiI+UGl4ZWxBdWRpb0VuZ2luZTwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjEyMDIiIHk9IjQwMCI+QXVkaW9DdWUg5raI6LS5IHRyYW5zaXRpb24gZmFjdHM8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImJveC1jb3B5IiB4PSIxMjAyIiB5PSI0MjgiPueLrOeriyBBdWRpb1dvcmtsZXQgV0FTTTwvdGV4dD4KCiAgPHJlY3QgY2xhc3M9InN1cHBvcnQiIHg9IjEwODAiIHk9IjUyOSIgd2lkdGg9IjI0NSIgaGVpZ2h0PSIxNDgiLz4KICA8dGV4dCBjbGFzcz0iYm94LXRpdGxlIiB4PSIxMjAyIiB5PSI1NzMiPkhhcm5lc3MgLyBBZ2VudDwvdGV4dD4KICA8dGV4dCBjbGFzcz0iYm94LWNvcHkiIHg9IjEyMDIiIHk9IjYwNyI+VFMgT3JhY2xlIMK3IE5hdGl2ZSDCtyBXQVNNPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJib3gtY29weSIgeD0iMTIwMiIgeT0iNjM1Ij5SZXBsYXkgwrcgRHVtcCDCtyBEaWZmIMK3IOWuoeiuoTwvdGV4dD4KCiAgPHBhdGggY2xhc3M9ImxpbmsiIGQ9Ik0zMTkgMjg0IEMzOTIgMjg0IDQzNSAzMzYgNTIwIDM0OCIvPgogIDxwYXRoIGNsYXNzPSJsaW5rIiBkPSJNMzE5IDU0MiBDMzk0IDU0MiA0NDQgNDgwIDUyMCA0NjIiLz4KICA8cGF0aCBjbGFzcz0ibGluayIgZD0iTTg4NSAzMzMgQzk2MiAyNzEgMTAxNSAyMTUgMTA4MCAyMDAiLz4KICA8cGF0aCBjbGFzcz0ibGluayIgZD0iTTg4NSA0MDYgQzk1NSA0MDYgMTAxMiAzOTUgMTA4MCAzOTYiLz4KICA8cGF0aCBjbGFzcz0ibGluayIgZD0iTTg4NSA0ODEgQzk1MiA1NDcgMTAxNSA1OTIgMTA4MCA2MDQiLz4KICA8cGF0aCBjbGFzcz0iZGFzaGVkIiBkPSJNMTA3OCA2NTEgQzk3MSA3MzcgNjkwIDc0MSA2MDkgNTQ0Ii8+CiAgPHRleHQgY2xhc3M9Im5vdGUiIHg9Ijg0NSIgeT0iNzQwIj7pgJDlkb3ku6Tmr5TovoMgY2Fub25pY2FsRHVtcCAvIGV2ZW50cyAvIHJlamVjdGlvbu+8m+mmluS4qiBKU09OIOi3r+W+hOW3ruW8guWPr+iviuaWrTwvdGV4dD4KICA8dGV4dCBjbGFzcz0ibGFiZWwiIHg9Ijk3NyIgeT0iMjU4Ij7nirbmgIEgKyDkuovku7Y8L3RleHQ+CiAgPHRleHQgY2xhc3M9ImxhYmVsIiB4PSI5ODUiIHk9IjM4NCI+5bGV56S65LqL5a6e77yM5LiN5YaZ5YWl6KeE5YiZPC90ZXh0PgogIDx0ZXh0IGNsYXNzPSJsYWJlbCIgeD0iOTcyIiB5PSI1MzUiPua1i+ivlSAvIOS/ruWkjeWPjemmiDwvdGV4dD4KPC9zdmc+Cg==" alt="Brilliant Sort 架构图" />
+<figcaption aria-hidden="true">Brilliant Sort 架构图</figcaption>
+</figure>
+<h3 id="规则核心">规则核心</h3>
+<p><code>cpp/game_core.*</code> 的 <code>BrilliantSortCore</code>
+拥有关卡加载与验证、八方向连通、锁定判定、安全提取、目标放置、Shelf
+压缩、拒绝、胜利和 canonical 序列化。它不拥有
+DOM、CSS、PNG、ARIA、输入命中、动画时钟、音频时钟或布局。</p>
+<p>C++ 对外只暴露窄 JSON v1 / C ABI；<code>src/wasm/game-core.ts</code>
+把它封装为 <code>GameCorePort</code>。这样未来接入 Cocos
+或其它游戏引擎时，只需替换表现适配器，不需要复制规则或改动回放协议。</p>
+<h3 id="表现音频与规则的关系">表现、音频与规则的关系</h3>
+<p>React 根据 <code>CoreTransition</code>
+渲染像素素材、无障碍语义、键盘/触摸输入和临时 WAAPI
+动画。动画只测量已提交状态的来源/目标矩形，不能修改 canonical
+state。<code>PixelAudioEngine</code> 也只消费 post-dispatch
+<code>AudioCue</code>；AudioContext
+生命周期、设备采样率、静音偏好、音乐进度均不进入 <code>GameState</code>
+或 replay。</p>
+<h3 id="typescript-的定位">TypeScript 的定位</h3>
+<p>TypeScript reducer 保留为差分
+Oracle，而不是浏览器生产回退。生产浏览器经 WASM 调用 C++ 核心；如果 WASM
+初始化失败，应用明确失败或音频静默降级，不会偷偷切换到另一套规则引擎。</p>
+<h2 id="关键规则流程">4. 关键规则流程</h2>
+<h3 id="选择">4.1 选择</h3>
+<p><code>SelectBoardGem(coord)</code>
+校验有效格、宝石存在和可移动性后，以八方向邻居寻找同色最大连通分量。锁定宝石、空格与异色宝石都中断路径。遍历和返回顺序稳定，避免不同后端或同一
+Agent 重放出现歧义。</p>
+<h3 id="安全部分提取与-shelf">4.2 安全部分提取与 Shelf</h3>
+<p>对当前选择集合 <code>S</code>，核心只接受
+<code>Frontier(S) ∩ SafeToRemove(S)</code>
+中的成员；<code>SafeToRemove</code> 通过重新检查 <code>S - {v}</code>
+的八方向连通性保证剩余分量不会裂开。放入 Shelf 时取
+<code>min(selection.size, freeSlots)</code>
+个稳定优先级成员追加到紧凑序列；不足容量不是静默丢失，而是保留剩余选择。</p>
+<h3 id="放置拒绝与胜利">4.3 放置、拒绝与胜利</h3>
+<p><code>PlaceSelectionAtTarget(coord)</code>
+只接受同色、有效、空的目标格，查找同色空目标连通分量，并按 anchor
+距离、行、列的总序排序逐个落子。错误目标、满
+Shelf、锁定宝石和无可选宝石都返回稳定 <code>Rejection</code>
+且逻辑状态不变。胜利谓词为：Shelf
+空、选择空、全部有效格有宝石且颜色匹配。</p>
+<h2 id="harness-与自动化验收">5. Harness 与自动化验收</h2>
+<p>Harness
+的设计目标不是“列出测试名称”，而是让任意固定关卡在同一协议下被加载、驱动、序列化、重放、比较和诊断：</p>
+<pre class="text"><code>scenario.load(LevelSpec) → command.apply(GameCommand) → CoreTransition
+      → before/after canonical dump + events + rejection
+      → trace.replay(commandLog) → snapshot.diff(expected, actual)</code></pre>
+<p>三后端差分会逐命令比较 TypeScript Oracle、native C++ 和 WASM C++ 的
+<code>canonicalDump</code>、events 与 rejection。发生分歧时，诊断包括
+scenario、命令索引、命令 JSON、后端、前后状态、首个 JSON
+路径差异、期望/实际 events 和
+rejection，不把“失败”压缩成不可行动的一行文本。</p>
+<h3 id="必须覆盖的自动化场景">必须覆盖的自动化场景</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>场景</th>
+<th>初始状态与操作</th>
+<th>预期结果</th>
+<th>失败诊断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>八方向选择</td>
+<td>固定小棋盘，斜对角同色可动宝石，夹有锁定/异色屏障；点击起点</td>
+<td>仅返回同色可动八连通分量，起点第一，稳定 BFS 顺序</td>
+<td>起点、返回坐标、期望与实际顺序、错误屏障路径</td>
+</tr>
+<tr>
+<td>部分入 Shelf 与压缩</td>
+<td>选择大于剩余容量的分量，再从 Shelf 放回目标</td>
+<td>仅安全成员进入 Shelf；剩余选择连通；移除后 row-major 紧凑</td>
+<td>Shelf 序列、剩余 component、容量、首个不连通点</td>
+</tr>
+<tr>
+<td>拒绝不变性</td>
+<td>点击锁定/空格/错误颜色目标/满 Shelf</td>
+<td>收到指定 <code>Rejection</code>，状态 dump 保持字节相同</td>
+<td>命令、rejection code、before/after dump 的首个差异</td>
+</tr>
+<tr>
+<td><code>tux-01</code> 胜利回放</td>
+<td>24×32、546 有效格、16 槽 Shelf；回放提交的 48 条命令</td>
+<td>三后端逐 transition 一致，最终 <code>Won</code>、Shelf 空、546
+格匹配</td>
+<td>command index、backend、前后 dump、events、rejection、首个 JSON
+路径</td>
+</tr>
+</tbody>
+</table>
+<p><code>src/harness/differential.ts</code>
+让这套诊断成为真实实现，而不是设计口号；<code>bun run harness differential tux-01</code>
+可重放旗舰关卡的三后端证明。</p>
+<h2 id="ai-agent-的使用与验证">6. AI Agent 的使用与验证</h2>
+<h3 id="让-agent-做什么">让 Agent 做什么</h3>
+<p>Agent
+可承担限定范围内的模块拆解、接口审查、实现、测试补充、审查生成的像素资产、读取差分日志和提出修复。它不应自行发明未观察到的商业规则、Power-up、随机模式或支付流程。</p>
+<h3 id="给-agent-的上下文与可执行反馈">给 Agent
+的上下文与可执行反馈</h3>
+<p>归档 OpenSpec
+提供题目事实、假设、非目标、模块边界、接受标准和迁移顺序。<code>src/agent/context.ts</code>
+会拒绝请求中包含明确延期的能力；<code>src/agent/audit.ts</code>
+将规格版本、改动文件、验证命令、验证结果、下一决策和时间戳序列化为审计记录。</p>
+<p>Agent 的可执行反馈不是自然语言“看起来不对”，而是：固定
+fixture、命令日志、canonical dump、事件、rejection、Harness 首个 JSON
+差异、原生/WASM 差分、浏览器 E2E 以及人工视觉/听觉 review。</p>
+<h3 id="一个容易误解的边界与发现方式">一个容易误解的边界与发现方式</h3>
+<p><strong>规则误解</strong>：两个视觉 Shelf Bank 很容易诱导 Agent
+实现成两个独立逻辑容器。规格明确规定核心仅有一个紧凑
+<code>Shelf.gemIds</code> 序列，A/B 只是在表现层按索引 <code>0..7</code>
+与 <code>8..15</code>
+切片；否则追加顺序、部分提取和压缩都会产生错误。固定 Shelf 回放和
+canonical dump 会立即暴露这种偏差。</p>
+<p><strong>表现误解（实际修复案例）</strong>：初版飞行克隆只平移，Large
+Shelf 宝石抵达 Micro
+棋盘格时会突然换图。规则差分不会发现该问题；浏览器中帧和 E2E
+则要求来源/终点矩形对齐、一个可见表示、双向
+<code>translate + scale</code>、Large/Micro 离散 LOD
+交接和动画结束后才解锁输入。该修复说明“逻辑测试通过”不等于“产品表现合格”。</p>
+<h2 id="c-小型代码题">7. C++ 小型代码题</h2>
+<p>题目要求的 <code>FindConnectedMovableGems</code> 位于：<a href="cpp/connected_gems.hpp"><code>cpp/connected_gems.hpp</code></a> 与
+<a href="cpp/connected_gems.cpp"><code>cpp/connected_gems.cpp</code></a>。它采用
+BFS，稳定邻居次序为 <code>N, NE, E, SE, S, SW, W, NW</code>：</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>vector<span class="op">&lt;</span><span class="bu">std::</span>pair<span class="op">&lt;</span><span class="dt">int</span><span class="op">,</span> <span class="dt">int</span><span class="op">&gt;&gt;</span> FindConnectedMovableGems<span class="op">(</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="bu">std::</span>vector<span class="op">&lt;</span>GemCell<span class="op">&gt;&gt;&amp;</span> board<span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> startRow<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> startCol<span class="op">);</span></span></code></pre></div>
+<ul>
+<li>越界、空宝石或不可动起点返回空。</li>
+<li>入队时标记 visited，确保不重复返回。</li>
+<li>仅扩展与起点同色且可动的八方向邻居。</li>
+<li>返回顺序是起点在前的 BFS 发现顺序。</li>
+<li>对已发现网格的时间与辅助空间复杂度均为 <span class="math inline"><em>O</em>(<em>V</em>)</span>。</li>
+</ul>
+<p><a href="cpp/connected_gems_test.cpp"><code>cpp/connected_gems_test.cpp</code></a>
+覆盖对角连通、锁定/异色屏障、无效起点、稳定 BFS
+顺序和输入不变性。若把它扩展为“放置优先级”，还需要目标格集合、目标颜色、选择
+anchor、剩余连通约束、Shelf 容量、目标容量和稳定
+tie-break；拓扑遍历本身不应暗中承担这些策略。</p>
+<h2 id="扩展边界">8. 扩展边界</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>易于扩展</th>
+<th>需要协议升级或重构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新固定关卡、颜色、像素素材、音效/音乐、Harness 场景</td>
+<td>新命令类型、多个逻辑 Shelf、失败/计时状态、Power-up
+改变占用规则</td>
+</tr>
+<tr>
+<td>新 React/Cocos 表现适配器、更多无障碍展示、纯表现动画</td>
+<td>运行时随机生成进入 replay、持久化档案/货币、联机或非确定性物理</td>
+</tr>
+<tr>
+<td>新的 fixture 验证器与赢局 trace</td>
+<td><code>LevelSpec</code> 语义版本变更、JSON ABI
+破坏性改动、跨平台协议迁移</td>
+</tr>
+</tbody>
+</table>
+<p>这一区分避免把“可换表现层”误当作“任何规则都可零成本加进去”。新增规则必须同步更新核心规格、夹具验证器、replay
+基线、Harness 断言、C++/WASM 协议和 Agent 约束。</p>
+<h2 id="复现与证据">9. 复现与证据</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> install <span class="at">--frozen-lockfile</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run check</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run test:e2e</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness replay tux-01</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run harness differential tux-01</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run level:check:tux</span></code></pre></div>
+<p>对应版本的本地验证包括 31 个 Bun 测试、4 个 native CTest（含固定 48
+kHz PCM 哈希）、16 个 desktop/mobile Chromium E2E，以及 48 命令 Tux
+三后端逐 transition parity。最新 CI 在 Ubuntu 上重新执行类型检查、native
+C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和
+GitHub Pages 部署。</p>
+<p>详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：<a href="submission/evidence-matrix.md"><code>submission/evidence-matrix.md</code></a>。已归档
+OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事：</p>
+<ul>
+<li><a href="openspec/changes/archive/2026-07-15-add-brilliant-sort-core/"><code>2026-07-15-add-brilliant-sort-core</code></a></li>
+<li><a href="openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/"><code>2026-07-16-add-pixel-crystal-renderer</code></a></li>
+<li><a href="openspec/changes/archive/2026-07-16-rebuild-tux-mosaic-stage/"><code>2026-07-16-rebuild-tux-mosaic-stage</code></a></li>
+<li><a href="openspec/changes/archive/2026-07-16-add-cpp-pixel-audio-engine/"><code>2026-07-16-add-cpp-pixel-audio-engine</code></a></li>
+</ul>
+<h2 id="结论">结论</h2>
+<p>该方案的交付重点不是一张可玩的截图，而是把复杂度收敛到可验证边界：一个可替换表现层的规则核心、一套可重放/可比较/可诊断的状态协议、一条能约束
+AI 输出的验收闭环，以及可独立编译验证的 C++ 连通算法。在线 Tux
+Demo、像素资产和确定性音频证明这些边界能够承载真实产品表现，但它们不替代核心工程证据。</p>
+</body>
+</html>

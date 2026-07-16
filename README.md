@@ -4,6 +4,8 @@ A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The br
 
 Live demos: <https://cagedbird043.github.io/brilliant-sort/> · <https://brilliant-sort.cagedbird.cn/>
 
+Assessment submission: [`SUBMISSION.md`](./SUBMISSION.md) · [`PDF`](./submission/Brilliant-Sort-Answer.pdf) · [`Evidence matrix`](./submission/evidence-matrix.md)
+
 ## What is implemented
 
 - The compiled 24×32 `tux-01` flagship fixture: 546 active sockets, a deterministic 75.09% locked opening, and a sixteen-slot Shelf.
