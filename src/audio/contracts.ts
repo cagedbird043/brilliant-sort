@@ -21,6 +21,7 @@ export const audioCueColors = {
   navy: 3,
   ice: 4,
   coral: 5,
+  jade: 6,
   none: 0xff,
 } as const;
 

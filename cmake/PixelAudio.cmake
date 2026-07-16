@@ -29,6 +29,9 @@ function(pixel_audio_add_native_targets)
 
     if(BUILD_TESTING)
         add_executable(pixel_audio_test "${PIXEL_AUDIO_TEST_DIR}/pixel_audio_test.cpp")
+        target_compile_definitions(
+            pixel_audio_test
+            PRIVATE PIXEL_AUDIO_SCORE_PATH="${PIXEL_AUDIO_PROJECT_ROOT}/src/audio/tux-01.music.json")
         target_link_libraries(pixel_audio_test PRIVATE pixel_audio)
         pixel_audio_enable_warnings(pixel_audio_test)
         add_test(NAME pixel_audio COMMAND pixel_audio_test)

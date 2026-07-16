@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "tux-01",
+  "seed": 1414879280,
+  "tempoBpm": 104,
+  "ticksPerBeat": 24,
+  "beatsPerBar": 4,
+  "loopBars": 48,
+  "maxMusicVoices": 12,
+  "permittedTransformMask": 31,
+  "permittedTransforms": [
+    "motif_rotation",
+    "octave_displacement",
+    "chord_tone_substitution",
+    "bounded_omission",
+    "arpeggio_order"
+  ],
+  "scale": {
+    "rootMidi": 48,
+    "semitones": [0, 2, 4, 5, 7, 9, 11]
+  },
+  "arrangement": {
+    "layerThresholdPercent": [25, 50, 75],
+    "layerCount": 4,
+    "sectionBars": [12, 12, 12, 12]
+  },
+  "chordProgression": [
+    [0, 2, 4, 6],
+    [5, 0, 2, 4],
+    [3, 5, 0, 2],
+    [4, 6, 1, 3],
+    [0, 2, 4, 6],
+    [2, 4, 6, 1],
+    [5, 0, 2, 4],
+    [4, 6, 1, 3]
+  ],
+  "motifDegrees": [0, 2, 4, 2, 5, 4, 2, 1],
+  "rhythmMasks": [43688, 35466, 41634, 34986],
+  "instrumentAssignments": ["Lead", "Bass", "Pad", "Arp"]
+}

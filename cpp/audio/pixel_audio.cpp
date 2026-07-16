@@ -51,7 +51,8 @@ constexpr std::array<std::uint32_t, 49> kPhaseIncrementsAt48k{
     66'213'081, 70'150'316, 74'321'671, 78'741'067, 83'423'255, 88'383'859,
     93'639'437,
 };
-constexpr std::array<std::int32_t, 6> kColorMidiNotes{60, 62, 64, 67, 69, 72};
+constexpr std::array<std::int32_t, 7> kColorMidiNotes{60, 62, 64, 67,
+                                                      69, 72, 65};
 constexpr std::array<std::int32_t, 3> kPlacementIntervals{0, 4, 7};
 constexpr std::array<std::uint32_t, 6> kFanfareOffsets{0, 12, 24, 36, 48, 72};
 constexpr std::array<std::int32_t, 6> kFanfareNotes{72, 76, 79, 84, 79, 84};
@@ -67,7 +68,7 @@ constexpr std::array<std::int32_t, 6> kFanfareNotes{72, 76, 79, 84, 79, 84};
 
 [[nodiscard]] constexpr bool IsColor(CueColor color) noexcept {
   return static_cast<std::uint8_t>(color) <=
-         static_cast<std::uint8_t>(CueColor::Coral);
+         static_cast<std::uint8_t>(CueColor::Jade);
 }
 
 [[nodiscard]] constexpr std::int32_t ClampInt32(std::int64_t value,

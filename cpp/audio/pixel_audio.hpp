@@ -34,6 +34,7 @@ enum class CueColor : std::uint8_t {
   Navy = 3,
   Ice = 4,
   Coral = 5,
+  Jade = 6,
   None = 0xff,
 };
 

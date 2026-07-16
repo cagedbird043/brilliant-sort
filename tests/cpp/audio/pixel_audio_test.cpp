@@ -5,10 +5,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <new>
 #include <span>
+#include <string>
 #include <string_view>
 
 namespace {
@@ -89,6 +92,7 @@ using brilliant_sort::audio::AudioCue;
 using brilliant_sort::audio::AudioCueQueue;
 using brilliant_sort::audio::CueColor;
 using brilliant_sort::audio::CueKind;
+using brilliant_sort::audio::InstrumentId;
 using brilliant_sort::audio::kCueCapacity;
 using brilliant_sort::audio::kCueCriticalReserve;
 using brilliant_sort::audio::kReferenceSampleRate;
@@ -107,6 +111,173 @@ void Expect(bool condition, std::string_view message) {
   if (!condition) {
     Fail(message);
   }
+}
+
+[[nodiscard]] std::size_t JsonValueOffset(std::string_view json,
+                                          std::string_view key) {
+  const std::size_t key_offset = json.find(key);
+  Expect(key_offset != std::string_view::npos,
+         "JSON source should contain key");
+  const std::size_t colon_offset = json.find(':', key_offset + key.size());
+  Expect(colon_offset != std::string_view::npos,
+         "JSON source key should have a value");
+  return colon_offset + 1U;
+}
+
+void SkipJsonWhitespace(std::string_view json, std::size_t &offset) {
+  while (offset < json.size() &&
+         (json[offset] == ' ' || json[offset] == '\n' || json[offset] == '\r' ||
+          json[offset] == '\t')) {
+    ++offset;
+  }
+}
+
+[[nodiscard]] std::uint64_t ReadJsonUnsigned(std::string_view json,
+                                             std::size_t &offset) {
+  while (offset < json.size() && (json[offset] < '0' || json[offset] > '9')) {
+    ++offset;
+  }
+  Expect(offset < json.size(), "JSON source should contain an unsigned value");
+  std::uint64_t value = 0;
+  while (offset < json.size() && json[offset] >= '0' && json[offset] <= '9') {
+    value = value * 10U + static_cast<std::uint64_t>(json[offset] - '0');
+    ++offset;
+  }
+  return value;
+}
+
+[[nodiscard]] std::uint64_t JsonUnsigned(std::string_view json,
+                                         std::string_view key) {
+  std::size_t offset = JsonValueOffset(json, key);
+  return ReadJsonUnsigned(json, offset);
+}
+
+[[nodiscard]] std::string_view JsonString(std::string_view json,
+                                          std::string_view key) {
+  std::size_t offset = JsonValueOffset(json, key);
+  SkipJsonWhitespace(json, offset);
+  Expect(offset < json.size() && json[offset] == '"',
+         "JSON source should contain a string value");
+  const std::size_t start = ++offset;
+  const std::size_t end = json.find('"', start);
+  Expect(end != std::string_view::npos,
+         "JSON source string value should close");
+  return json.substr(start, end - start);
+}
+
+template <typename Value, std::size_t Count>
+void ExpectJsonUnsignedArray(std::string_view json, std::string_view key,
+                             const std::array<Value, Count> &expected,
+                             std::string_view message) {
+  std::size_t offset = JsonValueOffset(json, key);
+  for (const Value value : expected) {
+    Expect(ReadJsonUnsigned(json, offset) == static_cast<std::uint64_t>(value),
+           message);
+  }
+}
+
+void TestTuxScoreSourceConsistency() {
+#ifndef PIXEL_AUDIO_SCORE_PATH
+#error "PIXEL_AUDIO_SCORE_PATH must be supplied by the standalone CMake target"
+#endif
+  std::ifstream source(PIXEL_AUDIO_SCORE_PATH);
+  Expect(source.good(), "reviewed Tux score source should be readable");
+  const std::string json{std::istreambuf_iterator<char>(source),
+                         std::istreambuf_iterator<char>()};
+  const ScoreDefinition &score = TuxScore();
+
+  Expect(JsonUnsigned(json, "schemaVersion") == 1U,
+         "Tux score source schema should be supported");
+  Expect(JsonString(json, "id") == "tux-01",
+         "Tux score source should identify tux-01");
+  Expect(JsonUnsigned(json, "seed") == score.seed,
+         "source seed should match compiled score");
+  Expect(JsonUnsigned(json, "tempoBpm") == score.tempo_bpm,
+         "source tempo should match compiled score");
+  Expect(JsonUnsigned(json, "ticksPerBeat") == score.ticks_per_beat,
+         "source ticks should match compiled score");
+  Expect(JsonUnsigned(json, "beatsPerBar") == score.beats_per_bar,
+         "source meter should match compiled score");
+  Expect(JsonUnsigned(json, "loopBars") == score.loop_bars,
+         "source loop should match compiled score");
+  Expect(JsonUnsigned(json, "maxMusicVoices") == score.max_music_voices,
+         "source voice budget should match compiled score");
+  Expect(JsonUnsigned(json, "permittedTransformMask") ==
+             score.permitted_transforms,
+         "source transforms should match compiled score");
+  Expect(JsonUnsigned(json, "rootMidi") == score.scale_root_midi,
+         "source scale root should match compiled score");
+  Expect(JsonUnsigned(json, "layerCount") == score.arrangement_layer_count,
+         "source layer count should match compiled score");
+  Expect(score.scale_count == score.scale_semitones.size(),
+         "compiled Tux score should retain the source scale cardinality");
+  ExpectJsonUnsignedArray(json, "semitones", score.scale_semitones,
+                          "source scale should match compiled score");
+  ExpectJsonUnsignedArray(json, "layerThresholdPercent",
+                          score.layer_threshold_percent,
+                          "source thresholds should match compiled score");
+  ExpectJsonUnsignedArray(json, "sectionBars", score.section_bars,
+                          "source sections should match compiled score");
+  ExpectJsonUnsignedArray(json, "motifDegrees", score.motif_degrees,
+                          "source motif should match compiled score");
+  ExpectJsonUnsignedArray(json, "rhythmMasks", score.rhythm_masks,
+                          "source rhythm should match compiled score");
+
+  std::size_t chord_offset = JsonValueOffset(json, "chordProgression");
+  for (const auto &chord : score.chord_progression) {
+    Expect(chord.count == chord.scale_degrees.size(),
+           "source Tux chords should retain their bounded four-note shape");
+    for (std::size_t degree = 0; degree < chord.count; ++degree) {
+      Expect(ReadJsonUnsigned(json, chord_offset) ==
+                 chord.scale_degrees[degree],
+             "source chord grammar should match compiled score");
+    }
+  }
+
+  constexpr std::array<InstrumentId, 4> kInstrumentAssignments{
+      InstrumentId::Lead, InstrumentId::Bass, InstrumentId::Pad,
+      InstrumentId::Arp};
+  constexpr std::array<std::string_view, 4> kInstrumentNames{"Lead", "Bass",
+                                                             "Pad", "Arp"};
+  std::size_t instrument_offset =
+      JsonValueOffset(json, "instrumentAssignments");
+  for (std::size_t index = 0; index < kInstrumentNames.size(); ++index) {
+    const std::string_view name = kInstrumentNames[index];
+    Expect(score.instrument_assignments[index] == kInstrumentAssignments[index],
+           "compiled instrument assignment should match Tux source");
+    while (instrument_offset < json.size() && json[instrument_offset] != '"') {
+      ++instrument_offset;
+    }
+    Expect(instrument_offset < json.size(),
+           "source instrument assignment should be readable");
+    const std::size_t start = ++instrument_offset;
+    const std::size_t end = json.find('"', start);
+    Expect(end != std::string_view::npos,
+           "source instrument assignment should close");
+    Expect(json.substr(start, end - start) == name,
+           "source instrument assignment should match compiled score");
+    instrument_offset = end + 1U;
+  }
+}
+
+void TestJadeCueAbi() {
+  static_assert(static_cast<std::uint8_t>(CueColor::Obsidian) == 0U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Pearl) == 1U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Amber) == 2U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Navy) == 3U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Ice) == 4U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Coral) == 5U);
+  static_assert(static_cast<std::uint8_t>(CueColor::Jade) == 6U);
+  static_assert(static_cast<std::uint8_t>(CueColor::None) == 0xffU);
+  PixelAudioEngine engine(kReferenceSampleRate);
+  Expect(engine.Initialize(), "engine should initialize for jade cue");
+  Expect(
+      engine.PushCue(AudioCue{1, CueKind::Selection, CueColor::Jade, 1, 0, 0}),
+      "jade cue should use the stable audio ABI");
+  std::array<std::int16_t, 64> pcm{};
+  engine.Render(pcm.data(), pcm.size());
+  Expect(engine.diagnostics().cues_consumed == 1U,
+         "jade cue should be consumed by the synth");
 }
 
 void TestQueuePriorityAndOrder() {
@@ -257,6 +428,8 @@ void TestRenderHasNoAllocations() {
 int main() {
   TestQueuePriorityAndOrder();
   TestScoreConstraints();
+  TestTuxScoreSourceConsistency();
+  TestJadeCueAbi();
   TestDeterministicReferencePcm();
   TestBoundedSaturatedOutput();
   TestRenderHasNoAllocations();
