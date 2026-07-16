@@ -33,4 +33,4 @@
 - [x] 5.1 Smoke initial and mid-game global solve in the real browser, confirming the complete wave, Shelf Large→Micro members, input lock, final cleanup, arc, fireworks, fanfare, and `Won` state.
 - [x] 5.2 Add deterministic core, C++, WASM, differential, audio-cue, browser, mobile, onboarding-persistence, manual-win, wand-win, and reduced-motion regressions after smoke works.
 - [x] 5.3 Run `bun run check`, full Playwright desktop/mobile E2E, Tux differential Harness, production build, production startup, and strict OpenSpec validation.
-- [ ] 5.4 Update maintained README/submission evidence and archive only after human approval of the wand control, full-map wave, finale, and hint.
+- [x] 5.4 Update maintained README/submission evidence and archive only after human approval of the wand control, full-map wave, finale, and hint.

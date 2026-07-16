@@ -57,7 +57,7 @@ Movable Board cells, Shelf slots, bounded Board camera interaction, the implemen
 - **THEN** the initial Tux Board and empty Shelf are restored canonically
 - **AND THEN** production presentation is not required to expose a persistent reset control.
 
-#### Scenario: Navigating the dense Board with assistive technology
+#### Scenario: Navigating the dense board with assistive technology
 
 - **WHEN** keyboard or assistive-technology navigation enters the Tux stage
 - **THEN** only actionable movable cells, Shelf slots, audio mute, wand assist, and enabled camera semantics participate in the interactive sequence

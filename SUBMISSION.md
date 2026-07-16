@@ -165,13 +165,13 @@ bun run level:check:tux
 
 对应版本的本地验证包括 34 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition parity。最新 CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
 
-详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事；已归档规格和仍待人工视觉批准的活动规格分别为：
+详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是本答卷的需求来源与验收记录，不是另写一套事后叙事；以下规格均已通过自动验证与人工产品验收并归档：
 
 - [`2026-07-15-add-brilliant-sort-core`](openspec/changes/archive/2026-07-15-add-brilliant-sort-core/)
 - [`2026-07-16-add-pixel-crystal-renderer`](openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/)
 - [`2026-07-16-rebuild-tux-mosaic-stage`](openspec/changes/archive/2026-07-16-rebuild-tux-mosaic-stage/)
 - [`2026-07-16-add-cpp-pixel-audio-engine`](openspec/changes/archive/2026-07-16-add-cpp-pixel-audio-engine/)
-- [`add-demo-assist-and-victory-finale`](openspec/changes/add-demo-assist-and-victory-finale/)（实现与自动验证完成；保留活动状态等待人工视觉/产品验收）
+- [`2026-07-16-add-demo-assist-and-victory-finale`](openspec/changes/archive/2026-07-16-add-demo-assist-and-victory-finale/)
 
 ## 结论
 
