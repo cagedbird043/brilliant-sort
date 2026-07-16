@@ -1,0 +1,382 @@
+:root {
+  color-scheme: dark;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --three-void: #050814;
+  --three-field: #0d1225;
+  --three-workbench: #111a32;
+  --three-edge: #40557f;
+  --three-edge-faint: rgba(125, 151, 204, 0.24);
+  --three-ink: #e7edff;
+  --three-muted: #8ca0c6;
+  --three-gold: #e6c77a;
+  --three-cyan: #74d7e7;
+  --three-danger: #e78491;
+  --three-success: #85d0a2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: var(--three-void);
+  color: var(--three-ink);
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--three-cyan);
+  outline-offset: 3px;
+}
+
+.three-game-shell {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--three-void);
+}
+
+.three-game-shell::before,
+.three-game-shell::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+}
+
+.three-game-shell::before {
+  border: clamp(0.8rem, 3vw, 3.2rem) solid rgba(13, 18, 37, 0.74);
+  box-shadow:
+    inset 0 0 0 1px rgba(64, 85, 127, 0.42),
+    inset 0 0 4rem rgba(0, 0, 0, 0.46);
+}
+
+.three-game-shell::after {
+  background:
+    linear-gradient(90deg, rgba(17, 26, 50, 0.38), transparent 22%, transparent 78%, rgba(17, 26, 50, 0.38)),
+    linear-gradient(180deg, rgba(5, 8, 20, 0.46), transparent 18%, transparent 84%, rgba(5, 8, 20, 0.68));
+  mix-blend-mode: screen;
+  opacity: 0.46;
+}
+
+.three-stage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 21rem);
+  overflow: hidden;
+}
+
+.three-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.three-semantic-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.three-board-controls {
+  position: absolute;
+  top: 10%;
+  left: 4%;
+  width: min(70vw, 62rem);
+  height: 80%;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  grid-template-rows: repeat(32, minmax(0, 1fr));
+  pointer-events: none;
+}
+
+.three-shelf-controls {
+  position: absolute;
+  top: 25%;
+  right: 2.5%;
+  width: min(19vw, 17rem);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(2.6rem, 1fr));
+  gap: 0.42rem;
+  pointer-events: none;
+}
+
+.three-target-control {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: transparent;
+  pointer-events: auto;
+  opacity: 0.02;
+  transition:
+    opacity 150ms ease-out,
+    border-color 150ms ease-out,
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.three-target-control:hover,
+.three-target-control:focus-visible,
+.three-target-control.is-selected {
+  opacity: 1;
+}
+
+.three-target-control:hover {
+  border-color: rgba(116, 215, 231, 0.48);
+  background: rgba(116, 215, 231, 0.07);
+}
+
+.three-target-control:focus-visible,
+.three-target-control.is-selected {
+  border-color: var(--three-cyan);
+  background: rgba(116, 215, 231, 0.12);
+  box-shadow: 0 0 1rem rgba(116, 215, 231, 0.28);
+}
+
+.three-target-control.is-locked {
+  opacity: 0.03;
+}
+
+.three-target-control:disabled {
+  cursor: not-allowed;
+}
+
+.three-rail {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.three-icon-control {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--three-edge);
+  border-radius: 0.55rem;
+  background: rgba(13, 18, 37, 0.88);
+  color: var(--three-ink);
+  cursor: pointer;
+  transition:
+    color 150ms ease-out,
+    border-color 150ms ease-out,
+    background-color 150ms ease-out,
+    transform 150ms ease-out;
+}
+
+.three-icon-control:hover:not(:disabled) {
+  border-color: var(--three-cyan);
+  color: var(--three-cyan);
+  background: rgba(17, 26, 50, 0.96);
+}
+
+.three-icon-control:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.three-icon-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+
+.three-icon-glyph {
+  display: block;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.three-wand-control .three-icon-glyph {
+  color: var(--three-gold);
+}
+
+.three-mute-control[aria-pressed="true"] .three-icon-glyph {
+  color: var(--three-muted);
+}
+
+.three-replay-control {
+  border-color: rgba(230, 199, 122, 0.58);
+}
+
+.three-replay-control:not(:disabled) .three-icon-glyph {
+  color: var(--three-gold);
+}
+
+.three-status {
+  position: absolute;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: inline-flex;
+  min-width: 4.3rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--three-edge-faint);
+  border-radius: 0.35rem;
+  background: rgba(13, 18, 37, 0.76);
+  color: var(--three-muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.three-status[data-state="won"] {
+  border-color: rgba(133, 208, 162, 0.64);
+  color: var(--three-success);
+}
+
+.three-feedback {
+  position: absolute;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 6;
+  max-width: min(30rem, 68vw);
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--three-edge-faint);
+  border-radius: 0.35rem;
+  background: rgba(13, 18, 37, 0.86);
+  color: var(--three-muted);
+  font-size: 0.76rem;
+  line-height: 1.3;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.three-feedback[data-tone="rejected"] {
+  border-color: rgba(231, 132, 145, 0.68);
+  color: var(--three-danger);
+}
+
+.three-feedback[data-tone="won"] {
+  border-color: rgba(133, 208, 162, 0.68);
+  color: var(--three-success);
+}
+
+.three-boot,
+.three-error-panel {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 8;
+  width: min(23rem, calc(100% - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--three-edge);
+  border-radius: 0.5rem;
+  background: rgba(13, 18, 37, 0.94);
+  box-shadow: 0 1.4rem 3rem rgba(0, 0, 0, 0.38);
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.three-boot {
+  color: var(--three-muted);
+}
+
+.three-error-panel {
+  color: var(--three-danger);
+}
+
+.three-error-message {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.three-retry-control {
+  margin-top: 0.9rem;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 760px), (orientation: portrait) {
+  .three-stage {
+    display: block;
+  }
+
+  .three-board-controls {
+    top: 6%;
+    left: 4%;
+    width: 92%;
+    height: 63%;
+  }
+
+  .three-shelf-controls {
+    top: auto;
+    right: 4%;
+    bottom: 10%;
+    width: 92%;
+    grid-template-columns: repeat(12, minmax(1.65rem, 1fr));
+    gap: 0.28rem;
+  }
+
+  .three-target-control {
+    min-height: 2.2rem;
+  }
+
+  .three-rail {
+    top: max(0.8rem, env(safe-area-inset-top));
+    right: max(0.8rem, env(safe-area-inset-right));
+  }
+
+  .three-status {
+    right: max(0.8rem, env(safe-area-inset-right));
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
+  }
+
+  .three-feedback {
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
+    max-width: 58vw;
+    left: 42%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .three-target-control,
+  .three-icon-control {
+    transition: none;
+  }
+}
