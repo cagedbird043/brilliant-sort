@@ -1,0 +1,64 @@
+include_guard(GLOBAL)
+
+get_filename_component(PIXEL_AUDIO_PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+set(PIXEL_AUDIO_CPP_DIR "${PIXEL_AUDIO_PROJECT_ROOT}/cpp/audio")
+set(PIXEL_AUDIO_TEST_DIR "${PIXEL_AUDIO_PROJECT_ROOT}/tests/cpp/audio")
+set(
+    PIXEL_AUDIO_ENGINE_SOURCES
+    "${PIXEL_AUDIO_CPP_DIR}/pixel_audio.cpp"
+    "${PIXEL_AUDIO_CPP_DIR}/tux_score.cpp"
+    "${PIXEL_AUDIO_CPP_DIR}/audio_worklet_adapter.cpp")
+
+function(pixel_audio_enable_warnings target)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -pedantic)
+    target_compile_features(${target} PRIVATE cxx_std_20)
+endfunction()
+
+function(pixel_audio_add_native_targets)
+    if(TARGET pixel_audio)
+        return()
+    endif()
+
+    add_library(pixel_audio STATIC ${PIXEL_AUDIO_ENGINE_SOURCES})
+    target_include_directories(pixel_audio PUBLIC "${PIXEL_AUDIO_CPP_DIR}")
+    pixel_audio_enable_warnings(pixel_audio)
+
+    add_executable(pixel_audio_offline_renderer "${PIXEL_AUDIO_CPP_DIR}/offline_renderer.cpp")
+    target_link_libraries(pixel_audio_offline_renderer PRIVATE pixel_audio)
+    pixel_audio_enable_warnings(pixel_audio_offline_renderer)
+
+    if(BUILD_TESTING)
+        add_executable(pixel_audio_test "${PIXEL_AUDIO_TEST_DIR}/pixel_audio_test.cpp")
+        target_link_libraries(pixel_audio_test PRIVATE pixel_audio)
+        pixel_audio_enable_warnings(pixel_audio_test)
+        add_test(NAME pixel_audio COMMAND pixel_audio_test)
+    endif()
+endfunction()
+
+function(pixel_audio_add_emscripten_target)
+    if(NOT EMSCRIPTEN)
+        message(FATAL_ERROR "pixel_audio_add_emscripten_target requires Emscripten")
+    endif()
+    if(TARGET brilliant_sort_audio)
+        return()
+    endif()
+
+    add_executable(brilliant_sort_audio ${PIXEL_AUDIO_ENGINE_SOURCES})
+    target_include_directories(brilliant_sort_audio PRIVATE "${PIXEL_AUDIO_CPP_DIR}")
+    pixel_audio_enable_warnings(brilliant_sort_audio)
+    target_link_options(
+        brilliant_sort_audio
+        PRIVATE
+            "--no-entry"
+            "-sMODULARIZE=1"
+            "-sEXPORT_ES6=1"
+            "-sEXPORT_NAME=createBrilliantSortAudioModule"
+            "-sENVIRONMENT=web,worker"
+            "-sFILESYSTEM=0"
+            "-sEXPORTED_FUNCTIONS=['_bs_audio_worklet_create','_bs_audio_worklet_destroy','_bs_audio_worklet_push_cue','_bs_audio_worklet_set_muted','_bs_audio_worklet_render']")
+    set_target_properties(
+        brilliant_sort_audio
+        PROPERTIES
+            OUTPUT_NAME "brilliant-sort-audio"
+            SUFFIX ".mjs")
+endfunction()

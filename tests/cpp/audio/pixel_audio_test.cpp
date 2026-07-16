@@ -1,0 +1,265 @@
+#include "pixel_audio.hpp"
+
+#include <array>
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
+#include <new>
+#include <span>
+#include <string_view>
+
+namespace {
+
+std::atomic<bool> g_count_allocations{false};
+std::atomic<std::uint64_t> g_allocation_count{0};
+
+void *Allocate(std::size_t size) {
+  if (g_count_allocations.load(std::memory_order_relaxed)) {
+    g_allocation_count.fetch_add(1U, std::memory_order_relaxed);
+  }
+  void *const result = std::malloc(size == 0U ? 1U : size);
+  if (result == nullptr) {
+    throw std::bad_alloc();
+  }
+  return result;
+}
+
+void *AllocateAligned(std::size_t size, std::size_t alignment) {
+  if (g_count_allocations.load(std::memory_order_relaxed)) {
+    g_allocation_count.fetch_add(1U, std::memory_order_relaxed);
+  }
+  const std::size_t adjusted_size =
+      ((size + alignment - 1U) / alignment) * alignment;
+  void *const result = std::aligned_alloc(
+      alignment, adjusted_size == 0U ? alignment : adjusted_size);
+  if (result == nullptr) {
+    throw std::bad_alloc();
+  }
+  return result;
+}
+
+} // namespace
+
+void *operator new(std::size_t size) { return Allocate(size); }
+
+void *operator new[](std::size_t size) { return Allocate(size); }
+
+void operator delete(void *pointer) noexcept { std::free(pointer); }
+
+void operator delete[](void *pointer) noexcept { std::free(pointer); }
+
+void operator delete(void *pointer, std::size_t) noexcept {
+  std::free(pointer);
+}
+
+void operator delete[](void *pointer, std::size_t) noexcept {
+  std::free(pointer);
+}
+
+void *operator new(std::size_t size, std::align_val_t alignment) {
+  return AllocateAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void *operator new[](std::size_t size, std::align_val_t alignment) {
+  return AllocateAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void operator delete(void *pointer, std::align_val_t) noexcept {
+  std::free(pointer);
+}
+
+void operator delete[](void *pointer, std::align_val_t) noexcept {
+  std::free(pointer);
+}
+
+void operator delete(void *pointer, std::size_t, std::align_val_t) noexcept {
+  std::free(pointer);
+}
+
+void operator delete[](void *pointer, std::size_t, std::align_val_t) noexcept {
+  std::free(pointer);
+}
+
+namespace {
+
+using brilliant_sort::audio::AudioCue;
+using brilliant_sort::audio::AudioCueQueue;
+using brilliant_sort::audio::CueColor;
+using brilliant_sort::audio::CueKind;
+using brilliant_sort::audio::kCueCapacity;
+using brilliant_sort::audio::kCueCriticalReserve;
+using brilliant_sort::audio::kReferenceSampleRate;
+using brilliant_sort::audio::PixelAudioEngine;
+using brilliant_sort::audio::ScoreDefinition;
+using brilliant_sort::audio::ScoreError;
+using brilliant_sort::audio::TuxScore;
+using brilliant_sort::audio::ValidateScore;
+
+[[noreturn]] void Fail(std::string_view message) {
+  std::cerr << "FAILED: " << message << '\n';
+  std::exit(EXIT_FAILURE);
+}
+
+void Expect(bool condition, std::string_view message) {
+  if (!condition) {
+    Fail(message);
+  }
+}
+
+void TestQueuePriorityAndOrder() {
+  AudioCueQueue queue;
+  for (std::size_t index = 0; index < kCueCapacity - kCueCriticalReserve;
+       ++index) {
+    const AudioCue cue{
+        static_cast<std::uint32_t>(index + 1U),
+        CueKind::TargetPlace,
+        CueColor::Coral,
+        2,
+        0,
+        0,
+    };
+    Expect(queue.Push(cue),
+           "normal cue should occupy only noncritical capacity");
+  }
+  Expect(!queue.Push(AudioCue{57, CueKind::Selection, CueColor::Ice, 1, 0, 0}),
+         "low-priority selection should drop when critical reserve begins");
+  Expect(
+      !queue.Push(AudioCue{58, CueKind::Progress, CueColor::None, 25, 100, 0}),
+      "low-priority progress should drop when critical reserve begins");
+  Expect(queue.Push(AudioCue{59, CueKind::Won, CueColor::None, 0, 0, 0}),
+         "won cue should consume reserved capacity");
+
+  AudioCue popped{};
+  for (std::size_t index = 0; index < kCueCapacity - kCueCriticalReserve;
+       ++index) {
+    Expect(queue.Pop(popped), "queued normal cue should be available");
+    Expect(popped.sequence == index + 1U,
+           "queue should preserve producer order");
+  }
+  Expect(queue.Pop(popped), "reserved won cue should remain available");
+  Expect(popped.kind == CueKind::Won, "reserved cue should be won");
+  Expect(!queue.Pop(popped), "queue should be empty after ordered drain");
+}
+
+void TestScoreConstraints() {
+  Expect(ValidateScore(TuxScore()).ok(), "reviewed Tux score should validate");
+
+  ScoreDefinition missing_seed = TuxScore();
+  missing_seed.seed = 0;
+  Expect(ValidateScore(missing_seed).error == ScoreError::MissingSeed,
+         "score without a fixed seed should be rejected");
+
+  ScoreDefinition invalid_rhythm = TuxScore();
+  invalid_rhythm.rhythm_masks[1] = 0;
+  Expect(ValidateScore(invalid_rhythm).error == ScoreError::InvalidRhythm,
+         "empty rhythm mask should be rejected");
+
+  ScoreDefinition excessive_voices = TuxScore();
+  excessive_voices.max_music_voices = 13;
+  Expect(ValidateScore(excessive_voices).error ==
+             ScoreError::InvalidVoiceBudget,
+         "unbounded score voice budget should be rejected");
+
+  ScoreDefinition invalid_instrument = TuxScore();
+  invalid_instrument.instrument_assignments[0] =
+      static_cast<brilliant_sort::audio::InstrumentId>(255);
+  Expect(ValidateScore(invalid_instrument).error ==
+             ScoreError::UnsupportedInstrument,
+         "unsupported instrument should be rejected");
+}
+
+void EnqueueReferenceCues(PixelAudioEngine &engine) {
+  constexpr std::array<AudioCue, 7> cues{
+      AudioCue{1, CueKind::Selection, CueColor::Ice, 4, 0, 0},
+      AudioCue{2, CueKind::ShelfStore, CueColor::Navy, 3, 0, 0},
+      AudioCue{3, CueKind::TargetPlace, CueColor::Coral, 5, 0, 0},
+      AudioCue{4, CueKind::ShelfCompact, CueColor::None, 4, 0, 0},
+      AudioCue{5, CueKind::Rejected, CueColor::None, 2, 0, 0},
+      AudioCue{6, CueKind::Progress, CueColor::None, 76, 100, 0},
+      AudioCue{7, CueKind::Won, CueColor::None, 0, 0, 0},
+  };
+  for (const AudioCue &cue : cues) {
+    Expect(engine.PushCue(cue), "reference cue should enter bounded queue");
+  }
+}
+
+void TestDeterministicReferencePcm() {
+  constexpr std::size_t kFrames = kReferenceSampleRate * 2U;
+  static std::array<std::int16_t, kFrames> first{};
+  static std::array<std::int16_t, kFrames> second{};
+
+  PixelAudioEngine first_engine(kReferenceSampleRate);
+  PixelAudioEngine second_engine(kReferenceSampleRate);
+  Expect(first_engine.Initialize(), "first engine should initialize");
+  Expect(second_engine.Initialize(), "second engine should initialize");
+  EnqueueReferenceCues(first_engine);
+  EnqueueReferenceCues(second_engine);
+  first_engine.Render(first.data(), first.size());
+  second_engine.Render(second.data(), second.size());
+
+  const std::uint64_t first_hash = brilliant_sort::audio::HashPcmFNV1a(first);
+  const std::uint64_t second_hash = brilliant_sort::audio::HashPcmFNV1a(second);
+  Expect(first_hash == second_hash, "fixed 48kHz runs should hash identically");
+  Expect(first_hash != 0U, "reference hash should contain PCM data");
+  Expect(first_engine.diagnostics().peak_absolute_sample ==
+             second_engine.diagnostics().peak_absolute_sample,
+         "deterministic runs should retain the same peak diagnostic");
+  Expect(first_engine.diagnostics().fanfare_count == 1U,
+         "duplicate-safe victory should schedule one fanfare");
+}
+
+void TestBoundedSaturatedOutput() {
+  PixelAudioEngine engine(kReferenceSampleRate);
+  Expect(engine.Initialize(),
+         "engine should initialize for bounded output test");
+  for (std::uint32_t sequence = 1; sequence <= 32; ++sequence) {
+    Expect(engine.PushCue(AudioCue{sequence, CueKind::TargetPlace,
+                                   CueColor::Amber, 65'535, 0, 0}),
+           "bounded placement cue should enqueue");
+  }
+  std::array<std::int16_t, 2'048> pcm{};
+  engine.Render(pcm.data(), pcm.size());
+  for (const std::int16_t sample : pcm) {
+    Expect(sample >= std::numeric_limits<std::int16_t>::min() &&
+               sample <= std::numeric_limits<std::int16_t>::max(),
+           "saturated output should remain signed 16-bit PCM");
+  }
+  const auto diagnostics = engine.diagnostics();
+  Expect(diagnostics.active_music_voices <= 12U,
+         "music voices should remain reserved and bounded");
+  Expect(diagnostics.active_effect_voices <= 8U,
+         "effect voices should remain reserved and bounded");
+  Expect(diagnostics.peak_absolute_sample <= 32'768U,
+         "mix bus should saturate without wraparound");
+}
+
+void TestRenderHasNoAllocations() {
+  PixelAudioEngine engine(kReferenceSampleRate);
+  Expect(engine.Initialize(),
+         "engine should initialize before allocation audit");
+  EnqueueReferenceCues(engine);
+  std::array<std::int16_t, 512> pcm{};
+  const std::uint64_t before =
+      g_allocation_count.load(std::memory_order_relaxed);
+  g_count_allocations.store(true, std::memory_order_relaxed);
+  engine.Render(pcm.data(), pcm.size());
+  g_count_allocations.store(false, std::memory_order_relaxed);
+  const std::uint64_t after =
+      g_allocation_count.load(std::memory_order_relaxed);
+  Expect(after == before, "render callback should make zero heap allocations");
+}
+
+} // namespace
+
+int main() {
+  TestQueuePriorityAndOrder();
+  TestScoreConstraints();
+  TestDeterministicReferencePcm();
+  TestBoundedSaturatedOutput();
+  TestRenderHasNoAllocations();
+  std::cout << "pixel_audio tests passed\n";
+  return EXIT_SUCCESS;
+}
