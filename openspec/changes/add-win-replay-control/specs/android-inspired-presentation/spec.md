@@ -24,6 +24,8 @@ Movable Board cells, Shelf slots, bounded Board camera interaction, the implemen
 - **THEN** exactly one `restart-level` command restores the initial Tux Board, empty Shelf, empty selection, and `Playing` status
 - **AND THEN** the Board camera returns to its default transform
 - **AND THEN** onboarding dismissal and the audio mute preference remain unchanged
+- **AND THEN** the audio bridge emits one ordered restart cue that preserves mute while resetting score transport and the submitted-victory latch
+- **AND THEN** a second completed run plays the success music again
 - **AND THEN** production presentation exposes no persistent reset control during `Playing`.
 
 #### Scenario: Navigating the dense board with assistive technology

@@ -261,6 +261,8 @@ void TestTuxScoreSourceConsistency() {
 }
 
 void TestJadeCueAbi() {
+  static_assert(static_cast<std::uint8_t>(CueKind::Won) == 6U);
+  static_assert(static_cast<std::uint8_t>(CueKind::Restart) == 7U);
   static_assert(static_cast<std::uint8_t>(CueColor::Obsidian) == 0U);
   static_assert(static_cast<std::uint8_t>(CueColor::Pearl) == 1U);
   static_assert(static_cast<std::uint8_t>(CueColor::Amber) == 2U);
@@ -302,6 +304,8 @@ void TestQueuePriorityAndOrder() {
       "low-priority progress should drop when critical reserve begins");
   Expect(queue.Push(AudioCue{59, CueKind::Won, CueColor::None, 0, 0, 0}),
          "won cue should consume reserved capacity");
+  Expect(queue.Push(AudioCue{60, CueKind::Restart, CueColor::None, 0, 0, 0}),
+         "restart cue should consume reserved capacity");
 
   AudioCue popped{};
   for (std::size_t index = 0; index < kCueCapacity - kCueCriticalReserve;
@@ -312,6 +316,8 @@ void TestQueuePriorityAndOrder() {
   }
   Expect(queue.Pop(popped), "reserved won cue should remain available");
   Expect(popped.kind == CueKind::Won, "reserved cue should be won");
+  Expect(queue.Pop(popped), "reserved restart cue should remain available");
+  Expect(popped.kind == CueKind::Restart, "reserved cue should be restart");
   Expect(!queue.Pop(popped), "queue should be empty after ordered drain");
 }
 
@@ -380,6 +386,30 @@ void TestDeterministicReferencePcm() {
          "deterministic runs should retain the same peak diagnostic");
   Expect(first_engine.diagnostics().fanfare_count == 1U,
          "duplicate-safe victory should schedule one fanfare");
+}
+
+void TestVictoryFanfareCanRepeatAfterReplay() {
+  PixelAudioEngine engine(kReferenceSampleRate);
+  Expect(engine.Initialize(),
+         "engine should initialize for replay victory test");
+  std::array<std::int16_t, 256> pcm{};
+
+  Expect(engine.PushCue(AudioCue{1, CueKind::Won, CueColor::None, 0, 0, 0}),
+         "first victory should enter the audio queue");
+  engine.Render(pcm.data(), pcm.size());
+  Expect(engine.diagnostics().fanfare_count == 1U,
+         "first victory should start one fanfare");
+
+  engine.SetMuted(true);
+  Expect(engine.PushCue(AudioCue{2, CueKind::Restart, CueColor::None, 0, 0, 0}),
+         "replay should enqueue a transport restart");
+  Expect(engine.PushCue(AudioCue{3, CueKind::Won, CueColor::None, 0, 0, 0}),
+         "second-run victory should enter the audio queue after restart");
+  engine.Render(pcm.data(), pcm.size());
+  Expect(engine.diagnostics().fanfare_count == 2U,
+         "second-run victory should start another fanfare");
+  Expect(engine.muted(),
+         "replay transport restart should preserve the mute preference");
 }
 
 void TestBoundedSaturatedOutput() {
@@ -457,6 +487,7 @@ int main() {
   TestTuxScoreSourceConsistency();
   TestJadeCueAbi();
   TestDeterministicReferencePcm();
+  TestVictoryFanfareCanRepeatAfterReplay();
   TestBoundedSaturatedOutput();
   TestDeviceSampleRates();
   TestRenderHasNoAllocations();

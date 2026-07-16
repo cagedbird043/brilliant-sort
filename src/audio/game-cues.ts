@@ -38,6 +38,11 @@ export function deriveAudioCues(
     return { cues, nextSequence: sequence };
   }
 
+  if (command.type === "restart-level") {
+    append({ kind: "restart" });
+    return { cues, nextSequence: sequence };
+  }
+
   const selectionChanged = transition.events.some((event) => event.type === "selection-changed");
   if (selectionChanged && transition.state.selection !== null) {
     append({

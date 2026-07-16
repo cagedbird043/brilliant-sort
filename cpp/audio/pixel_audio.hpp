@@ -25,6 +25,7 @@ enum class CueKind : std::uint8_t {
   Rejected = 4,
   Progress = 5,
   Won = 6,
+  Restart = 7,
 };
 
 enum class CueColor : std::uint8_t {
@@ -265,6 +266,7 @@ private:
   };
 
   void ResetTransport() noexcept;
+  void RestartForReplay() noexcept;
   void DrainCues() noexcept;
   void ApplyCue(const AudioCue &cue) noexcept;
   void ProcessScoreTick() noexcept;

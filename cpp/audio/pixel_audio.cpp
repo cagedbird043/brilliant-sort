@@ -57,12 +57,12 @@ constexpr std::array<std::uint32_t, 6> kFanfareOffsets{0, 12, 24, 36, 48, 72};
 constexpr std::array<std::int32_t, 6> kFanfareNotes{72, 76, 79, 84, 79, 84};
 
 [[nodiscard]] constexpr bool IsCriticalCue(CueKind kind) noexcept {
-  return kind == CueKind::Won;
+  return kind == CueKind::Won || kind == CueKind::Restart;
 }
 
 [[nodiscard]] constexpr bool IsKnownCueKind(CueKind kind) noexcept {
   return static_cast<std::uint8_t>(kind) <=
-         static_cast<std::uint8_t>(CueKind::Won);
+         static_cast<std::uint8_t>(CueKind::Restart);
 }
 
 [[nodiscard]] constexpr bool IsColor(CueColor color) noexcept {
@@ -251,6 +251,14 @@ bool PixelAudioEngine::PushCue(const AudioCue &cue) noexcept {
     ++diagnostics_.dropped_cues;
     return false;
   }
+  if (cue.kind == CueKind::Restart) {
+    if (cue_queue_.Push(cue)) {
+      won_submitted_.store(false, std::memory_order_release);
+      return true;
+    }
+    ++diagnostics_.dropped_cues;
+    return false;
+  }
   if (cue.kind == CueKind::Won) {
     bool expected = false;
     if (!won_submitted_.compare_exchange_strong(expected, true,
@@ -349,6 +357,21 @@ void PixelAudioEngine::ResetTransport() noexcept {
   diagnostics_ = {};
 }
 
+void PixelAudioEngine::RestartForReplay() noexcept {
+  music_voices_.fill({});
+  effect_voices_.fill({});
+  won_submitted_.store(false, std::memory_order_release);
+  transport_sample_q32_ = 0;
+  next_tick_q32_ = 0;
+  transport_tick_ = 0;
+  voice_age_ = 0;
+  active_layer_ = 0;
+  pending_layer_ = 0;
+  victory_pending_ = false;
+  victory_started_ = false;
+  victory_start_tick_ = 0;
+}
+
 void PixelAudioEngine::DrainCues() noexcept {
   AudioCue cue{};
   for (std::size_t count = 0; count < kMaxCuesPerRender && cue_queue_.Pop(cue);
@@ -408,6 +431,9 @@ void PixelAudioEngine::ApplyCue(const AudioCue &cue) noexcept {
     }
     return;
   }
+  case CueKind::Restart:
+    RestartForReplay();
+    return;
   case CueKind::Won:
     if (!victory_started_) {
       victory_pending_ = true;

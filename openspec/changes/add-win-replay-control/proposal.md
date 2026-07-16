@@ -11,7 +11,7 @@ A persistent reset button during play would add clutter and create accidental-lo
 - Give the replay control an accessible name, keyboard activation, visible focus state, and stable browser-test identifier.
 - Dispatch the existing canonical `restart-level` command exactly once. Do not reload the page or mutate React state directly.
 - Restore the initial Board, empty Shelf, empty selection, `Playing` status, and default Board camera framing.
-- Preserve page-scoped audio state, the persisted mute preference, and the versioned onboarding key across replay.
+- Preserve the AudioContext and mute preference while resetting deterministic score transport and the submitted-victory latch, so a later `Won` plays the success music again.
 - Under reduced motion, expose replay immediately after `Won`; no artificial finale delay is introduced.
 
 ## Capabilities
@@ -20,7 +20,8 @@ A persistent reset button during play would add clutter and create accidental-lo
 
 - `android-inspired-presentation`: Adds the accessible contextual replay action and defines its canonical restart, camera, persistence, and reduced-motion behavior.
 - `pixel-crystal-renderer`: Allows one post-finale replay control while retaining the wordless cavern and prohibiting persistent reset/dashboard/progression UI.
+- `cpp-pixel-audio`: Adds the ordered replay transport-reset cue and makes victory fanfare deduplication per run rather than per engine lifetime.
 
 ## Impact
 
-Affected areas are the active presentation specifications, App command wiring, Board camera reset identity, one project-owned SVG icon, control styling, browser E2E, README/submission evidence, and visual review. Core command types, TypeScript/C++ reducers, JSON v1, C ABI, WASM parity, `LevelSpec`, audio ABI, onboarding storage schema, and gameplay rules remain unchanged.
+Affected areas are the active presentation specifications, App command wiring, Board camera reset identity, one project-owned SVG icon, the TypeScript audio-cue bridge, the C++/WASM audio engine, control styling, browser/native regressions, README/submission evidence, and visual review. Core game commands/events, JSON v1, game-core C ABI, `LevelSpec`, onboarding storage schema, gameplay rules, and the 12-byte audio packet shape remain unchanged; the audio cue enum gains one append-only `Restart = 7` value.

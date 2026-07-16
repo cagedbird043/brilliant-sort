@@ -512,7 +512,7 @@ test("reduced motion commits the authoritative state immediately without flight 
   await expect(page.getByTestId("global-wand")).toBeVisible();
 });
 
-test("audio starts on a puzzle gesture, reports suspension, resumes, and persists mute", async ({ page }) => {
+test("audio resumes, persists mute, and resets transport across replay", async ({ page }) => {
   await page.addInitScript(() => {
     const NativeAudioContext = window.AudioContext;
     const TestAudioContext = new Proxy(NativeAudioContext, {
@@ -522,7 +522,39 @@ test("audio starts on a puzzle gesture, reports suspension, resumes, and persist
         return context;
       },
     });
-    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+    const cueKinds: number[] = [];
+    (
+      window as typeof window & {
+        __testAudioCueKinds?: number[];
+      }
+    ).__testAudioCueKinds = cueKinds;
+    const NativeAudioWorkletNode = window.AudioWorkletNode;
+    const TestAudioWorkletNode = new Proxy(NativeAudioWorkletNode, {
+      construct(target, argumentsList, newTarget) {
+        const node = Reflect.construct(target, argumentsList, newTarget) as AudioWorkletNode;
+        const nativePostMessage = node.port.postMessage.bind(node.port);
+        Object.defineProperty(node.port, "postMessage", {
+          configurable: true,
+          value(
+            message: unknown,
+            transferOrOptions?: StructuredSerializeOptions | Transferable[],
+          ) {
+            const cueMessage = message as { type?: string; bytes?: ArrayBuffer };
+            if (cueMessage.type === "cue" && cueMessage.bytes instanceof ArrayBuffer) {
+              cueKinds.push(new Uint8Array(cueMessage.bytes)[4] ?? -1);
+            }
+            const argumentsList =
+              transferOrOptions === undefined ? [message] : [message, transferOrOptions];
+            Reflect.apply(nativePostMessage, node.port, argumentsList);
+          },
+        });
+        return node;
+      },
+    });
+    Object.defineProperties(window, {
+      AudioContext: { configurable: true, value: TestAudioContext },
+      AudioWorkletNode: { configurable: true, value: TestAudioWorkletNode },
+    });
   });
   await page.goto("/");
   const audioControl = page.locator(".audio-crystal-control");
@@ -544,6 +576,19 @@ test("audio starts on a puzzle gesture, reports suspension, resumes, and persist
   await expect(audioControl).toHaveAttribute("aria-pressed", "true");
   await audioControl.click();
   await expect(audioControl).toHaveAttribute("aria-pressed", "false");
+
+  await page.getByTestId("global-wand").click();
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toBeVisible();
+  await replay.click();
+  await page.getByTestId("global-wand").click();
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as typeof window & { __testAudioCueKinds: number[] }).__testAudioCueKinds,
+    ),
+  ).toEqual([6, 7, 6]);
 });
 
 test("audio initialization failure degrades silently without blocking gameplay", async ({ page }) => {

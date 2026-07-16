@@ -12,6 +12,7 @@ export const audioCueKinds = {
   rejected: 4,
   progress: 5,
   won: 6,
+  restart: 7,
 } as const;
 
 export const audioCueColors = {
@@ -66,6 +67,10 @@ export interface ProgressAudioCue extends AudioCueBase {
   readonly total: number;
 }
 
+export interface RestartAudioCue extends AudioCueBase {
+  readonly kind: "restart";
+}
+
 export interface WonAudioCue extends AudioCueBase {
   readonly kind: "won";
 }
@@ -77,6 +82,7 @@ export type AudioCue =
   | ShelfCompactAudioCue
   | RejectedAudioCue
   | ProgressAudioCue
+  | RestartAudioCue
   | WonAudioCue;
 
 function uint16(value: number, field: string): number {
@@ -125,6 +131,7 @@ export function writeAudioCue(
       secondary = uint16(cue.total, "total");
       break;
     case "won":
+    case "restart":
       break;
   }
 

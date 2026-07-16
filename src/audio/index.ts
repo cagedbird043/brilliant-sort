@@ -8,6 +8,7 @@ export {
   type AudioCueColor,
   type ProgressAudioCue,
   type RejectedAudioCue,
+  type RestartAudioCue,
   type SelectionAudioCue,
   type ShelfCompactAudioCue,
   type ShelfStoreAudioCue,

@@ -7,6 +7,7 @@ import {
   type GameCommand,
   type GameState,
 } from "../../src/core";
+import { audioCueKinds, encodeAudioCue } from "../../src/audio/contracts";
 import { deriveAudioCues } from "../../src/audio/game-cues";
 import { tuxLevel, tuxWinningTrace } from "../../src/fixtures";
 
@@ -63,6 +64,26 @@ test("the global wand emits one victory cue without per-gem audio flooding", () 
   expect(deriveAudioCues(transition, command, 41)).toEqual({
     cues: [{ kind: "won", sequence: 41 }],
     nextSequence: 42,
+  });
+});
+
+test("replay resets the audio transport before a second victory cue", () => {
+  const winCommand = { type: "apply-global-wand" } as const;
+  const firstWin = dispatch(initial, winCommand);
+  const restartCommand = { type: "restart-level" } as const;
+  const restarted = dispatch(firstWin.state, restartCommand);
+
+  expect(deriveAudioCues(restarted, restartCommand, 42)).toEqual({
+    cues: [{ kind: "restart", sequence: 42 }],
+    nextSequence: 43,
+  });
+  expect(audioCueKinds.restart).toBe(7);
+  expect(encodeAudioCue({ kind: "restart", sequence: 42 })[4]).toBe(7);
+
+  const secondWin = dispatch(restarted.state, winCommand);
+  expect(deriveAudioCues(secondWin, winCommand, 43)).toEqual({
+    cues: [{ kind: "won", sequence: 43 }],
+    nextSequence: 44,
   });
 });
 
