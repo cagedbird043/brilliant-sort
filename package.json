@@ -17,6 +17,8 @@
     "pixel-bloom": "bun run src/pixel-bloom/cli.ts",
     "level:compile:tux": "bun tools/compile-level-map.ts src/fixtures/source/tux-01.map.json src/fixtures/tux-01.json",
     "level:check:tux": "bun tools/compile-level-map.ts src/fixtures/source/tux-01.map.json src/fixtures/tux-01.json --check",
+    "spec:validate": "openspec validate --all --strict",
+    "hooks:install": "lefthook install",
     "test:e2e": "bun run build && playwright test",
     "build:cpp": "cmake -S . -B .cache/cmake -DCMAKE_BUILD_TYPE=Release && cmake --build .cache/cmake --parallel",
     "test:cpp": "bun run build:cpp && ctest --test-dir .cache/cmake --output-on-failure",
@@ -31,12 +33,14 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@fission-ai/openspec": "1.6.0",
     "@playwright/test": "^1.61.1",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "bun-types": "^1.3.14",
+    "lefthook": "2.1.10",
     "typescript": "^7.0.2",
     "vite": "^8.1.4"
   }
