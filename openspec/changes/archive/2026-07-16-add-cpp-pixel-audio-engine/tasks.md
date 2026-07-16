@@ -29,7 +29,7 @@
 ## 5. Working proof and cleanup
 
 - [x] 5.1 Smoke-play the real browser from silent load through first-interaction resume, selections, Shelf movement, placement, rejection, progress layers, mute/unmute, background resume, and victory before adding cleanup coverage.
-- [ ] 5.2 Listen-review the offline/native and browser mix on headphones and speakers for melody quality, 16-bit character, cue readability, fatigue, loop seam, and Tux fanfare timing.
+- [x] 5.2 Listen-review the offline/native and browser mix on headphones and speakers for melody quality, 16-bit character, cue readability, fatigue, loop seam, and Tux fanfare timing.
 - [x] 5.3 Add fixed-PCM hash, score validation, oscillator/envelope, queue priority, clipping, zero-allocation, cue mapping, mute persistence, worklet lifecycle, and silent-fallback tests after the smoke path works.
 - [x] 5.4 Verify supported browser engines, mobile first-gesture behavior, production MIME/hosting, native build, AudioWorklet build, Bun checks, and strict OpenSpec validation.
-- [ ] 5.5 Update maintained audio architecture/score documentation and archive this change only after human music, effects, and in-world mute approval.
+- [x] 5.5 Update maintained audio architecture/score documentation and archive this change only after human music, effects, and in-world mute approval.

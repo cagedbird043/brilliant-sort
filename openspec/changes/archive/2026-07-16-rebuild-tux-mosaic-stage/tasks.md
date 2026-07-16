@@ -34,4 +34,4 @@
 - [x] 5.2 Verify flight frames show exactly one moved gem, source/end alignment within one CSS pixel, no page-origin excursion, no fading trail, and no early input unlock.
 - [x] 5.3 Add focused compiler, palette, configured-Shelf, Tux replay, motion, responsive-layout, accessibility, reduced-motion, native, WASM, and differential regression tests after the smoke path works.
 - [x] 5.4 Run `pixel-bloom` review, native/WASM parity, Bun checks, browser E2E at desktop/square/390px portrait, production build, and strict OpenSpec validation.
-- [ ] 5.5 Update maintained architecture/fixture documentation and archive this change only after human Tux visual and gameplay approval.
+- [x] 5.5 Update maintained architecture/fixture documentation and archive this change only after human Tux visual and gameplay approval.
