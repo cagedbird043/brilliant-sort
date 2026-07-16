@@ -24,4 +24,4 @@
 - [x] 4.2 Update Playwright for real assets, WASM boot, gameplay replay, completion, reduced motion, and desktop/mobile visual smoke checks.
 - [x] 4.3 Run pixel-bloom, C++ native, WASM, differential, Bun, Vite, Playwright, GitHub Pages, and strict OpenSpec validation evidence.
 - [x] 4.4 Update README with C++/WASM architecture.
-- [ ] 4.5 Archive the unified change after human visual/product approval.
+- [x] 4.5 Archive the unified change after human visual/product approval.

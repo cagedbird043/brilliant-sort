@@ -33,19 +33,18 @@ The Harness SHALL expose `state.dump()` as canonical JSON. A dump SHALL include 
 
 ### Requirement: Command application returns a complete transition trace
 
-The Harness SHALL expose `command.apply(command)`. It SHALL call the production reducer and return command input, canonical before state, canonical after state, emitted events, optional rejection, and a field-level diff.
+The Harness SHALL expose `command.apply(command)` through a selected `GameCorePort`. A transition SHALL include command input, canonical before/after state, emitted events, nullable rejection, and field-level diff. Differential mode SHALL run the same command through TypeScript reference, native C++, and WebAssembly C++ backends before accepting a transition.
 
 #### Scenario: Applying a rejected target placement
 
-- **GIVEN** a lifted white selection and an empty blue target cell
-- **WHEN** the Harness applies `PlaceSelectionAtTarget` to that blue cell
-- **THEN** the transition includes rejection code `TargetColorMismatch`
-- **AND THEN** before and after state dumps are equal
-- **AND THEN** the diff reports no changed state fields.
+- **GIVEN** a lifted selection and an empty wrong-color target in a fixed scenario
+- **WHEN** differential Harness mode applies the placement command
+- **THEN** TypeScript reference, native C++, and WebAssembly all return the same rejection code/detail and byte-equivalent before/after dumps
+- **AND THEN** the report identifies every backend and the command index if any result differs.
 
 ### Requirement: Replay is deterministic and diagnostic
 
-The Harness SHALL expose `trace.replay(commandLog)` and apply every command through the production reducer in order. On failure it SHALL identify the command index, command payload, before/after dumps, events, rejection, and field-level diff.
+The Harness SHALL expose replay for a selected production core port and a differential replay mode. Differential replay SHALL compare byte-equivalent canonical dumps, ordered events, and rejection code/details at every command index across TypeScript reference, native C++, and WebAssembly C++.
 
 #### Scenario: Replaying a winning log
 
@@ -61,6 +60,13 @@ The Harness SHALL expose `trace.replay(commandLog)` and apply every command thro
 - **WHEN** replay validation runs
 - **THEN** the Harness reports command index `2`
 - **AND THEN** it includes expected and actual dumps plus a field-level diff.
+
+#### Scenario: Replay identifies the first cross-language divergence
+
+- **GIVEN** a fixed scenario and command log where any backend diverges at one transition
+- **WHEN** differential replay runs
+- **THEN** it reports fixture metadata, command index, command JSON, backend, before/after dumps, first JSON-path mismatch, events, and rejection difference
+- **AND THEN** verification fails before browser production cutover.
 
 ### Requirement: Snapshot diffs identify semantic field changes
 
