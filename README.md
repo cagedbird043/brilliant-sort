@@ -1,8 +1,8 @@
-<a id="english"></a>
-
 # Brilliant Sort
 
-**[English](#english)** · [简体中文](#zh-cn)
+**[English](#english)** · [简体中文](#简体中文)
+
+## English
 
 A deterministic, playable web slice of a Brilliant Sort-style gem puzzle. The browser drives a headless C++20 `BrilliantSortCore` compiled to WebAssembly; the original TypeScript reducer remains only as a differential-test oracle.
 
@@ -135,11 +135,9 @@ The deployed artifact is `dist/`; production does not require a Bun daemon or ba
 
 ---
 
-<a id="zh-cn"></a>
+## 简体中文
 
-# Brilliant Sort
-
-[English](#english) · **[简体中文](#zh-cn)**
+[English](#english) · **[简体中文](#简体中文)**
 
 一个确定性的 Brilliant Sort 宝石拼图核心、Harness 与可在线游玩的 Web Demo。浏览器通过 WebAssembly 驱动无头 C++20 `BrilliantSortCore`；原始 TypeScript reducer 仅保留为独立差分 Oracle。
 
