@@ -1,1 +1,26 @@
 schema: spec-driven
+
+context: |
+  Brilliant Sort is a deterministic fixed-level pixel puzzle and assessment artifact.
+  The production browser uses React plus a headless C++20 game core compiled to WASM;
+  the TypeScript reducer is the differential oracle, and native C++/WASM/TypeScript
+  canonical replay must remain byte-identical.
+
+  Core invariants:
+  - Same-color movable gems use eight-neighbor connectivity.
+  - Locked matching gems are immutable.
+  - Partial extraction must leave the remaining component connected.
+  - Shelf is a compact twelve-column row-major sequence.
+  - Victory requires every active cell matched, Shelf empty, selection empty, and no loss state.
+  - Fixed LevelSpec fixtures and command logs replay deterministically.
+
+  Presentation is a wordless full-screen pixel cavern. The global wand is a deterministic
+  demo assist, and contextual replay dispatches the existing restart command after the
+  victory finale. A separate deterministic C++20 PixelAudioEngine runs as AudioWorklet
+  WASM. Commercial progression, payment, random generation, random mode, and unimplemented
+  power-ups remain out of scope.
+
+  Use Bun for package/scripts. Local gates are Lefthook pre-commit and pre-push;
+  authoritative commands are `bun run check`, `bunx --bun playwright test`,
+  `bun run level:check:tux`, and `bun run spec:validate`.
+  Keep OpenSpec changes active until their required human visual/product approval.
