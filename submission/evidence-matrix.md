@@ -29,7 +29,7 @@
 
 ## 固定提交与复现入口
 
-- **答卷对应提交**：[`53caf03fda09`](https://github.com/cagedbird043/brilliant-sort/commit/53caf03fda0958c4b1bff3c91b44ed5766413ac2)
+- **答卷对应实现提交**：[`c9dc26fecfcb`](https://github.com/cagedbird043/brilliant-sort/commit/c9dc26fecfcb43d4e79eb693510b3e445b76787e)
 - **线上演示**：[Hong Kong](https://brilliant-sort.cagedbird.cn/) · [GitHub Pages](https://cagedbird043.github.io/brilliant-sort/)
 - **核心复现**：`bun run check`
 - **浏览器回归**：`bun run test:e2e`
