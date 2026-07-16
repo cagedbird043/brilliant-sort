@@ -70,7 +70,7 @@ Presentation motion SHALL use short transitions or keyframes limited to transfor
 
 ### Requirement: Interactive puzzle elements SHALL remain accessible and testable
 
-Movable Board cells, Shelf slots, bounded Board camera interaction, the implemented in-world audio mute control, and the implemented global-wand assist SHALL retain semantic roles, accessible names/states, keyboard focus visibility, and stable browser-test identifiers. Locked decorative cells SHALL not create redundant keyboard stops. The production stage SHALL not require reset, buffer, cancellation, completion, or level-navigation HUD controls, while the core restart command remains available to deterministic tests and Harness replay. The transient onboarding sentence SHALL be readable without entering the focus order.
+Movable Board cells, Shelf slots, bounded Board camera interaction, the implemented in-world audio mute control, the implemented global-wand assist, and the contextual settled-Won replay action SHALL retain semantic roles, accessible names/states, keyboard focus visibility, and stable browser-test identifiers. Locked decorative cells SHALL not create redundant keyboard stops. The production stage SHALL contain no persistent reset, buffer, cancellation, completion, or level-navigation HUD controls during `Playing`; the existing canonical restart command MAY be exposed only as the contextual replay action after victory motion and finale settlement. The transient onboarding sentence SHALL be readable without entering the focus order.
 
 #### Scenario: Activating the global wand by keyboard
 
@@ -87,15 +87,28 @@ Movable Board cells, Shelf slots, bounded Board camera interaction, the implemen
 
 #### Scenario: Restarting after visual refinement
 
-- **WHEN** a focused test or Harness explicitly dispatches the core restart command
-- **THEN** the initial Tux Board and empty Shelf are restored canonically
-- **AND THEN** production presentation is not required to expose a persistent reset control.
+- **GIVEN** status is `Won` and authoritative motion plus the bounded finale have settled
+- **WHEN** keyboard focus activates the contextual replay button, or a focused test/Harness explicitly dispatches the core restart command
+- **THEN** exactly one `restart-level` command restores the initial Tux Board, empty Shelf, empty selection, and `Playing` status
+- **AND THEN** the Board camera returns to its default transform
+- **AND THEN** onboarding dismissal and the audio mute preference remain unchanged
+- **AND THEN** the audio bridge emits one ordered restart cue that preserves mute while resetting score transport and the submitted-victory latch
+- **AND THEN** a second completed run plays the success music again
+- **AND THEN** production presentation exposes no persistent reset control during `Playing`.
 
 #### Scenario: Navigating the dense board with assistive technology
 
 - **WHEN** keyboard or assistive-technology navigation enters the Tux stage
-- **THEN** only actionable movable cells, Shelf slots, audio mute, wand assist, and enabled camera semantics participate in the interactive sequence
-- **AND THEN** labels identify Gem/target state and the wand's one-click completion action.
+- **THEN** actionable movable cells, Shelf slots, audio mute, wand assist, and enabled camera semantics participate while `Playing`
+- **AND THEN** only audio mute and contextual replay remain actionable after settled `Won`
+- **AND THEN** labels identify Gem/target state, the wand's one-click completion action, and replay's restart action.
+
+#### Scenario: Replaying with reduced motion
+
+- **GIVEN** `prefers-reduced-motion: reduce` and status transitions to `Won`
+- **WHEN** no spatial finale is mounted
+- **THEN** the replay action is available immediately
+- **AND THEN** activating it restores the initial playable state without a replay transition animation.
 
 ### Requirement: The first visit SHALL show one transient onboarding sentence
 

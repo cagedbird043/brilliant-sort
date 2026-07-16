@@ -14,4 +14,4 @@
 - [x] 2.1 Add browser/native regressions for manual and wand victory timing, keyboard replay, canonical reset, camera reset, persistence, mobile layout, reduced motion, and consecutive success music.
 - [x] 2.2 Smoke the complete win → finale → replay → playable-again path in real desktop and mobile Chromium.
 - [x] 2.3 Run `bun run check`, full desktop/mobile Playwright, production build/startup, and strict OpenSpec validation.
-- [ ] 2.4 Update maintained README/submission evidence, regenerate the answer artifacts, and archive only after human visual/product approval of replay.
+- [x] 2.4 Update maintained README/submission evidence, regenerate the answer artifacts, and archive only after human visual/product approval of replay.

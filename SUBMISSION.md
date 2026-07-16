@@ -192,14 +192,14 @@ bun run level:check:tux
 
 对应版本的本地验证包括 35 个 Bun 测试、4 个 native CTest（含固定 48 kHz PCM 哈希和两局 fanfare 诊断）、22 次 desktop/mobile Chromium E2E，以及 48 命令 Tux 与初始/中途魔法棒场景的三后端逐 transition parity。浏览器回归还覆盖 `Won → Restart → Won` 音频 Cue、重玩时机、键盘操作、canonical 重开、相机复位、偏好保留、移动布局和 reduced motion。CI 在 Ubuntu 上重新执行类型检查、native C++、WASM 构建、Bun 测试、CTest、Chromium E2E、Hong Kong 静态产物和 GitHub Pages 部署。
 
-详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是需求来源和验收记录，不是事后补写的故事。已验收功能均已归档；重玩功能的活动规格保留到人工视觉验收：
+详细的“题目要求 → 设计 → 代码 → 测试/线上证据”索引见：[`submission/evidence-matrix.md`](submission/evidence-matrix.md)。OpenSpec 是需求来源和验收记录，不是事后补写的故事；以下功能均已完成自动验证与人工产品验收并归档：
 
 - [`2026-07-15-add-brilliant-sort-core`](openspec/changes/archive/2026-07-15-add-brilliant-sort-core/)
 - [`2026-07-16-add-pixel-crystal-renderer`](openspec/changes/archive/2026-07-16-add-pixel-crystal-renderer/)
 - [`2026-07-16-rebuild-tux-mosaic-stage`](openspec/changes/archive/2026-07-16-rebuild-tux-mosaic-stage/)
 - [`2026-07-16-add-cpp-pixel-audio-engine`](openspec/changes/archive/2026-07-16-add-cpp-pixel-audio-engine/)
 - [`2026-07-16-add-demo-assist-and-victory-finale`](openspec/changes/archive/2026-07-16-add-demo-assist-and-victory-finale/)
-- [`add-win-replay-control`](openspec/changes/add-win-replay-control/)（实现与自动验证完成，等待人工视觉/产品验收）
+- [`2026-07-16-add-win-replay-control`](openspec/changes/archive/2026-07-16-add-win-replay-control/)
 
 ## 结论
 
