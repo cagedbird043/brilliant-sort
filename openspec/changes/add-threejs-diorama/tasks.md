@@ -1,6 +1,6 @@
 ## 1. Multi-page foundation
 
-- [ ] 1.1 Add exact `three@0.185.1` and `@types/three@0.185.1` dependencies with Bun and keep the lockfile reproducible.
+- [x] 1.1 Add exact `three@0.185.1` and `@types/three@0.185.1` dependencies with Bun and keep the lockfile reproducible.
 - [ ] 1.2 Add `3d/index.html` and `src/main-3d.tsx` with route-specific document metadata and a boot-safe React root.
 - [ ] 1.3 Configure Vite multi-page inputs so root-base and `/brilliant-sort/` builds emit both `index.html` and `3d/index.html` with shared hashed assets.
 - [ ] 1.4 Prove in a browser/network smoke that the 2D root remains unchanged and does not request or initialize the Three.js entry chunk.
