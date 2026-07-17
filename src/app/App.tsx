@@ -48,12 +48,13 @@ type FeedbackTone = "neutral" | "selected" | "placed" | "compacted" | "rejected"
 
 interface LevelPresentation {
   readonly level: LevelSpec;
+  readonly cameraLabel: string;
   readonly boardLabel: string;
 }
 
 const LEVEL_SEQUENCE = [
-  { level: tuxLevel, boardLabel: "Tux 宝石棋盘" },
-  { level: chromeLevel, boardLabel: "Chrome 宝石棋盘" },
+  { level: tuxLevel, boardLabel: "Tux 宝石棋盘", cameraLabel: "Tux 棋盘视图" },
+  { level: chromeLevel, boardLabel: "Chrome 宝石棋盘", cameraLabel: "Chrome 棋盘视图" },
 ] as const satisfies readonly LevelPresentation[];
 
 interface MotionRect {
@@ -1018,6 +1019,7 @@ export function App() {
         <section className="calibration-bay" aria-label={activeLevel.boardLabel}>
           <BoardCamera
             enabled={!stageLayout.directTouch}
+            label={activeLevel.cameraLabel}
             maxZoom={stageLayout.maxZoom}
             resetKey={`${activeLevel.level.id}:${runToken}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
             width={boardWidth}

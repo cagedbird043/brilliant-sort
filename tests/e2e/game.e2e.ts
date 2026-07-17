@@ -649,6 +649,7 @@ test("portrait camera resets on Tux→Chrome advance and Chrome replay", async (
   await page.getByTestId("global-wand").click();
   await advanceFromSettledTux(page);
   await expect(page.locator(".calibration-bay")).toHaveAttribute("aria-label", "Chrome 宝石棋盘");
+  await expect(camera).toHaveAttribute("aria-label", "Chrome 棋盘视图，当前 1 倍缩放");
   await expect(camera).not.toHaveClass(/is-zoomed/);
   await expect(camera.locator(".board-camera-content")).toHaveCSS(
     "transform",

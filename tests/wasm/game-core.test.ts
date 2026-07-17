@@ -55,6 +55,7 @@ describe("WasmGameCore", () => {
       core.destroy();
     }
   });
+
   test("matches every transition of the Chrome winning trace", async () => {
     const core = await GameCoreFactory.load(chromeLevel);
     try {
@@ -80,5 +81,4 @@ describe("WasmGameCore", () => {
       core.destroy();
     }
   });
-
 });

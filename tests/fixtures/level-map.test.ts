@@ -72,11 +72,11 @@ test("the compact Chrome map compiles byte-for-byte to the committed LevelSpec",
   });
 });
 
-test("the Chrome map compiler rejects a fifth color, mask drift, and per-color imbalance", () => {
-  const fifthColor = structuredClone(chromeMapJson) as unknown as {
+test("the Chrome map compiler rejects an unsupported color, mask drift, and imbalance", () => {
+  const unsupportedColor = structuredClone(chromeMapJson) as unknown as {
     palette: Record<string, unknown>;
   };
-  fifthColor.palette.V = "violet";
+  unsupportedColor.palette.V = "violet";
 
   const maskDrift = structuredClone(chromeMapJson);
   maskDrift.gems[1] = `${maskDrift.gems[1]!.slice(0, 13)}.${maskDrift.gems[1]!.slice(14)}`;
@@ -84,7 +84,7 @@ test("the Chrome map compiler rejects a fifth color, mask drift, and per-color i
   const imbalanced = structuredClone(chromeMapJson);
   imbalanced.gems[1] = `${imbalanced.gems[1]!.slice(0, 13)}C${imbalanced.gems[1]!.slice(14)}`;
 
-  expect(() => compileLevelMap(fifthColor)).toThrow("palette symbol V uses unsupported color");
+  expect(() => compileLevelMap(unsupportedColor)).toThrow("palette symbol V uses unsupported color");
   expect(() => compileLevelMap(maskDrift)).toThrow("target/gem masks differ at 1:13");
   expect(() => compileLevelMap(imbalanced)).toThrow("color conservation failed");
 });

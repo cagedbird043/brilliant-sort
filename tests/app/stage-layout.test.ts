@@ -4,7 +4,6 @@ import { calculateStageLayout } from "../../src/app/stage-layout";
 const tuxBoard = { rows: 32, cols: 24, shelfCapacity: 16 } as const;
 const chromeBoard = { rows: 32, cols: 32, shelfCapacity: 16 } as const;
 
-
 test("the stage solver selects stable integer layouts for desktop, square, and portrait", () => {
   expect(calculateStageLayout({ width: 1280, height: 720, ...tuxBoard })).toEqual({
     orientation: "side",

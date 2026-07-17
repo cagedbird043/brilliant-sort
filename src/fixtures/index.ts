@@ -8,7 +8,6 @@ import type { GameCommand, LevelSpec } from "../core/types";
 export const chromeLevel = chromeLevelJson as LevelSpec;
 export const chromeWinningTrace = chromeWinningTraceJson as unknown as readonly GameCommand[];
 
-
 export const prismLevel = prismLevelJson as LevelSpec;
 export const prismWinningTrace = prismWinningTraceJson as unknown as readonly GameCommand[];
 

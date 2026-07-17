@@ -346,10 +346,10 @@ button:focus-visible {
   mix-blend-mode: screen;
   pointer-events: none;
   transform: translate3d(0, 0, 0) skewX(-12deg);
-  animation: tux-victory-shimmer 900ms steps(16, end) 120ms both;
+  animation: mosaic-victory-shimmer 900ms steps(16, end) 120ms both;
 }
 
-@keyframes tux-victory-shimmer {
+@keyframes mosaic-victory-shimmer {
   0% {
     opacity: 0;
     transform: translate3d(0, 0, 0) skewX(-12deg);

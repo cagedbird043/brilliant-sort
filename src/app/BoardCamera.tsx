@@ -7,6 +7,7 @@ interface Point {
 
 interface BoardCameraProps {
   readonly enabled: boolean;
+  readonly label: string;
   readonly maxZoom: number;
   readonly resetKey: string;
   readonly width: number;
@@ -23,7 +24,15 @@ function clampPan(value: Point, zoom: number, width: number, height: number): Po
   };
 }
 
-export function BoardCamera({ enabled, maxZoom, resetKey, width, height, children }: BoardCameraProps) {
+export function BoardCamera({
+  enabled,
+  label,
+  maxZoom,
+  resetKey,
+  width,
+  height,
+  children,
+}: BoardCameraProps) {
   const pointersRef = useRef(new Map<number, Point>());
   const dragRef = useRef<{ readonly pointer: number; readonly point: Point; readonly pan: Point } | null>(null);
   const pinchRef = useRef<{ readonly distance: number; readonly zoom: number } | null>(null);
@@ -62,7 +71,7 @@ export function BoardCamera({ enabled, maxZoom, resetKey, width, height, childre
       className={`board-camera${enabled ? " is-zoomable" : ""}${zoom > 1 ? " is-zoomed" : ""}`}
       style={{ width: `${width}px`, height: `${height}px` }}
       tabIndex={enabled ? 0 : -1}
-      aria-label={enabled ? `Tux 棋盘视图，当前 ${zoom} 倍缩放` : undefined}
+      aria-label={enabled ? `${label}，当前 ${zoom} 倍缩放` : undefined}
       onClickCapture={(event) => {
         if (draggedRef.current) {
           event.preventDefault();
