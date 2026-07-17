@@ -30,3 +30,9 @@
 - [x] 5.1 Reuse the deterministic level-switch reset path for Chrome→Tux and restore canonical Tux state without page navigation.
 - [x] 5.2 Add a mirrored upper-left previous-level control on Chrome without colliding with the existing audio control.
 - [x] 5.3 Verify same-document backward navigation, canonical reset, audio sequencing, and desktop/mobile control spacing.
+
+## 6. Independent Victory Controls
+
+- [x] 6.1 Restore the wand→replay slot on Tux and render next-level as a separate post-finale control.
+- [x] 6.2 Keep replay/next absent throughout the visible arc-light and pixel-firework finale and prevent corner-control overlap.
+- [x] 6.3 Run strict two-level visual-state regressions and the complete project verification gates.

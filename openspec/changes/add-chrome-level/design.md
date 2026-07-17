@@ -32,7 +32,7 @@ Alternative considered: consume the approved PNG directly. Rejected because the 
 
 `App.tsx` will own a constant two-entry sequence with each `LevelSpec` and accessible board label. A local `levelIndex` selects the active entry, and one presentation-owned switch routine recreates the core for either legal index while clearing finale, rejection, feedback-motion, and input-lock state. The level ID resets the camera.
 
-On Tux victory, the upper-right post-finale action becomes `next-level` and loads Chrome without navigation or page reload. Whenever Chrome is active and no authoritative motion is running, a mirrored upper-left `previous-level` action returns to a fresh canonical Tux state; Chrome victory still exposes `replay-level`. Refreshing still starts Tux, so no persistence or migration is required.
+On every settled victory, the upper-right assist slot changes from `global-wand` to `replay-level` exactly as it did before multi-level progression. Tux additionally exposes an independent `next-level` control beside that slot only after authoritative motion and the finale settle. Whenever Chrome is active and no authoritative motion is running, a mirrored upper-left `previous-level` action returns to a fresh canonical Tux state. Refreshing still starts Tux, so no persistence or migration is required.
 
 Alternative considered: add progression to the C++ core. Rejected because ordering levels is presentation policy, not a gameplay rule, and would needlessly expand the ABI.
 
@@ -42,7 +42,7 @@ Changing levels in either direction will enqueue the existing strictly sequenced
 
 ### Verify Chrome as data, gameplay, and presentation
 
-The fixture drift command and hooks will cover both authored production maps. A committed Chrome trace will perform accepted board/Shelf interaction before the global wand finishes the level, and will replay through the reducer oracle, native C++, and WASM backends. Playwright will prove same-document Tux→Chrome advance, persistent Chrome→Tux return, canonical resets in both directions, Chrome victory/replay, accessibility, and bounded desktop/mobile compositions.
+The fixture drift command and hooks will cover both authored production maps. A committed Chrome trace will perform accepted board/Shelf interaction before the global wand finishes the level, and will replay through the reducer oracle, native C++, and WASM backends. Playwright will prove the arc and fireworks become visibly rendered before navigation/replay controls appear, Tux replay and independent next coexist after settlement, same-document Tux↔Chrome switching resets canonically, and desktop/mobile controls remain bounded.
 
 ## Risks / Trade-offs
 

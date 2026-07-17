@@ -43,8 +43,46 @@ async function waitForSettledVictory(page: Page, actionTestId: VictoryActionTest
 
 async function advanceFromSettledTux(page: Page): Promise<void> {
   const nextLevel = await waitForSettledVictory(page, "next-level");
+  await expect(page.getByTestId("replay-level")).toBeVisible();
   await nextLevel.click();
   await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+}
+
+async function assertVisibleVictoryFinale(page: Page): Promise<void> {
+  await expect(page.getByTestId("victory-finale")).toHaveCount(1);
+  await expect(page.locator(".victory-arc path")).toHaveCount(1);
+  await expect(page.locator(".pixel-firework")).toHaveCount(3);
+  await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
+  await expect(page.getByTestId("replay-level")).toHaveCount(0);
+  await expect(page.getByTestId("next-level")).toHaveCount(0);
+
+  const visibleFinale = await page.getByTestId("victory-finale").evaluate((finale) => {
+    const arc = finale.querySelector<SVGPathElement>(".victory-arc path");
+    const arcAnimation = arc?.getAnimations()[0];
+    if (!arc || !arcAnimation || !(arcAnimation.effect instanceof KeyframeEffect)) {
+      return null;
+    }
+    arcAnimation.pause();
+    arcAnimation.currentTime = 325;
+
+    const sparks = [...finale.querySelectorAll<HTMLElement>(".pixel-firework-spark")];
+    for (const spark of sparks) {
+      const animation = spark.getAnimations()[0];
+      if (animation?.effect instanceof KeyframeEffect) {
+        animation.pause();
+        animation.currentTime = Number(animation.effect.getTiming().delay) + 260;
+      }
+    }
+    return {
+      arcOpacity: Number(getComputedStyle(arc).opacity),
+      arcDashOffset: Number.parseFloat(getComputedStyle(arc).strokeDashoffset),
+      visibleSparks: sparks.filter((spark) => Number(getComputedStyle(spark).opacity) > 0).length,
+    };
+  });
+  expect(visibleFinale).not.toBeNull();
+  expect(visibleFinale!.arcOpacity).toBeGreaterThan(0.9);
+  expect(visibleFinale!.arcDashOffset).toBeLessThan(100);
+  expect(visibleFinale!.visibleSparks).toBe(24);
 }
 
 async function readFlightSnapshot(page: Page) {
@@ -141,13 +179,15 @@ test("a player can complete the committed Tux level in the browser", async ({ pa
   await expect(page.locator(".activity-announcer")).toHaveText("所有宝石都已归位。");
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(0);
-  await expect(page.getByTestId("victory-finale")).toHaveCount(1);
-  await expect(page.locator(".victory-arc path")).toHaveCount(1);
-  await expect(page.locator(".pixel-firework")).toHaveCount(3);
-  await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
-  await expect(page.getByTestId("replay-level")).toHaveCount(0);
+  await assertVisibleVictoryFinale(page);
   const nextLevel = await waitForSettledVictory(page, "next-level");
   await expect(nextLevel).toHaveAttribute("aria-label", "进入下一关");
+  const replay = page.getByTestId("replay-level");
+  await expect(replay).toHaveAttribute("aria-label", "重新玩这一关");
+  const [replayBox, nextBox] = await Promise.all([replay.boundingBox(), nextLevel.boundingBox()]);
+  expect(replayBox).not.toBeNull();
+  expect(nextBox).not.toBeNull();
+  expect(replayBox!.x + replayBox!.width).toBeLessThanOrEqual(nextBox!.x);
 });
 
 test("Tux advances to Chrome in the same document and Chrome replays canonically", async ({ page }) => {
@@ -159,6 +199,7 @@ test("Tux advances to Chrome in the same document and Chrome replays canonically
 
   await page.getByTestId("global-wand").click();
   const nextLevel = await waitForSettledVictory(page, "next-level");
+  await expect(page.getByTestId("replay-level")).toBeVisible();
   await nextLevel.focus();
   await nextLevel.press("Enter");
 
@@ -287,6 +328,7 @@ test("solved Chrome uses the existing gem renderer", async ({ page }) => {
   await page.getByTestId("global-wand").click();
   await advanceFromSettledTux(page);
   await page.getByTestId("global-wand").click();
+  await assertVisibleVictoryFinale(page);
   await waitForSettledVictory(page, "replay-level");
 
   await expect(page.locator(".board-camera")).toHaveScreenshot("chrome-solved.png", {

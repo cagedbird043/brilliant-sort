@@ -945,10 +945,12 @@ export function App() {
     "--board-cell": `${stageLayout.boardCellSize}px`,
     "--bank-cell": `${stageLayout.bankCellSize}px`,
   } as CSSProperties;
+  const victorySettled = state.status === "won" && !finaleVisible && !inputLocked;
+  const hasNextLevel = victorySettled && activeLevelIndex < LEVEL_SEQUENCE.length - 1;
 
   return (
     <main
-      className={`workbench-shell${activeLevelIndex > 0 ? " has-previous-level" : ""}`}
+      className={`workbench-shell${activeLevelIndex > 0 ? " has-previous-level" : ""}${hasNextLevel ? " has-next-level" : ""}`}
       data-feedback={feedbackTone}
       data-level-id={activeLevel.level.id}
       ref={shellRef}
@@ -980,28 +982,16 @@ export function App() {
       >
         <img src={audioCrystal} alt="" aria-hidden="true" />
       </button>
-      {state.status === "won" && !finaleVisible && !inputLocked ? (
-        activeLevelIndex === LEVEL_SEQUENCE.length - 1 ? (
-          <button
-            className="global-wand-control replay-level-control"
-            type="button"
-            data-testid="replay-level"
-            aria-label="重新玩这一关"
-            onClick={() => applyCommand({ type: "restart-level" })}
-          >
-            <img src={replayLevel} alt="" aria-hidden="true" />
-          </button>
-        ) : (
-          <button
-            className="global-wand-control next-level-control"
-            type="button"
-            data-testid="next-level"
-            aria-label="进入下一关"
-            onClick={() => switchLevel(activeLevelIndex + 1)}
-          >
-            <img src={nextLevel} alt="" aria-hidden="true" />
-          </button>
-        )
+      {victorySettled ? (
+        <button
+          className="global-wand-control replay-level-control"
+          type="button"
+          data-testid="replay-level"
+          aria-label="重新玩这一关"
+          onClick={() => applyCommand({ type: "restart-level" })}
+        >
+          <img src={replayLevel} alt="" aria-hidden="true" />
+        </button>
       ) : (
         <button
           className="global-wand-control"
@@ -1014,6 +1004,17 @@ export function App() {
           <img src={globalWand} alt="" aria-hidden="true" />
         </button>
       )}
+      {hasNextLevel ? (
+        <button
+          className="global-wand-control next-level-control"
+          type="button"
+          data-testid="next-level"
+          aria-label="进入下一关"
+          onClick={() => switchLevel(activeLevelIndex + 1)}
+        >
+          <img src={nextLevel} alt="" aria-hidden="true" />
+        </button>
+      ) : null}
       {showOnboarding ? (
         <p className="onboarding-hint" role="note">
           {ONBOARDING_COPY}
