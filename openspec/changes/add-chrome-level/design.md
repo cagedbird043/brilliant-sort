@@ -9,7 +9,7 @@ The approved Chrome draft is a 32×32 modern flat mark with a pinwheel outer rin
 **Goals:**
 - Ship `chrome-01` as the second production level after `tux-01`.
 - Preserve canonical `LevelSpec v1`, existing gameplay rules, and exact TypeScript/native/WASM replay parity.
-- Preserve the wordless full-screen stage while making board semantics and the victory action level-aware.
+- Preserve the wordless full-screen stage while making board semantics and level controls level-aware.
 - Keep the approved four-color geometry recognizable at desktop and narrow mobile sizes.
 
 **Non-Goals:**
@@ -30,19 +30,19 @@ Alternative considered: consume the approved PNG directly. Rejected because the 
 
 ### Keep progression in the React presentation
 
-`App.tsx` will own a constant two-entry sequence with each `LevelSpec` and accessible board label. A local `levelIndex` selects the active entry, and the existing core-loading effect recreates the core when that entry changes. The level ID already resets the camera; the transition will also clear finale, rejection, feedback-motion, and input-lock presentation state.
+`App.tsx` will own a constant two-entry sequence with each `LevelSpec` and accessible board label. A local `levelIndex` selects the active entry, and one presentation-owned switch routine recreates the core for either legal index while clearing finale, rejection, feedback-motion, and input-lock state. The level ID resets the camera.
 
-On Tux victory, the upper-right post-finale action becomes `next-level` and loads Chrome without navigation or page reload. On Chrome victory it remains `replay-level` and dispatches the existing `restart-level` command. Refreshing still starts Tux, so no persistence or migration is required.
+On Tux victory, the upper-right post-finale action becomes `next-level` and loads Chrome without navigation or page reload. Whenever Chrome is active and no authoritative motion is running, a mirrored upper-left `previous-level` action returns to a fresh canonical Tux state; Chrome victory still exposes `replay-level`. Refreshing still starts Tux, so no persistence or migration is required.
 
 Alternative considered: add progression to the C++ core. Rejected because ordering levels is presentation policy, not a gameplay rule, and would needlessly expand the ABI.
 
 ### Reuse the established restart audio transition
 
-Advancing to Chrome will enqueue the existing strictly sequenced `restart` audio cue before loading the new core. This resets the deterministic audio engine after Tux victory without adding a cue kind or a second score; mute state remains owned by the existing browser audio port.
+Changing levels in either direction will enqueue the existing strictly sequenced `restart` audio cue before loading the new core. This resets the deterministic audio engine without adding a cue kind or a second score; mute state remains owned by the existing browser audio port.
 
 ### Verify Chrome as data, gameplay, and presentation
 
-The fixture drift command and hooks will cover both authored production maps. A committed Chrome trace will perform accepted board/Shelf interaction before the global wand finishes the level, and will replay through the reducer oracle, native C++, and WASM backends. Playwright will prove Tux victory exposes the next-level action, Chrome loads without a document navigation, the four-color 562-cell board is playable, Chrome victory exposes replay, and desktop/mobile compositions remain bounded.
+The fixture drift command and hooks will cover both authored production maps. A committed Chrome trace will perform accepted board/Shelf interaction before the global wand finishes the level, and will replay through the reducer oracle, native C++, and WASM backends. Playwright will prove same-document Tux→Chrome advance, persistent Chrome→Tux return, canonical resets in both directions, Chrome victory/replay, accessibility, and bounded desktop/mobile compositions.
 
 ## Risks / Trade-offs
 

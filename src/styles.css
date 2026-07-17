@@ -150,6 +150,21 @@ button:focus-visible {
   filter: grayscale(0.5) drop-shadow(0.16rem 0.2rem 0 rgba(2, 4, 10, 0.34));
 }
 
+.previous-level-control {
+  right: auto;
+  left: max(0.65rem, env(safe-area-inset-left));
+}
+
+.previous-level-control img {
+  transform: scaleX(-1);
+}
+
+.workbench-shell.has-previous-level .audio-crystal-control {
+  left: calc(
+    max(0.65rem, env(safe-area-inset-left)) + clamp(3.4rem, 6vw, 4.5rem)
+  );
+}
+
 .onboarding-hint {
   position: fixed;
   z-index: 19;

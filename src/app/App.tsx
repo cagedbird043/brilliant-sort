@@ -870,43 +870,48 @@ export function App() {
     [applyCommand, inputLocked, state],
   );
 
-  const advanceLevel = useCallback(() => {
-    const nextLevelIndex = activeLevelIndex + 1;
-    if (
-      state === null ||
-      state.status !== "won" ||
-      inputLocked ||
-      nextLevelIndex >= LEVEL_SEQUENCE.length
-    ) {
-      return;
-    }
+  const switchLevel = useCallback(
+    (targetLevelIndex: number) => {
+      if (
+        state === null ||
+        inputLocked ||
+        finaleVisible ||
+        targetLevelIndex < 0 ||
+        targetLevelIndex >= LEVEL_SEQUENCE.length ||
+        targetLevelIndex === activeLevelIndex ||
+        (targetLevelIndex > activeLevelIndex && state.status !== "won")
+      ) {
+        return;
+      }
 
-    motionTokenRef.current += 1;
-    pendingMotionRef.current = null;
-    activeMotionCleanupRef.current?.();
-    activeMotionCleanupRef.current = null;
-    if (feedbackTimerRef.current !== null) {
-      window.clearTimeout(feedbackTimerRef.current);
-      feedbackTimerRef.current = null;
-    }
-    coreRef.current?.destroy();
-    coreRef.current = null;
+      motionTokenRef.current += 1;
+      pendingMotionRef.current = null;
+      activeMotionCleanupRef.current?.();
+      activeMotionCleanupRef.current = null;
+      if (feedbackTimerRef.current !== null) {
+        window.clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
+      coreRef.current?.destroy();
+      coreRef.current = null;
 
-    const sequence = audioSequenceRef.current;
-    audioSequenceRef.current = sequence + 1;
-    audioPortRef.current?.resumeFromGesture();
-    audioPortRef.current?.pushCue({ kind: "restart", sequence });
+      const sequence = audioSequenceRef.current;
+      audioSequenceRef.current = sequence + 1;
+      audioPortRef.current?.resumeFromGesture();
+      audioPortRef.current?.pushCue({ kind: "restart", sequence });
 
-    setFinaleVisible(false);
-    setRejectedCell(null);
-    setRejectedShelf(null);
-    setFeedbackTone("neutral");
-    setActivity("点击颜色错误的宝石开始整理。");
-    setInputLocked(false);
-    setBootError(null);
-    setState(null);
-    setActiveLevelIndex(nextLevelIndex);
-  }, [activeLevelIndex, inputLocked, state]);
+      setFinaleVisible(false);
+      setRejectedCell(null);
+      setRejectedShelf(null);
+      setFeedbackTone("neutral");
+      setActivity("点击颜色错误的宝石开始整理。");
+      setInputLocked(false);
+      setBootError(null);
+      setState(null);
+      setActiveLevelIndex(targetLevelIndex);
+    },
+    [activeLevelIndex, finaleVisible, inputLocked, state],
+  );
 
   if (!state) {
     return (
@@ -943,11 +948,23 @@ export function App() {
 
   return (
     <main
-      className="workbench-shell"
+      className={`workbench-shell${activeLevelIndex > 0 ? " has-previous-level" : ""}`}
       data-feedback={feedbackTone}
       data-level-id={activeLevel.level.id}
       ref={shellRef}
     >
+      {activeLevelIndex > 0 ? (
+        <button
+          className="global-wand-control previous-level-control"
+          type="button"
+          data-testid="previous-level"
+          aria-label="返回上一关"
+          disabled={inputLocked || finaleVisible}
+          onClick={() => switchLevel(activeLevelIndex - 1)}
+        >
+          <img src={nextLevel} alt="" aria-hidden="true" />
+        </button>
+      ) : null}
       <button
         className={`audio-crystal-control${audioSnapshot.muted ? " is-muted" : ""}${audioSnapshot.status === "failed" ? " is-unavailable" : ""}`}
         type="button"
@@ -980,7 +997,7 @@ export function App() {
             type="button"
             data-testid="next-level"
             aria-label="进入下一关"
-            onClick={advanceLevel}
+            onClick={() => switchLevel(activeLevelIndex + 1)}
           >
             <img src={nextLevel} alt="" aria-hidden="true" />
           </button>

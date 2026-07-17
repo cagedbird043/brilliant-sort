@@ -24,3 +24,9 @@
 
 - [x] 4.1 Run strict OpenSpec validation, TypeScript checks, focused Bun tests, map drift checks, native/WASM builds, and production build.
 - [x] 4.2 Run the complete desktop/mobile Playwright suite and manually verify both public levels remain wordless, playable, and visually coherent.
+
+## 5. Previous-Level Navigation
+
+- [x] 5.1 Reuse the deterministic level-switch reset path for Chrome→Tux and restore canonical Tux state without page navigation.
+- [x] 5.2 Add a mirrored upper-left previous-level control on Chrome without colliding with the existing audio control.
+- [x] 5.3 Verify same-document backward navigation, canonical reset, audio sequencing, and desktop/mobile control spacing.

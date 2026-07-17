@@ -7,7 +7,7 @@ A second authored mosaic is more persuasive than a rendering-only variant becaus
 - Add `chrome-01`, a hand-authored 32×32 modern Chrome mosaic using only coral, amber, jade, and navy gems; transparent coordinates form the center ring, blade seams, and outer silhouette.
 - Compile the human-reviewable Chrome target and initial-gem maps into canonical `LevelSpec v1`, with stable coordinate-derived gem IDs and a committed deterministic winning trace.
 - Change production from one hard-coded Tux level to a fixed two-level sequence: `tux-01` first, then `chrome-01`, without a level map, random generation, or persistent progression system.
-- On Tux victory, replace the replay action with a wordless next-level control that loads Chrome without refreshing the page; on Chrome victory, retain the replay action for Chrome.
+- On Tux victory, replace replay with a wordless next-level control that loads Chrome without refreshing; while Chrome is active, expose a mirrored upper-left previous-level control that returns to a fresh Tux level; on Chrome victory, retain replay for Chrome.
 - Keep the C++/WASM core and gameplay rules unchanged while extending named fixture, differential replay, responsive presentation, accessibility, and browser coverage to Chrome.
 - Use only project-owned generated pixel data and existing gem materials at runtime; external Chrome references remain design references and do not become runtime dependencies.
 
@@ -18,7 +18,7 @@ A second authored mosaic is more persuasive than a rendering-only variant becaus
 
 ### Modified Capabilities
 - `tux-mosaic-level`: Changes production from exactly one level with no progression to Tux as the first level in a fixed two-level sequence.
-- `android-inspired-presentation`: Makes stage semantics and the victory action level-aware while preserving the wordless responsive cavern presentation.
+- `android-inspired-presentation`: Makes stage semantics, bidirectional level navigation, and the victory action level-aware while preserving the wordless responsive cavern presentation.
 
 ## Impact
 

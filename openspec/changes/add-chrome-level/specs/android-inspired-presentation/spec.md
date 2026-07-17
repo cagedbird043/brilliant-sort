@@ -22,7 +22,7 @@ The production stage SHALL render the full active production mosaic and two Shel
 
 ### Requirement: Interactive puzzle elements SHALL remain accessible and testable
 
-Movable Board cells, Shelf slots, bounded Board camera interaction, the in-world audio mute control, global-wand assist, and the contextual settled-Won next or replay action SHALL retain semantic roles, level-aware accessible names/states, keyboard focus visibility, and stable browser-test identifiers. Locked decorative cells SHALL not create redundant keyboard stops. The production stage SHALL contain no persistent reset, completion, level-selection, or level-navigation HUD controls during `Playing`; a next or replay action MAY appear only after authoritative victory motion and finale settlement. The transient onboarding sentence SHALL remain outside the focus order.
+Movable Board cells, Shelf slots, bounded Board camera interaction, the in-world audio mute control, global-wand assist, the contextual settled-Won next or replay action, and the Chrome-only previous-level action SHALL retain semantic roles, level-aware accessible names/states, keyboard focus visibility, and stable browser-test identifiers. Locked decorative cells SHALL not create redundant keyboard stops. The production stage SHALL contain no persistent reset, completion, or level-selection HUD. While Chrome is active and no authoritative motion is running, a mirrored previous-level control MAY remain in the upper-left during `Playing` or settled `Won`; next and replay actions MAY appear only after authoritative victory motion and finale settlement. The transient onboarding sentence SHALL remain outside the focus order.
 
 #### Scenario: Activating the global wand by keyboard
 - **GIVEN** status is `Playing` and no motion is active
@@ -43,6 +43,14 @@ Movable Board cells, Shelf slots, bounded Board camera interaction, the in-world
 - **AND THEN** onboarding dismissal and audio mute preference remain unchanged
 - **AND THEN** the audio bridge emits one ordered restart cue before Chrome interaction begins.
 
+#### Scenario: Returning from Chrome to Tux
+- **GIVEN** Chrome is active and no authoritative motion is running
+- **WHEN** keyboard focus activates the upper-left `previous-level` button
+- **THEN** Tux loads without document navigation or refresh in canonical initial `Playing` state
+- **AND THEN** Board camera, Shelf, selection, finale, and transient feedback return to their defaults
+- **AND THEN** onboarding dismissal and audio mute preference remain unchanged
+- **AND THEN** the audio bridge emits one ordered restart cue before Tux interaction begins.
+
 #### Scenario: Replaying Chrome after victory
 - **GIVEN** Chrome status is `Won` and authoritative motion plus the bounded finale have settled
 - **WHEN** keyboard focus activates the contextual `replay-level` button
@@ -51,9 +59,9 @@ Movable Board cells, Shelf slots, bounded Board camera interaction, the in-world
 
 #### Scenario: Navigating either dense board with assistive technology
 - **WHEN** keyboard or assistive-technology navigation enters the active stage
-- **THEN** actionable movable cells, Shelf slots, audio mute, wand assist, and enabled camera semantics participate while `Playing`
-- **AND THEN** after settled `Won`, only audio mute and the level-appropriate contextual action remain actionable
-- **AND THEN** board and action labels identify the active mosaic and whether the action advances or replays.
+- **THEN** actionable movable cells, Shelf slots, audio mute, wand assist, enabled camera semantics, and the Chrome previous-level action when applicable participate while `Playing`
+- **AND THEN** after settled `Won`, audio mute, the Chrome previous-level action when applicable, and the level-appropriate contextual next or replay action remain actionable
+- **AND THEN** board and action labels identify the active mosaic and whether each action returns, advances, or replays.
 
 #### Scenario: Exposing post-victory action with reduced motion
 - **GIVEN** `prefers-reduced-motion: reduce` and the active status transitions to `Won`

@@ -179,6 +179,31 @@ test("Tux advances to Chrome in the same document and Chrome replays canonically
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.locator(".board-cell.is-selected, .shelf-slot.is-selected")).toHaveCount(0);
 
+  const previousLevel = page.getByTestId("previous-level");
+  await expect(previousLevel).toHaveAttribute("aria-label", "返回上一关");
+  await page.getByTestId("board-cell-1-13").click();
+  await page.getByTestId("shelf-slot-0").click();
+  await expect(page.locator(".shelf-slot.has-gem")).not.toHaveCount(0);
+  await expect(previousLevel).toBeEnabled();
+  await previousLevel.focus();
+  await previousLevel.press("Enter");
+  await expect(shell).toHaveAttribute("data-level-id", "tux-01");
+  await expect.poll(() =>
+    page.evaluate(() => ({
+      href: window.location.href,
+      timeOrigin: performance.timeOrigin,
+    })),
+  ).toEqual(initialDocument);
+  await expect(page.locator(".board-cell")).toHaveCount(546);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(136);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".board-cell.is-selected, .shelf-slot.is-selected")).toHaveCount(0);
+  await expect(previousLevel).toHaveCount(0);
+
+  await page.getByTestId("global-wand").click();
+  await advanceFromSettledTux(page);
+  await expect(page.getByTestId("previous-level")).toBeVisible();
+
   expect(chromeWinningTrace.map((command) => command.type)).toEqual([
     "select-board-gem",
     "place-selection-in-shelf",
@@ -602,6 +627,10 @@ test("desktop, square, and portrait Tux and Chrome stages stay centered without 
         bankBSlots: bankB.querySelectorAll(".shelf-slot").length,
         overflowX: document.documentElement.scrollWidth > window.innerWidth,
         overflowY: document.documentElement.scrollHeight > window.innerHeight,
+        audio: rect(document.querySelector(".audio-crystal-control")!),
+        previous: document.querySelector("[data-testid=\"previous-level\"]")
+          ? rect(document.querySelector("[data-testid=\"previous-level\"]")!)
+          : null,
       };
     });
 
@@ -611,6 +640,14 @@ test("desktop, square, and portrait Tux and Chrome stages stay centered without 
     expect(layout.bankBSlots).toBe(8);
     expect(layout.overflowX).toBe(false);
     expect(layout.overflowY).toBe(false);
+    if (viewport.levelId === "chrome-01") {
+      expect(layout.previous).not.toBeNull();
+      if (layout.previous) {
+        expect(layout.previous.right).toBeLessThanOrEqual(layout.audio.left);
+      }
+    } else {
+      expect(layout.previous).toBeNull();
+    }
     if (viewport.orientation === "side") {
       expect(layout.bankA.right).toBeLessThan(layout.camera.left);
       expect(layout.bankB.left).toBeGreaterThan(layout.camera.right);
@@ -789,6 +826,12 @@ test("audio resumes, persists mute, and resets transport across Tux→Chrome and
   const nextLevel = await waitForSettledVictory(page, "next-level");
   await nextLevel.click();
   await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+  const previousLevel = page.getByTestId("previous-level");
+  await previousLevel.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "tux-01");
+  await page.getByTestId("global-wand").click();
+  await (await waitForSettledVictory(page, "next-level")).click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
   await page.getByTestId("global-wand").click();
   const replay = await waitForSettledVictory(page, "replay-level");
   await replay.click();
@@ -799,7 +842,7 @@ test("audio resumes, persists mute, and resets transport across Tux→Chrome and
       () =>
         (window as typeof window & { __testAudioCueKinds: number[] }).__testAudioCueKinds,
     ),
-  ).toEqual([6, 7, 6, 7, 6]);
+  ).toEqual([6, 7, 7, 6, 7, 6, 7, 6]);
 });
 
 test("audio initialization failure degrades silently without blocking gameplay", async ({ page }) => {
