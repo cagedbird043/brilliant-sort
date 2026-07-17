@@ -4,6 +4,9 @@ import type { GameCommand } from "../../src/core";
 const tuxWinningTrace = JSON.parse(
   readFileSync(new URL("../../src/fixtures/traces/tux-01.win.json", import.meta.url), "utf8"),
 ) as readonly GameCommand[];
+const chromeWinningTrace = JSON.parse(
+  readFileSync(new URL("../../src/fixtures/traces/chrome-01.win.json", import.meta.url), "utf8"),
+) as readonly GameCommand[];
 
 async function clickCommand(page: Page, command: GameCommand): Promise<void> {
   switch (command.type) {
@@ -18,10 +21,30 @@ async function clickCommand(page: Page, command: GameCommand): Promise<void> {
       await page.getByTestId("shelf-slot-0").click();
       break;
     case "apply-global-wand":
+      await page.getByTestId("global-wand").click();
+      break;
     case "cancel-selection":
     case "restart-level":
-      throw new Error(`The Tux browser trace does not use ${command.type}`);
+      throw new Error(`A winning browser trace does not use ${command.type}`);
   }
+}
+
+type VictoryActionTestId = "next-level" | "replay-level";
+
+async function waitForSettledVictory(page: Page, actionTestId: VictoryActionTestId) {
+  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 2_000 });
+  await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
+  const action = page.getByTestId(actionTestId);
+  await expect(action).toBeVisible();
+  return action;
+}
+
+async function advanceFromSettledTux(page: Page): Promise<void> {
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await nextLevel.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
 }
 
 async function readFlightSnapshot(page: Page) {
@@ -123,11 +146,61 @@ test("a player can complete the committed Tux level in the browser", async ({ pa
   await expect(page.locator(".pixel-firework")).toHaveCount(3);
   await expect(page.locator(".pixel-firework-spark")).toHaveCount(24);
   await expect(page.getByTestId("replay-level")).toHaveCount(0);
-  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
-  await expect(page.getByTestId("replay-level")).toHaveAttribute(
-    "aria-label",
-    "重新玩这一关",
-  );
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await expect(nextLevel).toHaveAttribute("aria-label", "进入下一关");
+});
+
+test("Tux advances to Chrome in the same document and Chrome replays canonically", async ({ page }) => {
+  await page.goto("/");
+  const initialDocument = await page.evaluate(() => ({
+    href: window.location.href,
+    timeOrigin: performance.timeOrigin,
+  }));
+
+  await page.getByTestId("global-wand").click();
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await nextLevel.focus();
+  await nextLevel.press("Enter");
+
+  const shell = page.locator(".workbench-shell");
+  await expect(shell).toHaveAttribute("data-level-id", "chrome-01");
+  await expect.poll(() =>
+    page.evaluate(() => ({
+      href: window.location.href,
+      timeOrigin: performance.timeOrigin,
+    })),
+  ).toEqual(initialDocument);
+  await expect(page.locator(".calibration-bay")).toHaveAttribute("aria-label", "Chrome 宝石棋盘");
+  await expect(page.locator(".board-cell")).toHaveCount(562);
+  await expect(page.locator(".board-cell.target-coral")).toHaveCount(154);
+  await expect(page.locator(".board-cell.target-amber")).toHaveCount(154);
+  await expect(page.locator(".board-cell.target-jade")).toHaveCount(158);
+  await expect(page.locator(".board-cell.target-navy")).toHaveCount(96);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".board-cell.is-selected, .shelf-slot.is-selected")).toHaveCount(0);
+
+  expect(chromeWinningTrace.map((command) => command.type)).toEqual([
+    "select-board-gem",
+    "place-selection-in-shelf",
+    "apply-global-wand",
+  ]);
+  for (const command of chromeWinningTrace) {
+    await clickCommand(page, command);
+  }
+
+  const replay = await waitForSettledVictory(page, "replay-level");
+  await expect(replay).toHaveAttribute("aria-label", "重新玩这一关");
+  await replay.focus();
+  await replay.press("Enter");
+  await expect(shell).toHaveAttribute("data-level-id", "chrome-01");
+  await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(page.locator(".board-cell")).toHaveCount(562);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(140);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".board-cell.is-selected, .shelf-slot.is-selected")).toHaveCount(0);
+  await expect(replay).toHaveCount(0);
+  await expect(page.getByTestId("global-wand")).toBeVisible();
 });
 
 test("the victory shimmer crosses the completed pixel art", async ({ page }) => {
@@ -144,7 +217,7 @@ test("the victory shimmer crosses the completed pixel art", async ({ page }) => 
       .find(
         (candidate) =>
           (candidate as Animation & { readonly animationName?: string }).animationName ===
-          "tux-victory-shimmer",
+          "mosaic-victory-shimmer",
       );
     if (!animation || !(animation.effect instanceof KeyframeEffect)) {
       return null;
@@ -165,7 +238,7 @@ test("the victory shimmer crosses the completed pixel art", async ({ page }) => 
   });
 
   expect(shimmer).toMatchObject({
-    animationName: "tux-victory-shimmer",
+    animationName: "mosaic-victory-shimmer",
     currentTime: 570,
     playState: "paused",
     opacity: 1,
@@ -178,6 +251,21 @@ test("the victory shimmer crosses the completed pixel art", async ({ page }) => 
   await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
   await expect(camera).toHaveScreenshot("victory-shimmer.png", {
     animations: "allow",
+    caret: "hide",
+    maxDiffPixelRatio: 0.002,
+    scale: "css",
+  });
+});
+
+test("solved Chrome uses the existing gem renderer", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("global-wand").click();
+  await advanceFromSettledTux(page);
+  await page.getByTestId("global-wand").click();
+  await waitForSettledVictory(page, "replay-level");
+
+  await expect(page.locator(".board-camera")).toHaveScreenshot("chrome-solved.png", {
+    animations: "disabled",
     caret: "hide",
     maxDiffPixelRatio: 0.002,
     scale: "css",
@@ -221,7 +309,7 @@ test("the playable surface stays wordless while the mute crystal remains externa
   await expect(page.locator(".shelf-bank.bank-a")).toHaveAttribute("aria-label", "缓冲 Shelf A");
   await expect(page.locator(".shelf-bank.bank-b")).toHaveAttribute("aria-label", "缓冲 Shelf B");
 });
-test("onboarding persists only after an accepted keyboard wand and the global flight stays bounded", async ({
+test("onboarding persists through Tux→Chrome and Chrome replay after an accepted keyboard wand", async ({
   page,
 }) => {
   const copy = "点击同色宝石，经缓冲槽放回同色空位；也可以点魔法棒一键修复整幅 Tux。";
@@ -286,20 +374,36 @@ test("onboarding persists only after an accepted keyboard wand and the global fl
       clone.getAnimations().forEach((animation) => animation.play());
     }
   });
-  await expect(page.locator(".gem-flight-clone")).toHaveCount(0, { timeout: 2_000 });
-  await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
-  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await expect(nextLevel).toHaveAttribute("aria-label", "进入下一关");
+  await nextLevel.focus();
+  await nextLevel.press("Enter");
+
+  const shell = page.locator(".workbench-shell");
+  await expect(shell).toHaveAttribute("data-level-id", "chrome-01");
+  await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(page.locator(".board-cell")).toHaveCount(562);
+  await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(140);
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
-  await expect(page.getByTestId("victory-finale")).toHaveCount(0, { timeout: 2_000 });
-  const replay = page.getByTestId("replay-level");
+  await expect(page.locator(".board-cell.is-selected, .shelf-slot.is-selected")).toHaveCount(0);
+  await expect(hint).toHaveCount(0);
+  await expect(audioControl).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => localStorage.getItem("brilliant-sort:onboarding:v1"))).toBe(
+    "seen",
+  );
+
+  await page.getByTestId("global-wand").click();
+  const replay = await waitForSettledVictory(page, "replay-level");
   await expect(replay).toHaveAttribute("aria-label", "重新玩这一关");
   await replay.focus();
   await replay.press("Enter");
+  await expect(shell).toHaveAttribute("data-level-id", "chrome-01");
   await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
   await expect(page.locator(".activity-announcer")).toHaveText("校准台已重置。");
-  await expect(page.locator(".board-cell")).toHaveCount(546);
+  await expect(page.locator(".board-cell")).toHaveCount(562);
   await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
-  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(136);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(140);
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.getByTestId("global-wand")).toBeVisible();
   await expect(replay).toHaveCount(0);
@@ -309,11 +413,12 @@ test("onboarding persists only after an accepted keyboard wand and the global fl
   );
 
   await page.reload();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "tux-01");
   await expect(page.getByRole("note")).toHaveCount(0);
   await expect(page.locator(".audio-crystal-control")).toHaveAttribute("aria-pressed", "true");
 });
 
-test("unavailable storage keeps onboarding and the reduced-motion wand playable", async ({ page }) => {
+test("unavailable storage keeps onboarding and reduced-motion Tux→Chrome playability", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     const unavailable = () => {
@@ -341,9 +446,16 @@ test("unavailable storage keeps onboarding and the reduced-motion wand playable"
   await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
   await expect(page.getByTestId("victory-finale")).toHaveCount(0);
-  const replay = page.getByTestId("replay-level");
-  await expect(replay).toBeVisible();
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await nextLevel.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+  await expect(hint).toHaveCount(0);
+  await expect(page.getByTestId("global-wand")).toBeVisible();
+
+  await page.getByTestId("global-wand").click();
+  const replay = await waitForSettledVictory(page, "replay-level");
   await replay.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
   await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
   await expect(hint).toHaveCount(0);
   await expect(page.getByTestId("global-wand")).toBeVisible();
@@ -453,17 +565,27 @@ test("authoritative movement morphs one opaque gem between Micro and Large recta
   await expect(page.locator('[data-motion-destination="hidden"]')).toHaveCount(0);
 });
 
-test("desktop, square, and portrait stages stay centered without page overflow", async ({ page }) => {
+test("desktop, square, and portrait Tux and Chrome stages stay centered without page overflow", async ({
+  page,
+}) => {
   const cases = [
-    { width: 1280, height: 720, orientation: "side" },
-    { width: 768, height: 768, orientation: "side" },
-    { width: 390, height: 844, orientation: "stacked" },
+    { width: 1280, height: 720, orientation: "side", levelId: "tux-01", cells: 546 },
+    { width: 768, height: 768, orientation: "side", levelId: "tux-01", cells: 546 },
+    { width: 390, height: 844, orientation: "stacked", levelId: "tux-01", cells: 546 },
+    { width: 1280, height: 720, orientation: "side", levelId: "chrome-01", cells: 562 },
+    { width: 390, height: 844, orientation: "stacked", levelId: "chrome-01", cells: 562 },
   ] as const;
 
   for (const viewport of cases) {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await expect(page.locator(".game-board")).toBeVisible();
+    if (viewport.levelId === "chrome-01") {
+      await page.getByTestId("global-wand").click();
+      await advanceFromSettledTux(page);
+    }
+    await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", viewport.levelId);
+    await expect(page.locator(".board-cell")).toHaveCount(viewport.cells);
     const layout = await page.evaluate(() => {
       const stage = document.querySelector(".crystal-workbench")!;
       const camera = document.querySelector(".board-camera")!;
@@ -499,7 +621,7 @@ test("desktop, square, and portrait stages stay centered without page overflow",
   }
 });
 
-test("portrait camera exposes bounded keyboard zoom, pan, and reset semantics", async ({ page }) => {
+test("portrait camera resets on Tux→Chrome advance and Chrome replay", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   const camera = page.locator(".board-camera");
@@ -525,18 +647,36 @@ test("portrait camera exposes bounded keyboard zoom, pan, and reset semantics", 
   await expect(camera).toHaveClass(/is-zoomed/);
 
   await page.getByTestId("global-wand").click();
-  const replay = page.getByTestId("replay-level");
-  await expect(replay).toBeVisible();
-  await replay.click();
+  await advanceFromSettledTux(page);
+  await expect(page.locator(".calibration-bay")).toHaveAttribute("aria-label", "Chrome 宝石棋盘");
   await expect(camera).not.toHaveClass(/is-zoomed/);
-  await expect(camera).toHaveAttribute("aria-label", "Tux 棋盘视图，当前 1 倍缩放");
+  await expect(camera.locator(".board-camera-content")).toHaveCSS(
+    "transform",
+    "matrix(1, 0, 0, 1, 0, 0)",
+  );
+
+  await camera.focus();
+  await camera.press("Equal");
+  await camera.press("ArrowRight");
+  await camera.press("ArrowDown");
+  await expect(camera).toHaveClass(/is-zoomed/);
+  await expect(camera.locator(".board-camera-content")).not.toHaveCSS(
+    "transform",
+    "matrix(2, 0, 0, 2, 0, 0)",
+  );
+
+  await page.getByTestId("global-wand").click();
+  const replay = await waitForSettledVictory(page, "replay-level");
+  await replay.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+  await expect(camera).not.toHaveClass(/is-zoomed/);
   await expect(camera.locator(".board-camera-content")).toHaveCSS(
     "transform",
     "matrix(1, 0, 0, 1, 0, 0)",
   );
 });
 
-test("reduced motion commits the authoritative state immediately without flight clones", async ({ page }) => {
+test("reduced motion commits Tux→Chrome state immediately without flight clones", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByTestId("board-cell-10-7").click();
@@ -558,15 +698,28 @@ test("reduced motion commits the authoritative state immediately without flight 
   await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
   await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
   await expect(page.getByTestId("victory-finale")).toHaveCount(0);
-  const replay = page.getByTestId("replay-level");
-  await expect(replay).toBeVisible();
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await nextLevel.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+  await expect(page.locator(".board-cell")).toHaveCount(562);
+  await expect(page.locator(".shelf-slot.has-gem")).toHaveCount(0);
+  await expect(page.locator(".gem-flight-clone")).toHaveCount(0);
+  await expect(page.getByTestId("victory-finale")).toHaveCount(0);
+
+  await page.getByTestId("global-wand").click();
+  const replay = await waitForSettledVictory(page, "replay-level");
   await replay.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
   await expect(page.locator(".crystal-workbench")).not.toHaveClass(/is-won/);
+  await expect(page.locator(".board-cell")).toHaveCount(562);
   await expect(page.locator(".board-cell.is-empty")).toHaveCount(0);
+  await expect(page.locator(".board-cell:not(:disabled)")).toHaveCount(140);
   await expect(page.getByTestId("global-wand")).toBeVisible();
 });
 
-test("audio resumes, persists mute, and resets transport across replay", async ({ page }) => {
+test("audio resumes, persists mute, and resets transport across Tux→Chrome and Chrome replay", async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     const NativeAudioContext = window.AudioContext;
     const TestAudioContext = new Proxy(NativeAudioContext, {
@@ -632,17 +785,20 @@ test("audio resumes, persists mute, and resets transport across replay", async (
   await expect(audioControl).toHaveAttribute("aria-pressed", "false");
 
   await page.getByTestId("global-wand").click();
-  const replay = page.getByTestId("replay-level");
-  await expect(replay).toBeVisible();
+  const nextLevel = await waitForSettledVictory(page, "next-level");
+  await nextLevel.click();
+  await expect(page.locator(".workbench-shell")).toHaveAttribute("data-level-id", "chrome-01");
+  await page.getByTestId("global-wand").click();
+  const replay = await waitForSettledVictory(page, "replay-level");
   await replay.click();
   await page.getByTestId("global-wand").click();
-  await expect(page.locator(".crystal-workbench")).toHaveClass(/is-won/);
+  await waitForSettledVictory(page, "replay-level");
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & { __testAudioCueKinds: number[] }).__testAudioCueKinds,
     ),
-  ).toEqual([6, 7, 6]);
+  ).toEqual([6, 7, 6, 7, 6]);
 });
 
 test("audio initialization failure degrades silently without blocking gameplay", async ({ page }) => {
