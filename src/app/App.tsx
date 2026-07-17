@@ -9,6 +9,7 @@ import type {
   GameCommand,
   GameCorePort,
   GameState,
+  LevelSpec,
   RejectionCode,
 } from "../core";
 import {
@@ -17,13 +18,14 @@ import {
   type BrowserPixelAudioPort,
   type PixelAudioSnapshot,
 } from "../audio";
-import { tuxLevel } from "../fixtures";
+import { chromeLevel, tuxLevel } from "../fixtures";
 import { GameCoreFactory } from "../wasm/game-core";
 import { BoardCamera } from "./BoardCamera";
 import { calculateStageLayout } from "./stage-layout";
 import { VictoryFinale } from "./VictoryFinale";
 import audioCrystal from "../assets/pixel/audio-crystal.svg";
 import globalWand from "../assets/pixel/global-wand.svg";
+import nextLevel from "../assets/pixel/next-level.svg";
 import replayLevel from "../assets/pixel/replay-level.svg";
 import largeAmber from "../assets/pixel/gems/amber.png";
 import largeCoral from "../assets/pixel/gems/coral.png";
@@ -43,6 +45,16 @@ import microSocket from "../assets/pixel/micro/neutral.png";
 import shelfTray from "../assets/pixel/shelf-tray-neutral.png";
 
 type FeedbackTone = "neutral" | "selected" | "placed" | "compacted" | "rejected" | "won";
+
+interface LevelPresentation {
+  readonly level: LevelSpec;
+  readonly boardLabel: string;
+}
+
+const LEVEL_SEQUENCE = [
+  { level: tuxLevel, boardLabel: "Tux 宝石棋盘" },
+  { level: chromeLevel, boardLabel: "Chrome 宝石棋盘" },
+] as const satisfies readonly LevelPresentation[];
 
 interface MotionRect {
   readonly left: number;
@@ -333,9 +345,17 @@ function ShelfBank({
   );
 }
 
-function BootPanel({ error, onRetry }: { readonly error: string | null; readonly onRetry: () => void }) {
+function BootPanel({
+  error,
+  levelId,
+  onRetry,
+}: {
+  readonly error: string | null;
+  readonly levelId: string;
+  readonly onRetry: () => void;
+}) {
   return (
-    <main className="boot-shell">
+    <main className="boot-shell" data-level-id={levelId}>
       <section className="boot-panel" aria-live="polite" aria-label="Brilliant Sort 核心状态">
         <span className="boot-sigil" aria-hidden="true" />
         <p>BRILLIANT SORT / CORE LINK</p>
@@ -395,6 +415,8 @@ export function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   }));
+  const [activeLevelIndex, setActiveLevelIndex] = useState(0);
+  const activeLevel = LEVEL_SEQUENCE[activeLevelIndex]!;
 
   const dismissOnboarding = useCallback(() => {
     setShowOnboarding(false);
@@ -423,7 +445,7 @@ export function App() {
     setState(null);
     setBootError(null);
     setFinaleVisible(false);
-    void GameCoreFactory.load(tuxLevel)
+    void GameCoreFactory.load(activeLevel.level)
       .then((core) => {
         if (cancelled) {
           core.destroy();
@@ -443,7 +465,7 @@ export function App() {
       coreRef.current?.destroy();
       coreRef.current = null;
     };
-  }, [bootAttempt]);
+  }, [activeLevel, bootAttempt]);
   useLayoutEffect(() => {
     const shell = shellRef.current;
     if (shell === null) {
@@ -847,8 +869,52 @@ export function App() {
     [applyCommand, inputLocked, state],
   );
 
+  const advanceLevel = useCallback(() => {
+    const nextLevelIndex = activeLevelIndex + 1;
+    if (
+      state === null ||
+      state.status !== "won" ||
+      inputLocked ||
+      nextLevelIndex >= LEVEL_SEQUENCE.length
+    ) {
+      return;
+    }
+
+    motionTokenRef.current += 1;
+    pendingMotionRef.current = null;
+    activeMotionCleanupRef.current?.();
+    activeMotionCleanupRef.current = null;
+    if (feedbackTimerRef.current !== null) {
+      window.clearTimeout(feedbackTimerRef.current);
+      feedbackTimerRef.current = null;
+    }
+    coreRef.current?.destroy();
+    coreRef.current = null;
+
+    const sequence = audioSequenceRef.current;
+    audioSequenceRef.current = sequence + 1;
+    audioPortRef.current?.resumeFromGesture();
+    audioPortRef.current?.pushCue({ kind: "restart", sequence });
+
+    setFinaleVisible(false);
+    setRejectedCell(null);
+    setRejectedShelf(null);
+    setFeedbackTone("neutral");
+    setActivity("点击颜色错误的宝石开始整理。");
+    setInputLocked(false);
+    setBootError(null);
+    setState(null);
+    setActiveLevelIndex(nextLevelIndex);
+  }, [activeLevelIndex, inputLocked, state]);
+
   if (!state) {
-    return <BootPanel error={bootError} onRetry={() => setBootAttempt((attempt) => attempt + 1)} />;
+    return (
+      <BootPanel
+        error={bootError}
+        levelId={activeLevel.level.id}
+        onRetry={() => setBootAttempt((attempt) => attempt + 1)}
+      />
+    );
   }
 
   const stageLayout = calculateStageLayout({
@@ -878,6 +944,7 @@ export function App() {
     <main
       className="workbench-shell"
       data-feedback={feedbackTone}
+      data-level-id={activeLevel.level.id}
       ref={shellRef}
     >
       <button
@@ -896,15 +963,27 @@ export function App() {
         <img src={audioCrystal} alt="" aria-hidden="true" />
       </button>
       {state.status === "won" && !finaleVisible && !inputLocked ? (
-        <button
-          className="global-wand-control replay-level-control"
-          type="button"
-          data-testid="replay-level"
-          aria-label="重新玩这一关"
-          onClick={() => applyCommand({ type: "restart-level" })}
-        >
-          <img src={replayLevel} alt="" aria-hidden="true" />
-        </button>
+        activeLevelIndex === LEVEL_SEQUENCE.length - 1 ? (
+          <button
+            className="global-wand-control replay-level-control"
+            type="button"
+            data-testid="replay-level"
+            aria-label="重新玩这一关"
+            onClick={() => applyCommand({ type: "restart-level" })}
+          >
+            <img src={replayLevel} alt="" aria-hidden="true" />
+          </button>
+        ) : (
+          <button
+            className="global-wand-control next-level-control"
+            type="button"
+            data-testid="next-level"
+            aria-label="进入下一关"
+            onClick={advanceLevel}
+          >
+            <img src={nextLevel} alt="" aria-hidden="true" />
+          </button>
+        )
       ) : (
         <button
           className="global-wand-control"
@@ -936,11 +1015,11 @@ export function App() {
           onSlotClick={handleShelfClick}
         />
 
-        <section className="calibration-bay" aria-label="Tux 宝石棋盘">
+        <section className="calibration-bay" aria-label={activeLevel.boardLabel}>
           <BoardCamera
             enabled={!stageLayout.directTouch}
             maxZoom={stageLayout.maxZoom}
-            resetKey={`${state.levelId}:${runToken}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
+            resetKey={`${activeLevel.level.id}:${runToken}:${stageLayout.orientation}:${boardWidth}x${boardHeight}`}
             width={boardWidth}
             height={boardHeight}
           >
