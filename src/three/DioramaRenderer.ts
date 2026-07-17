@@ -82,10 +82,10 @@ const GAME_COLORS: readonly GameColor[] = [
   "pearl",
   "amber",
 ];
-const VOID = 0x070b16;
-const OBSIDIAN_SLAB = 0x111a2b;
-const OBSIDIAN_FRAME = 0x1a2844;
-const EXPOSED_EDGE = 0x8fa8ce;
+const VOID = 0x030610;
+const OBSIDIAN_SLAB = 0x050a16;
+const OBSIDIAN_FRAME = 0x15223b;
+const EXPOSED_EDGE = 0x6f8bb8;
 const MAX_PIXEL_RATIO = 2;
 const REJECTION_DURATION_MS = 260;
 const GEM_SCALE = 0.86;
@@ -249,9 +249,9 @@ class DioramaRenderer implements DioramaRendererPort {
   private readonly reliquaryFrame: InstancedMesh;
   private readonly wand: Group;
   private readonly victoryBeam: Mesh;
-  private readonly keyLight = new DirectionalLight(0xffd0a5, 2.25);
-  private readonly rimLight = new DirectionalLight(0x65e3ff, 1.35);
-  private readonly hemisphereLight = new HemisphereLight(0x30415f, 0x0a1020, 1.15);
+  private readonly keyLight = new DirectionalLight(0xffd0a5, 1.4);
+  private readonly rimLight = new DirectionalLight(0x65e3ff, 1.05);
+  private readonly hemisphereLight = new HemisphereLight(0x30415f, 0x050815, 0.58);
   private readonly pmremGenerator: PMREMGenerator;
   private readonly roomEnvironment: RoomEnvironment;
   private readonly environmentTexture: Texture;
@@ -300,7 +300,7 @@ class DioramaRenderer implements DioramaRendererPort {
     });
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = 0.94;
     this.renderer.setClearColor(VOID, 1);
     this.scene.background = new ThreeColor(VOID);
 
@@ -317,10 +317,12 @@ class DioramaRenderer implements DioramaRendererPort {
     const floorMaterial = this.trackMaterial(
       new MeshPhysicalMaterial({
         color: OBSIDIAN_SLAB,
-        roughness: 0.78,
-        metalness: 0.18,
-        clearcoat: 0.16,
-        clearcoatRoughness: 0.52,
+        roughness: 0.82,
+        metalness: 0,
+        specularIntensity: 0.05,
+        clearcoat: 0.02,
+        clearcoatRoughness: 0.58,
+        envMapIntensity: 0,
         flatShading: true,
       }),
     );
@@ -329,7 +331,12 @@ class DioramaRenderer implements DioramaRendererPort {
 
     const backdropGeometry = this.trackGeometry(new PlaneGeometry(1, 1));
     const backdropMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: 0x0c1428, roughness: 0.96, metalness: 0 }),
+      new MeshStandardMaterial({
+        color: 0x02040b,
+        roughness: 0.98,
+        metalness: 0,
+        envMapIntensity: 0.12,
+      }),
     );
     this.backdrop = new Mesh(backdropGeometry, backdropMaterial);
     this.backdrop.position.z = -0.76;
@@ -337,10 +344,11 @@ class DioramaRenderer implements DioramaRendererPort {
     const frameMaterial = this.trackMaterial(
       new MeshPhysicalMaterial({
         color: OBSIDIAN_FRAME,
-        roughness: 0.56,
-        metalness: 0.28,
-        clearcoat: 0.28,
-        clearcoatRoughness: 0.32,
+        roughness: 0.48,
+        metalness: 0.42,
+        clearcoat: 0.38,
+        clearcoatRoughness: 0.26,
+        envMapIntensity: 0.52,
         flatShading: true,
       }),
     );
@@ -1131,7 +1139,7 @@ class DioramaRenderer implements DioramaRendererPort {
   private setStateColor(mesh: InstancedMesh, index: number, intensity: number, focused: boolean, rejecting: boolean): void {
     this.scratchColor.setRGB(intensity, intensity, intensity);
     if (focused) {
-      this.scratchColor.lerp(this.focusColor, -0.18);
+      this.scratchColor.lerp(this.focusColor, 0.22);
     }
     if (rejecting) {
       this.scratchColor.setRGB(1.18, 0.52, 0.54);

@@ -32,7 +32,10 @@
 - [x] 5.1 Build and launch both local routes, then exercise initial load, a ray-picked selection, one complete placement path, global-wand victory, and replay in desktop Chromium.
 - [x] 5.2 Exercise the same critical path at the Pixel 5 viewport and confirm complete Board/Shelf framing, touch picking, no document overflow, and readable scene focus.
 - [x] 5.3 Inspect renderer diagnostics after play and unmount to confirm instance counts, draw-call/pixel-ratio budgets, zero stale motion, one core authority, and disposed resources.
-- [ ] 5.4 Present the working desktop and mobile diorama in the browser for initial human visual direction review before expanding regression coverage.
+- [x] 5.4 Present the working desktop and mobile diorama in the browser for initial human visual direction review before expanding regression coverage.
+
+- [ ] 5.5 Replace the rejected octahedron/ring treatment with the approved obsidian crystal reliquary geometry, palette, lighting, integrated Shelf rails, silhouette edge, and victory beam.
+- [ ] 5.6 Re-run desktop and Pixel 5 visual/gameplay review on the redesigned scene before committing regression baselines.
 
 ## 6. Regression coverage and publishing
 

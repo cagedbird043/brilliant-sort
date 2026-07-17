@@ -60,22 +60,25 @@ This keeps the initial change boring: two presentation controllers share the aut
 
 World X follows Board columns, world Y follows inverted Board rows, and Z expresses target depth, seated/locked state, selection lift, and motion. The default `OrthographicCamera` looks nearly front-on with a small elevation and azimuth offset so thickness and lighting are visible without breaking the Tux silhouette.
 
-A camera-fit function derives the orthographic frustum from the active Board bounds, Shelf-bank bounds, viewport aspect ratio, and safe padding. Desktop may accept bounded wheel/keyboard zoom and small pointer parallax; mobile uses the fitted composition without unrestricted orbit. Restart restores the fitted camera exactly.
+A camera-fit function derives the orthographic frustum from the active Board bounds, two horizontal Shelf rails below the Board, viewport aspect ratio, and safe padding. Desktop accepts bounded wheel zoom; mobile uses the fitted composition without unrestricted orbit. Restart restores the fitted camera exactly.
 
 **Alternatives considered:** a perspective camera gives stronger depth but changes apparent cell sizes and complicates mobile picking. OrbitControls makes a good model viewer but lets players hide the Board or misread target adjacency. Orthographic projection preserves puzzle readability.
 
-### 4. Keep draw calls bounded with stable instancing
+### 4. Build an obsidian crystal reliquary with stable instancing
 
 Repeated objects use fixed-capacity `InstancedMesh` groups:
 
-- one target/socket mesh per gameplay color;
-- one gem mesh per gameplay color, with a stable `gemId -> instance index` table across Board and Shelf moves;
-- one Shelf-tray mesh for every configured slot;
-- a small fixed set of cave frame, floor, and light objects.
+- one low-contrast recessed socket/enamel-well mesh per gameplay color;
+- one chamfered square-cut crystal mesh per gameplay color, with a stable `gemId -> instance index` table across Board and Shelf moves;
+- two horizontal obsidian Shelf rails with one stable slot instance per configured position;
+- one batched exposed-edge treatment that reinforces the active-cell silhouette;
+- a small fixed set of floating slab, cave frame, victory beam, and coherent studio-light objects.
 
-A shared beveled low-poly gem geometry and color-specific opaque/emissive materials avoid transparent-sort artifacts. Selection, locked state, rejection, and focus change transforms and instance colors; they do not create per-cell meshes. Matrices and colors are updated in batches with reusable `Matrix4`, `Color`, and vector scratch objects, followed by one `needsUpdate` per changed buffer.
+The first browser review rejected the initial octahedrons: 546 small facets read as chainmail, high-contrast empty rings dominated the Tux, low-saturation colors disappeared into the dark slab, and side Shelf rails felt detached. The approved direction is an **obsidian crystal reliquary**: square pixel readability, visible but restrained bevel depth, brighter color-specific clearcoat materials, cool environment reflection, one warm key light, one cyan rim light, and glow reserved for focus, rejection, and victory.
 
-The first stable frame budget is 32 draw calls and device pixel ratio is capped at 2. Real-time shadow maps and transmission are deferred; authored key/fill/rim lights, emissive materials, and inexpensive contact-darkening geometry provide depth.
+The crystal palette increases value and chroma while preserving gameplay identity: navy `#6c7cff`, ice `#65e3ff`, coral `#ff6f78`, jade `#54dfa5`, obsidian `#30415f`, pearl `#f4f7ff`, and amber `#ffb33f`. Empty targets use darker enamel versions of the same hues instead of white outlines. Selection lifts a coherent region above the slab; locked gems sit flush inside their wells.
+
+The first stable frame budget remains 32 draw calls and device pixel ratio remains capped at 2. `MeshPhysicalMaterial` clearcoat and a locally generated environment map are allowed, but transmission, dynamic shadow maps, stochastic particles, and post-processing remain deferred. Matrices and colors are updated in batches with reusable scratch objects and one buffer upload per changed group.
 
 **Alternatives considered:** 546 independent Mesh objects simplify local state but waste draw calls, allocations, traversal, and ray tests. A custom merged shader could reduce calls further but is unnecessary under the explicit budget.
 
@@ -149,8 +152,11 @@ The renderer exposes diagnostics containing readiness, authoritative canonical i
 7. Merge the approved renderer and multi-page build to `main`. Let the existing workflow publish one commit-aligned artifact, then smoke-test all four public 2D/3D URLs.
 8. Roll back by redeploying or reverting the last known-good combined artifact; the Hong Kong symlink and Pages commit remain atomic, and no DNS rollback exists.
 
+## Visual Review Decision
+
+The 2026-07-17 desktop/mobile review rejected the first faceted-dark treatment and selected the obsidian crystal reliquary direction above. Regression screenshots MUST be generated only after the replacement materials, square-cut geometry, recessed targets, integrated Shelf rails, lighting, and victory beam receive another browser review.
+
 ## Open Questions
 
-- The exact balance between pixel-stepped faceting and polished crystal highlights will be resolved through browser visual review of the first rendered Tux.
 - Small bounded pointer parallax may improve depth on desktop, but it remains optional if it weakens picking or mobile consistency.
 - The first victory treatment will reuse the established light sweep and deterministic timing vocabulary; additional 3D camera motion or particles require separate visual approval after the core loop is stable.
