@@ -1,6 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import type { Color, LevelCellSpec, LevelSpec } from "../../src/core";
-import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../../src/fixtures";
+import {
+  chromeLevel,
+  chromeWinningTrace,
+  prismLevel,
+  prismWinningTrace,
+  tuxLevel,
+  tuxWinningTrace,
+} from "../../src/fixtures";
 import {
   replayDifferential,
   type DifferentialScenario,
@@ -130,6 +137,11 @@ const scenarios: readonly DifferentialScenario[] = [
       { type: "apply-global-wand" },
     ],
   },
+  {
+    name: "chrome-01-winning-trace",
+    level: chromeLevel,
+    commands: chromeWinningTrace,
+  },
 ];
 
 describe("differential core replay", () => {
@@ -156,5 +168,11 @@ describe("differential core replay", () => {
     const midGameWand = JSON.parse(results[8]!.final);
     expect(midGameWand.status).toBe("won");
     expect(midGameWand.shelf.gemIds).toEqual([]);
+    const chrome = JSON.parse(results[9]!.final);
+    expect(results[9]!.commandCount).toBe(chromeWinningTrace.length);
+    expect(chrome.status).toBe("won");
+    expect(chrome.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
+    expect(chrome.selection).toBeNull();
+    expect(Object.keys(chrome.board.cells)).toHaveLength(562);
   });
 });

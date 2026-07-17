@@ -1,6 +1,13 @@
 import { expect, test } from "bun:test";
 import { canonicalDump } from "../../src/core";
-import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../../src/fixtures";
+import {
+  chromeLevel,
+  chromeWinningTrace,
+  prismLevel,
+  prismWinningTrace,
+  tuxLevel,
+  tuxWinningTrace,
+} from "../../src/fixtures";
 import { diffSnapshots, replayCommandLog } from "../../src/harness";
 import { GameCoreFactory } from "../../src/wasm/game-core";
 
@@ -29,6 +36,28 @@ test("the committed Tux trace reaches victory through the WASM core", async () =
     expect(replay.finalState.status).toBe("won");
     expect(replay.finalState.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
     expect(Object.keys(replay.finalState.board.cells)).toHaveLength(546);
+    expect(replay.finalState.selection).toBeNull();
+  } finally {
+    core.destroy();
+  }
+});
+
+test("the committed Chrome select/Shelf/wand trace reaches victory through the WASM core", async () => {
+  expect(chromeWinningTrace.map((command) => command.type)).toEqual([
+    "select-board-gem",
+    "place-selection-in-shelf",
+    "apply-global-wand",
+  ]);
+
+  const core = await GameCoreFactory.load(chromeLevel);
+  try {
+    const replay = replayCommandLog(core, chromeWinningTrace);
+
+    expect(replay.transitions).toHaveLength(chromeWinningTrace.length);
+    expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
+    expect(replay.finalState.status).toBe("won");
+    expect(replay.finalState.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });
+    expect(Object.keys(replay.finalState.board.cells)).toHaveLength(562);
     expect(replay.finalState.selection).toBeNull();
   } finally {
     core.destroy();
