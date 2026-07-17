@@ -10,11 +10,24 @@ import type {
 } from "./contracts";
 
 const CELL_SIZE = 1;
-const SHELF_PITCH = 1.08;
-const SHELF_GAP = 1.45;
+const SHELF_PITCH = 0.9;
+const SHELF_GAP = 1.22;
+const SHELF_BANK_GAP = 0.92;
 const CAMERA_PADDING = 1.35;
 const CAMERA_NEAR = -40;
 const CAMERA_FAR = 80;
+
+export const DIORAMA_SHELF_PITCH = SHELF_PITCH;
+
+export interface DioramaShelfRailAnchor {
+  readonly center: WorldPoint;
+  readonly width: number;
+}
+
+export interface DioramaEdgeSegment {
+  readonly from: WorldPoint;
+  readonly to: WorldPoint;
+}
 
 export interface DioramaViewport {
   readonly width: number;
@@ -91,24 +104,32 @@ function shelfPosition(
   const bank = index < splitIndex ? 0 : 1;
   const bankStart = bank === 0 ? 0 : splitIndex;
   const bankLength = bank === 0 ? splitIndex : capacity - splitIndex;
+  const firstBankLength = splitIndex;
+  const secondBankLength = capacity - splitIndex;
   const localIndex = index - bankStart;
+  const boardCenterX = (boardBounds.minX + boardBounds.maxX) / 2;
+  const boardMinY = boardBounds.minY;
 
   if (mode === "landscape") {
-    const x =
+    const firstSpan = Math.max(0, firstBankLength - 1) * SHELF_PITCH;
+    const secondSpan = Math.max(0, secondBankLength - 1) * SHELF_PITCH;
+    const totalSpan = firstSpan + SHELF_BANK_GAP + secondSpan;
+    const bankSpan = bank === 0 ? firstSpan : secondSpan;
+    const bankCenter =
       bank === 0
-        ? boardBounds.minX - SHELF_GAP
-        : boardBounds.maxX + SHELF_GAP;
+        ? boardCenterX - totalSpan / 2 + bankSpan / 2
+        : boardCenterX + totalSpan / 2 - bankSpan / 2;
     return {
-      x,
-      y: ((bankLength - 1) / 2 - localIndex) * SHELF_PITCH,
-      z: -0.06,
+      x: bankCenter + (localIndex - (bankLength - 1) / 2) * SHELF_PITCH,
+      y: boardMinY - SHELF_GAP,
+      z: -0.08,
     };
   }
 
   return {
-    x: (localIndex - (bankLength - 1) / 2) * SHELF_PITCH,
-    y: boardBounds.minY - SHELF_GAP - bank * SHELF_PITCH,
-    z: -0.06,
+    x: boardCenterX + (localIndex - (bankLength - 1) / 2) * SHELF_PITCH,
+    y: boardMinY - SHELF_GAP - bank * SHELF_BANK_GAP,
+    z: -0.08,
   };
 }
 
@@ -171,6 +192,77 @@ export function createDioramaLayout(
       ...shelfSlots.map((slot) => slot.position),
     ]),
   };
+}
+
+/**
+ * Returns the visual anchors for the two horizontal Shelf rails. Anchors are
+ * derived from slot positions so the renderer never re-implements responsive
+ * bank spacing.
+ */
+export function getDioramaShelfRailAnchors(
+  layout: DioramaSceneLayout,
+): readonly DioramaShelfRailAnchor[] {
+  const splitIndex = Math.ceil(layout.shelfSlots.length / 2);
+  const anchors: DioramaShelfRailAnchor[] = [];
+  for (const [start, end] of [
+    [0, splitIndex],
+    [splitIndex, layout.shelfSlots.length],
+  ] as const) {
+    const slots = layout.shelfSlots.slice(start, end);
+    if (slots.length === 0) {
+      continue;
+    }
+    const minX = Math.min(...slots.map((slot) => slot.position.x));
+    const maxX = Math.max(...slots.map((slot) => slot.position.x));
+    const centerY = slots.reduce((sum, slot) => sum + slot.position.y, 0) / slots.length;
+    anchors.push({
+      center: { x: (minX + maxX) / 2, y: centerY, z: -0.15 },
+      width: Math.max(SHELF_PITCH, maxX - minX + SHELF_PITCH),
+    });
+  }
+  return anchors;
+}
+
+/**
+ * Computes one batched line segment for every exposed edge of the active Board
+ * silhouette. The result is pure world data and remains stable for a level.
+ */
+export function getDioramaExposedEdgeSegments(state: GameState): readonly DioramaEdgeSegment[] {
+  const segments: DioramaEdgeSegment[] = [];
+  const hasCell = (row: number, col: number): boolean =>
+    Object.prototype.hasOwnProperty.call(state.board.cells, keyOf({ row, col }));
+  const coordinates = boardCoordinates(state);
+  for (const coord of coordinates) {
+    const point = boardPoint(state, coord);
+    const edges: readonly [Coord, WorldPoint, WorldPoint][] = [
+      [
+        { row: coord.row - 1, col: coord.col },
+        { x: point.x - CELL_SIZE / 2, y: point.y + CELL_SIZE / 2, z: 0.13 },
+        { x: point.x + CELL_SIZE / 2, y: point.y + CELL_SIZE / 2, z: 0.13 },
+      ],
+      [
+        { row: coord.row, col: coord.col + 1 },
+        { x: point.x + CELL_SIZE / 2, y: point.y + CELL_SIZE / 2, z: 0.13 },
+        { x: point.x + CELL_SIZE / 2, y: point.y - CELL_SIZE / 2, z: 0.13 },
+      ],
+      [
+        { row: coord.row + 1, col: coord.col },
+        { x: point.x + CELL_SIZE / 2, y: point.y - CELL_SIZE / 2, z: 0.13 },
+        { x: point.x - CELL_SIZE / 2, y: point.y - CELL_SIZE / 2, z: 0.13 },
+      ],
+      [
+        { row: coord.row, col: coord.col - 1 },
+        { x: point.x - CELL_SIZE / 2, y: point.y - CELL_SIZE / 2, z: 0.13 },
+        { x: point.x - CELL_SIZE / 2, y: point.y + CELL_SIZE / 2, z: 0.13 },
+      ],
+    ];
+    for (const [neighbor, from, to] of edges) {
+      if (!hasCell(neighbor.row, neighbor.col)) {
+        segments.push({ from, to });
+      }
+    }
+  }
+  return segments;
 }
 
 /**

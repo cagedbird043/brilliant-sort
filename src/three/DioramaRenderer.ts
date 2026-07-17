@@ -1,23 +1,27 @@
 import {
-  AmbientLight,
+  ACESFilmicToneMapping,
+  AdditiveBlending,
   BoxGeometry,
+  BufferAttribute,
   BufferGeometry,
   Color as ThreeColor,
-  CylinderGeometry,
   DirectionalLight,
-  DodecahedronGeometry,
+  DoubleSide,
   DynamicDrawUsage,
   Euler,
   Group,
+  HemisphereLight,
   InstancedMesh,
+  LineBasicMaterial,
+  LineSegments,
   Material,
   Matrix4,
   Mesh,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
-  OctahedronGeometry,
   OrthographicCamera,
+  PMREMGenerator,
   PlaneGeometry,
-  PointLight,
   Quaternion,
   Raycaster,
   Scene,
@@ -26,6 +30,8 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
+import type { Texture } from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { keyOf } from "../core/coords";
 import type { CoreTransition } from "../core/port";
 import type { Color as GameColor, GameCommand, GameState, GemId } from "../core/types";
@@ -46,7 +52,9 @@ import {
   createDioramaInstanceIdentity,
   createDioramaLayout,
   dioramaTargetKey,
+  getDioramaExposedEdgeSegments,
   getDioramaLayoutMode,
+  getDioramaShelfRailAnchors,
   type DioramaInstanceIdentity,
   type DioramaViewport,
 } from "./layout";
@@ -57,13 +65,13 @@ import {
 } from "./motion";
 
 const PALETTE: Record<GameColor, number> = {
-  navy: 0x5567c2,
-  ice: 0x4ca9c8,
-  coral: 0xbb686c,
-  jade: 0x579b79,
-  obsidian: 0x33425d,
-  pearl: 0xdce4ef,
-  amber: 0xd47d1f,
+  navy: 0x6c7cff,
+  ice: 0x65e3ff,
+  coral: 0xff6f78,
+  jade: 0x54dfa5,
+  obsidian: 0x30415f,
+  pearl: 0xf4f7ff,
+  amber: 0xffb33f,
 };
 const GAME_COLORS: readonly GameColor[] = [
   "navy",
@@ -74,17 +82,19 @@ const GAME_COLORS: readonly GameColor[] = [
   "pearl",
   "amber",
 ];
-const VOID = 0x050814;
-const WORKBENCH = 0x111a32;
-const FOCUS_CYAN = 0x4ca9c8;
-const REJECTION_CORAL = 0xbb686c;
+const VOID = 0x070b16;
+const OBSIDIAN_SLAB = 0x111a2b;
+const OBSIDIAN_FRAME = 0x1a2844;
+const EXPOSED_EDGE = 0x8fa8ce;
 const MAX_PIXEL_RATIO = 2;
 const REJECTION_DURATION_MS = 260;
-const GEM_SCALE = 0.72;
-const LOCKED_GEM_SCALE = 0.63;
-const SELECTED_GEM_LIFT = 0.22;
+const GEM_SCALE = 0.86;
+const LOCKED_GEM_SCALE = 0.81;
+const SELECTED_GEM_LIFT = 0.24;
 const FOCUS_GEM_LIFT = 0.11;
 const HIDDEN_SCALE = 0.00001;
+const CAMERA_AZIMUTH = 0.68;
+const CAMERA_ELEVATION = 0.86;
 
 interface SocketGroup {
   readonly mesh: InstancedMesh;
@@ -108,14 +118,6 @@ interface GemRenderState {
   readonly selectedGemIds: ReadonlySet<GemId>;
 }
 
-function stableHash(value: string): number {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
 
 function levelSignature(state: GameState): string {
   const cells = Object.entries(state.board.cells)
@@ -129,10 +131,89 @@ function levelSignature(state: GameState): string {
   return `${state.levelId}|${state.board.rows}x${state.board.cols}|${state.shelf.capacity}|${cells}|${gems}`;
 }
 
+function darkEnamel(color: number): ThreeColor {
+  return new ThreeColor(color).multiplyScalar(0.28);
+}
+
+function createChamferedSquareGeometry(size: number, depth: number, bevel: number): BufferGeometry {
+  const half = size / 2;
+  const clip = half * 0.24;
+  const outline = [
+    [-half + clip, -half],
+    [half - clip, -half],
+    [half, -half + clip],
+    [half, half - clip],
+    [half - clip, half],
+    [-half + clip, half],
+    [-half, half - clip],
+    [-half, -half + clip],
+  ] as const;
+  const layers = [
+    { z: -depth / 2, scale: 0.78 },
+    { z: -depth / 2 + bevel, scale: 1 },
+    { z: depth / 2 - bevel, scale: 1 },
+    { z: depth / 2, scale: 0.84 },
+  ] as const;
+  const vertices: number[] = [];
+  for (const layer of layers) {
+    for (const [x, y] of outline) {
+      vertices.push(x * layer.scale, y * layer.scale, layer.z);
+    }
+  }
+  const bottomCenter = vertices.length / 3;
+  vertices.push(0, 0, -depth / 2);
+  const topCenter = vertices.length / 3;
+  vertices.push(0, 0, depth / 2);
+  const indices: number[] = [];
+  for (let layer = 0; layer < layers.length - 1; layer += 1) {
+    const from = layer * outline.length;
+    const to = (layer + 1) * outline.length;
+    for (let index = 0; index < outline.length; index += 1) {
+      const next = (index + 1) % outline.length;
+      const a = from + index;
+      const b = from + next;
+      const c = to + next;
+      const d = to + index;
+      indices.push(a, b, d, b, c, d);
+    }
+  }
+  const firstLayer = 0;
+  const lastLayer = (layers.length - 1) * outline.length;
+  for (let index = 0; index < outline.length; index += 1) {
+    const next = (index + 1) % outline.length;
+    indices.push(bottomCenter, firstLayer + next, firstLayer + index);
+    indices.push(topCenter, lastLayer + index, lastLayer + next);
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(new Float32Array(vertices), 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
+function createEdgeGeometry(state: GameState): BufferGeometry {
+  const segments = getDioramaExposedEdgeSegments(state);
+  const positions = new Float32Array(segments.length * 6);
+  segments.forEach((segment, index) => {
+    const offset = index * 6;
+    positions[offset] = segment.from.x;
+    positions[offset + 1] = segment.from.y;
+    positions[offset + 2] = segment.from.z;
+    positions[offset + 3] = segment.to.x;
+    positions[offset + 4] = segment.to.y;
+    positions[offset + 5] = segment.to.z;
+  });
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(positions, 3));
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
 /**
- * Imperative native Three.js renderer. Its only mutable game-facing input is a
- * GameState snapshot supplied by the authoritative core; no scene object owns
- * selection, connectivity, placement, or victory rules.
+ * Imperative native Three.js renderer. Its only mutable game-facing input is
+ * a GameState snapshot supplied by the authoritative core; no scene object
+ * owns selection, connectivity, placement, or victory rules.
  */
 class DioramaRenderer implements DioramaRendererPort {
   private readonly scene = new Scene();
@@ -147,8 +228,8 @@ class DioramaRenderer implements DioramaRendererPort {
   private readonly scratchEuler = new Euler();
   private readonly scratchColor = new ThreeColor();
   private readonly scratchProjection = new Vector3();
-  private readonly focusColor = new ThreeColor(FOCUS_CYAN);
-  private readonly rejectionColor = new ThreeColor(REJECTION_CORAL);
+  private readonly focusColor = new ThreeColor(0x65e3ff);
+  private readonly rejectionColor = new ThreeColor(0xff6f78);
   private readonly resizeObserver: ResizeObserver;
   private readonly contextLostListener: (event: Event) => void;
   private readonly contextRestoredListener: () => void;
@@ -165,16 +246,27 @@ class DioramaRenderer implements DioramaRendererPort {
   private readonly caveGroup = new Group();
   private readonly floor: Mesh;
   private readonly backdrop: Mesh;
-  private readonly caveRocks: InstancedMesh;
+  private readonly reliquaryFrame: InstancedMesh;
   private readonly wand: Group;
-  private readonly victoryLight = new PointLight(FOCUS_CYAN, 0, 18);
-  private readonly keyLight = new DirectionalLight(0xdce4ef, 2.2);
-  private readonly fillLight = new DirectionalLight(FOCUS_CYAN, 1.15);
+  private readonly victoryBeam: Mesh;
+  private readonly keyLight = new DirectionalLight(0xffd0a5, 2.25);
+  private readonly rimLight = new DirectionalLight(0x65e3ff, 1.35);
+  private readonly hemisphereLight = new HemisphereLight(0x30415f, 0x0a1020, 1.15);
+  private readonly pmremGenerator: PMREMGenerator;
+  private readonly roomEnvironment: RoomEnvironment;
+  private readonly environmentTexture: Texture;
+  private readonly gemGeometry: BufferGeometry;
+  private readonly socketGeometry: BufferGeometry;
+  private readonly railGeometry: BufferGeometry;
 
   private currentState: GameState | null = null;
   private identity: DioramaInstanceIdentity | null = null;
   private signature: string | null = null;
   private layoutMode: DioramaLayoutMode = "landscape";
+  private currentLayout: DioramaSceneLayout | null = null;
+  private shelfMesh: InstancedMesh | null = null;
+  private shelfRailMesh: InstancedMesh | null = null;
+  private edgeLines: LineSegments | null = null;
   private cameraFit: DioramaCameraFit = {
     left: -1,
     right: 1,
@@ -196,59 +288,122 @@ class DioramaRenderer implements DioramaRendererPort {
   private disposed = false;
   private contextLost = false;
   private sceneReady = false;
+  private reducedMotion = false;
 
   constructor(canvas: HTMLCanvasElement, options: DioramaRendererOptions) {
     this.options = options;
-    this.renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
+    this.renderer = new WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
     this.renderer.outputColorSpace = SRGBColorSpace;
+    this.renderer.toneMapping = ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.setClearColor(VOID, 1);
     this.scene.background = new ThreeColor(VOID);
-    this.camera.position.set(0.9, 1.25, 25);
-    this.camera.lookAt(0, 0, 0);
 
-    const floorGeometry = this.trackGeometry(new BoxGeometry(1, 1, 0.13));
+    this.pmremGenerator = new PMREMGenerator(this.renderer);
+    this.roomEnvironment = new RoomEnvironment();
+    this.environmentTexture = this.pmremGenerator.fromScene(this.roomEnvironment).texture;
+    this.scene.environment = this.environmentTexture;
+
+    this.gemGeometry = this.trackGeometry(createChamferedSquareGeometry(0.84, 0.46, 0.09));
+    this.socketGeometry = this.trackGeometry(createChamferedSquareGeometry(0.98, 0.14, 0.055));
+    this.railGeometry = this.trackGeometry(new BoxGeometry(1, 0.18, 0.12));
+
+    const floorGeometry = this.trackGeometry(new BoxGeometry(1, 1, 0.14));
     const floorMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: WORKBENCH, roughness: 0.92, metalness: 0.04, flatShading: true }),
+      new MeshPhysicalMaterial({
+        color: OBSIDIAN_SLAB,
+        roughness: 0.78,
+        metalness: 0.18,
+        clearcoat: 0.16,
+        clearcoatRoughness: 0.52,
+        flatShading: true,
+      }),
     );
     this.floor = new Mesh(floorGeometry, floorMaterial);
     this.floor.position.z = -0.3;
 
     const backdropGeometry = this.trackGeometry(new PlaneGeometry(1, 1));
     const backdropMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: 0x0b142a, roughness: 1, metalness: 0, flatShading: true }),
+      new MeshStandardMaterial({ color: 0x0c1428, roughness: 0.96, metalness: 0 }),
     );
     this.backdrop = new Mesh(backdropGeometry, backdropMaterial);
-    this.backdrop.position.z = -0.72;
+    this.backdrop.position.z = -0.76;
 
-    const rockGeometry = this.trackGeometry(new DodecahedronGeometry(0.82, 0));
-    const rockMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: 0x1a3154, roughness: 0.78, metalness: 0.12, flatShading: true }),
+    const frameMaterial = this.trackMaterial(
+      new MeshPhysicalMaterial({
+        color: OBSIDIAN_FRAME,
+        roughness: 0.56,
+        metalness: 0.28,
+        clearcoat: 0.28,
+        clearcoatRoughness: 0.32,
+        flatShading: true,
+      }),
     );
-    this.caveRocks = new InstancedMesh(rockGeometry, rockMaterial, 4);
-    this.caveRocks.instanceMatrix.setUsage(DynamicDrawUsage);
+    const frameGeometry = this.trackGeometry(new BoxGeometry(1, 1, 0.15));
+    this.reliquaryFrame = new InstancedMesh(frameGeometry, frameMaterial, 4);
+    this.reliquaryFrame.instanceMatrix.setUsage(DynamicDrawUsage);
+    this.reliquaryFrame.frustumCulled = false;
 
-    const wandStemGeometry = this.trackGeometry(new CylinderGeometry(0.065, 0.09, 1.18, 5));
+    const wandStemGeometry = this.trackGeometry(new BoxGeometry(0.08, 1.12, 0.08));
     const wandStemMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: 0xdce4ef, roughness: 0.46, metalness: 0.42, flatShading: true }),
+      new MeshPhysicalMaterial({
+        color: 0xf4f7ff,
+        roughness: 0.36,
+        metalness: 0.42,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.24,
+      }),
     );
     const wandStem = new Mesh(wandStemGeometry, wandStemMaterial);
     wandStem.rotation.z = -0.48;
-    const wandTipGeometry = this.trackGeometry(new OctahedronGeometry(0.22, 0));
     const wandTipMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: FOCUS_CYAN, emissive: 0x12263a, roughness: 0.35, metalness: 0.2, flatShading: true }),
+      new MeshPhysicalMaterial({
+        color: PALETTE.ice,
+        roughness: 0.25,
+        metalness: 0.18,
+        clearcoat: 0.48,
+        clearcoatRoughness: 0.18,
+        emissive: new ThreeColor(PALETTE.ice).multiplyScalar(0.035),
+        emissiveIntensity: 0.65,
+        flatShading: true,
+      }),
     );
-    const wandTip = new Mesh(wandTipGeometry, wandTipMaterial);
-    wandTip.position.set(0.27, 0.53, 0.06);
+    const wandTip = new Mesh(this.gemGeometry, wandTipMaterial);
+    wandTip.scale.setScalar(0.42);
+    wandTip.position.set(0.26, 0.54, 0.08);
     this.wand = new Group();
     this.wand.add(wandStem, wandTip);
 
-    this.caveGroup.add(this.backdrop, this.floor, this.caveRocks, this.wand);
+    const beamGeometry = this.trackGeometry(new PlaneGeometry(1, 1));
+    const beamMaterial = this.trackMaterial(
+      new MeshPhysicalMaterial({
+        color: 0x9edfff,
+        emissive: new ThreeColor(0x65e3ff),
+        emissiveIntensity: 1.25,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: AdditiveBlending,
+        roughness: 0.22,
+        metalness: 0,
+        side: DoubleSide,
+      }),
+    );
+    this.victoryBeam = new Mesh(beamGeometry, beamMaterial);
+    this.victoryBeam.renderOrder = 7;
+
+    this.caveGroup.add(this.backdrop, this.floor, this.reliquaryFrame, this.wand, this.victoryBeam);
     this.scene.add(this.caveGroup);
-    this.scene.add(this.victoryLight);
-    this.scene.add(new AmbientLight(0x7f92b2, 0.86));
-    this.keyLight.position.set(-8, 12, 18);
-    this.fillLight.position.set(10, 2, 12);
-    this.scene.add(this.keyLight, this.fillLight);
+    this.scene.add(this.hemisphereLight, this.keyLight, this.rimLight);
+    this.keyLight.position.set(-8, 11, 18);
+    this.rimLight.position.set(8, 3, -10);
+    this.camera.position.set(CAMERA_AZIMUTH, CAMERA_ELEVATION, 25);
+    this.camera.lookAt(0, 0, 0);
 
     this.contextLostListener = (event) => {
       event.preventDefault();
@@ -268,6 +423,7 @@ class DioramaRenderer implements DioramaRendererPort {
     };
     canvas.addEventListener("webglcontextlost", this.contextLostListener);
     canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+
     this.wheelListener = (event) => {
       if (this.disposed || this.layoutMode !== "landscape") {
         return;
@@ -294,7 +450,6 @@ class DioramaRenderer implements DioramaRendererPort {
     this.resizeObserver.observe(canvas);
     const rect = canvas.getBoundingClientRect();
     this.resize(rect.width || canvas.clientWidth || 1, rect.height || canvas.clientHeight || 1);
-
   }
 
   renderState(state: GameState): void {
@@ -314,25 +469,19 @@ class DioramaRenderer implements DioramaRendererPort {
       this.signature = nextSignature;
       this.identity = createDioramaInstanceIdentity(state);
     }
-    const layout = createDioramaLayout(state, this.layoutMode);
-    this.currentLayout = layout;
-
+    this.currentLayout = createDioramaLayout(state, this.layoutMode);
     if (needsRebuild) {
       this.buildGameplayMeshes(state);
     }
     if (needsRebuild || modeChanged) {
-      this.updateStaticLayout(state);
+      this.updateStaticLayout();
     }
     this.applyStateTransforms();
     this.sceneReady = true;
     this.render();
   }
 
-  playTransition(
-    before: GameState,
-    transition: CoreTransition,
-    command: GameCommand,
-  ): Promise<void> {
+  playTransition(before: GameState, transition: CoreTransition, command: GameCommand): Promise<void> {
     if (this.disposed || this.contextLost) {
       return Promise.resolve();
     }
@@ -352,7 +501,7 @@ class DioramaRenderer implements DioramaRendererPort {
     this.applyStateTransforms();
 
     if (this.reducedMotion || plan.durationMs === 0) {
-      this.victoryLight.intensity = 0;
+      this.resetVictoryPresentation();
       this.render();
       return Promise.resolve();
     }
@@ -437,7 +586,7 @@ class DioramaRenderer implements DioramaRendererPort {
     if (reduced) {
       this.finishActiveMotion();
       this.applyStateTransforms();
-      this.victoryLight.intensity = 0;
+      this.resetVictoryPresentation();
       this.render();
     }
   }
@@ -512,16 +661,15 @@ class DioramaRenderer implements DioramaRendererPort {
     this.renderer.domElement.removeEventListener("webglcontextrestored", this.contextRestoredListener);
     this.renderer.domElement.removeEventListener("wheel", this.wheelListener);
     this.clearGameplayMeshes();
+    this.roomEnvironment.dispose();
+    this.environmentTexture.dispose();
+    this.pmremGenerator.dispose();
     this.ownedGeometries.forEach((geometry) => geometry.dispose());
     this.ownedMaterials.forEach((material) => material.dispose());
     this.ownedGeometries.clear();
     this.ownedMaterials.clear();
     this.renderer.dispose();
-    this.renderer.forceContextLoss();
   }
-
-  private currentLayout: DioramaSceneLayout | null = null;
-  private reducedMotion = false;
 
   private trackGeometry<T extends BufferGeometry>(geometry: T): T {
     this.ownedGeometries.add(geometry);
@@ -557,7 +705,7 @@ class DioramaRenderer implements DioramaRendererPort {
     this.layoutMode = nextMode;
     this.currentLayout = createDioramaLayout(this.currentState, this.layoutMode);
     if (modeChanged) {
-      this.updateStaticLayout(this.currentState);
+      this.updateStaticLayout();
     }
     this.applyStateTransforms();
     this.render();
@@ -567,33 +715,24 @@ class DioramaRenderer implements DioramaRendererPort {
     if (!this.currentLayout) {
       return;
     }
-    const socketGeometry = this.trackGeometry(new CylinderGeometry(0.45, 0.52, 0.13, 6));
-    socketGeometry.rotateX(Math.PI / 2);
-    const gemGeometry = this.trackGeometry(new OctahedronGeometry(0.42, 0));
-    const shelfGeometry = this.trackGeometry(new BoxGeometry(0.84, 0.84, 0.15));
-    const shelfMaterial = this.trackMaterial(
-      new MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.74,
-        metalness: 0.16,
-        flatShading: true,
-      }),
-    );
-
     for (const color of GAME_COLORS) {
       const cells = this.currentLayout.boardCells.filter(
         (cell) => state.board.cells[keyOf(cell.coord)]?.targetColor === color,
       );
       if (cells.length > 0) {
         const socketMaterial = this.trackMaterial(
-          new MeshStandardMaterial({
-            color: 0xffffff,
-            roughness: 0.72,
-            metalness: 0.12,
+          new MeshPhysicalMaterial({
+            color: darkEnamel(PALETTE[color]),
+            roughness: 0.58,
+            metalness: 0.2,
+            clearcoat: 0.24,
+            clearcoatRoughness: 0.38,
+            emissive: darkEnamel(PALETTE[color]).multiplyScalar(0.018),
+            emissiveIntensity: 0.55,
             flatShading: true,
           }),
         );
-        const socketMesh = new InstancedMesh(socketGeometry, socketMaterial, cells.length);
+        const socketMesh = new InstancedMesh(this.socketGeometry, socketMaterial, cells.length);
         socketMesh.instanceMatrix.setUsage(DynamicDrawUsage);
         socketMesh.frustumCulled = false;
         const targets = cells.map((cell) => ({
@@ -611,14 +750,18 @@ class DioramaRenderer implements DioramaRendererPort {
         .sort();
       if (gemIds.length > 0) {
         const gemMaterial = this.trackMaterial(
-          new MeshStandardMaterial({
-            color: 0xffffff,
-            roughness: 0.38,
-            metalness: 0.2,
+          new MeshPhysicalMaterial({
+            color: PALETTE[color],
+            roughness: 0.3,
+            metalness: 0.14,
+            clearcoat: 0.46,
+            clearcoatRoughness: 0.2,
+            emissive: new ThreeColor(PALETTE[color]).multiplyScalar(0.018),
+            emissiveIntensity: 0.62,
             flatShading: true,
           }),
         );
-        const gemMesh = new InstancedMesh(gemGeometry, gemMaterial, gemIds.length);
+        const gemMesh = new InstancedMesh(this.gemGeometry, gemMaterial, gemIds.length);
         gemMesh.instanceMatrix.setUsage(DynamicDrawUsage);
         gemMesh.frustumCulled = false;
         const instanceByGemId = new Map<GemId, number>();
@@ -633,17 +776,51 @@ class DioramaRenderer implements DioramaRendererPort {
       }
     }
 
-    const shelfMesh = new InstancedMesh(shelfGeometry, shelfMaterial, this.currentLayout.shelfSlots.length);
-    shelfMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-    shelfMesh.frustumCulled = false;
-    const shelfTargets = this.currentLayout.shelfSlots.map((slot) => ({ kind: "shelf" as const, index: slot.index }));
-    this.shelfMesh = shelfMesh;
-    this.pickTargets.set(shelfMesh, shelfTargets);
-    this.pickMeshes.push(shelfMesh);
-    this.scene.add(shelfMesh);
-  }
+    const shelfMaterial = this.trackMaterial(
+      new MeshPhysicalMaterial({
+        color: PALETTE.obsidian,
+        roughness: 0.5,
+        metalness: 0.3,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.3,
+        flatShading: true,
+      }),
+    );
+    this.shelfMesh = new InstancedMesh(this.socketGeometry, shelfMaterial, this.currentLayout.shelfSlots.length);
+    this.shelfMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+    this.shelfMesh.frustumCulled = false;
+    const shelfTargets = this.currentLayout.shelfSlots.map((slot) => ({
+      kind: "shelf" as const,
+      index: slot.index,
+    }));
+    this.pickTargets.set(this.shelfMesh, shelfTargets);
+    this.pickMeshes.push(this.shelfMesh);
+    this.scene.add(this.shelfMesh);
 
-  private shelfMesh: InstancedMesh | null = null;
+    const railMaterial = this.trackMaterial(
+      new MeshPhysicalMaterial({
+        color: 0x263653,
+        roughness: 0.62,
+        metalness: 0.28,
+        clearcoat: 0.22,
+        clearcoatRoughness: 0.38,
+        flatShading: true,
+      }),
+    );
+    this.shelfRailMesh = new InstancedMesh(this.railGeometry, railMaterial, 2);
+    this.shelfRailMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+    this.shelfRailMesh.frustumCulled = false;
+    this.scene.add(this.shelfRailMesh);
+
+    const edgeGeometry = this.trackGeometry(createEdgeGeometry(state));
+    const edgeMaterial = this.trackMaterial(
+      new LineBasicMaterial({ color: EXPOSED_EDGE, transparent: true, opacity: 0.42 }),
+    );
+    this.edgeLines = new LineSegments(edgeGeometry, edgeMaterial);
+    this.edgeLines.frustumCulled = false;
+    this.edgeLines.renderOrder = 5;
+    this.scene.add(this.edgeLines);
+  }
 
   private clearGameplayMeshes(): void {
     for (const group of this.socketGroups.values()) {
@@ -656,6 +833,23 @@ class DioramaRenderer implements DioramaRendererPort {
       this.disposeGameplayMesh(this.shelfMesh);
       this.shelfMesh = null;
     }
+    if (this.shelfRailMesh) {
+      this.disposeGameplayMesh(this.shelfRailMesh);
+      this.shelfRailMesh = null;
+    }
+    if (this.edgeLines) {
+      this.scene.remove(this.edgeLines);
+      if (this.ownedGeometries.delete(this.edgeLines.geometry)) {
+        this.edgeLines.geometry.dispose();
+      }
+      const materials = Array.isArray(this.edgeLines.material) ? this.edgeLines.material : [this.edgeLines.material];
+      materials.forEach((material) => {
+        if (this.ownedMaterials.delete(material)) {
+          material.dispose();
+        }
+      });
+      this.edgeLines = null;
+    }
     this.socketGroups.clear();
     this.gemGroups.clear();
     this.gemGroupById.clear();
@@ -665,9 +859,6 @@ class DioramaRenderer implements DioramaRendererPort {
 
   private disposeGameplayMesh(mesh: InstancedMesh): void {
     this.scene.remove(mesh);
-    if (this.ownedGeometries.delete(mesh.geometry)) {
-      mesh.geometry.dispose();
-    }
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     materials.forEach((material) => {
       if (this.ownedMaterials.delete(material)) {
@@ -676,7 +867,7 @@ class DioramaRenderer implements DioramaRendererPort {
     });
   }
 
-  private updateStaticLayout(state: GameState): void {
+  private updateStaticLayout(): void {
     if (!this.currentLayout) {
       return;
     }
@@ -692,7 +883,7 @@ class DioramaRenderer implements DioramaRendererPort {
           return;
         }
         this.setInstanceTransform(group.mesh, index, cell.target, 1, 0);
-        this.setScaledColor(group.mesh, index, PALETTE[color], 0.36);
+        this.setStateColor(group.mesh, index, 1, false, false);
       });
       group.mesh.instanceMatrix.needsUpdate = true;
       if (group.mesh.instanceColor) {
@@ -704,7 +895,7 @@ class DioramaRenderer implements DioramaRendererPort {
     if (this.shelfMesh) {
       this.currentLayout.shelfSlots.forEach((slot, index) => {
         this.setInstanceTransform(this.shelfMesh!, index, slot.position, 1, 0);
-        this.setScaledColor(this.shelfMesh!, index, WORKBENCH, 1);
+        this.setStateColor(this.shelfMesh!, index, 0.9, false, false);
       });
       this.shelfMesh.instanceMatrix.needsUpdate = true;
       if (this.shelfMesh.instanceColor) {
@@ -713,30 +904,76 @@ class DioramaRenderer implements DioramaRendererPort {
       this.shelfMesh.computeBoundingSphere();
     }
 
+    if (this.shelfRailMesh) {
+      const rails = getDioramaShelfRailAnchors(this.currentLayout);
+      rails.forEach((rail, index) => {
+        this.setInstanceTransformXYZ(
+          this.shelfRailMesh!,
+          index,
+          rail.center,
+          rail.width,
+          1,
+          1,
+          0,
+        );
+      });
+      this.shelfRailMesh.instanceMatrix.needsUpdate = true;
+      this.shelfRailMesh.computeBoundingSphere();
+    }
+
     const bounds = this.currentLayout.bounds;
-    const width = bounds.maxX - bounds.minX + 2.5;
-    const height = bounds.maxY - bounds.minY + 2.5;
+    const width = bounds.maxX - bounds.minX + 2.6;
+    const height = bounds.maxY - bounds.minY + 2.7;
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
-    this.floor.position.set(centerX, centerY, -0.31);
+    this.floor.position.set(centerX, centerY, -0.3);
     this.floor.scale.set(width, height, 1);
-    this.backdrop.position.set(centerX, centerY, -0.74);
+    this.backdrop.position.set(centerX, centerY, -0.78);
     this.backdrop.scale.set(width, height, 1);
 
-    const rockPositions = [
-      { x: bounds.minX - 0.86, y: bounds.maxY + 0.18, z: -0.38, scale: 1.12 },
-      { x: bounds.maxX + 0.84, y: bounds.maxY + 0.28, z: -0.42, scale: 0.94 },
-      { x: bounds.minX - 0.68, y: bounds.minY - 0.56, z: -0.4, scale: 0.74 },
-      { x: bounds.maxX + 0.72, y: bounds.minY - 0.48, z: -0.45, scale: 0.82 },
-    ];
-    rockPositions.forEach((rock, index) => {
-      this.setInstanceTransform(this.caveRocks, index, rock, rock.scale, stableHash(`${index}`) * 0.0008);
-    });
-    this.caveRocks.instanceMatrix.needsUpdate = true;
-    this.caveRocks.computeBoundingSphere();
-    this.wand.position.set(bounds.maxX - 0.85, bounds.maxY + 0.18, 0.28);
+    const frameWidth = bounds.maxX - bounds.minX + 1.15;
+    const frameHeight = bounds.maxY - bounds.minY + 1.15;
+    this.setInstanceTransformXYZ(
+      this.reliquaryFrame,
+      0,
+      { x: centerX, y: bounds.maxY + 0.56, z: -0.2 },
+      frameWidth,
+      0.14,
+      1,
+      0,
+    );
+    this.setInstanceTransformXYZ(
+      this.reliquaryFrame,
+      1,
+      { x: centerX, y: bounds.minY - 0.56, z: -0.2 },
+      frameWidth,
+      0.14,
+      1,
+      0,
+    );
+    this.setInstanceTransformXYZ(
+      this.reliquaryFrame,
+      2,
+      { x: bounds.minX - 0.56, y: centerY, z: -0.2 },
+      0.14,
+      frameHeight,
+      1,
+      0,
+    );
+    this.setInstanceTransformXYZ(
+      this.reliquaryFrame,
+      3,
+      { x: bounds.maxX + 0.56, y: centerY, z: -0.2 },
+      0.14,
+      frameHeight,
+      1,
+      0,
+    );
+    this.reliquaryFrame.instanceMatrix.needsUpdate = true;
+    this.reliquaryFrame.computeBoundingSphere();
+
+    this.wand.position.set(bounds.maxX - 0.8, bounds.maxY + 0.36, 0.24);
     this.applyCameraFit();
-    void state;
   }
 
   private applyCameraFit(): void {
@@ -752,7 +989,7 @@ class DioramaRenderer implements DioramaRendererPort {
     this.camera.far = this.cameraFit.far;
     const centerX = (this.cameraFit.left + this.cameraFit.right) / 2;
     const centerY = (this.cameraFit.top + this.cameraFit.bottom) / 2;
-    this.camera.position.set(centerX + 0.9, centerY + 1.25, 25);
+    this.camera.position.set(centerX + CAMERA_AZIMUTH, centerY + CAMERA_ELEVATION, 25);
     this.camera.lookAt(centerX, centerY, 0);
     this.camera.zoom = this.cameraZoom;
     this.camera.updateProjectionMatrix();
@@ -764,7 +1001,7 @@ class DioramaRenderer implements DioramaRendererPort {
       return;
     }
     this.wand.rotation.z = 0;
-    this.wand.position.z = 0.28;
+    this.wand.position.z = 0.24;
     this.applySocketTransforms();
     this.applyShelfTransforms();
     this.applyGemTransforms();
@@ -776,7 +1013,7 @@ class DioramaRenderer implements DioramaRendererPort {
     }
     const rejectingKey = this.rejectedTarget && this.isRejecting() ? dioramaTargetKey(this.rejectedTarget) : null;
     const focusedKey = this.focusedTarget ? dioramaTargetKey(this.focusedTarget) : null;
-    for (const [color, group] of this.socketGroups) {
+    for (const group of this.socketGroups.values()) {
       group.targets.forEach((target, index) => {
         if (target.kind !== "board") {
           return;
@@ -791,8 +1028,8 @@ class DioramaRenderer implements DioramaRendererPort {
         const focused = targetKey === focusedKey;
         const rejecting = targetKey === rejectingKey;
         const pulse = rejecting ? this.rejectionPulse() : 1;
-        this.setInstanceTransform(group.mesh, index, cell.target, (focused ? 1.11 : 1) * pulse, 0);
-        this.setStateColor(group.mesh, index, PALETTE[color], 0.36, focused, rejecting);
+        this.setInstanceTransform(group.mesh, index, cell.target, (focused ? 1.08 : 1) * pulse, 0);
+        this.setStateColor(group.mesh, index, 1, focused, rejecting);
       });
       group.mesh.instanceMatrix.needsUpdate = true;
       if (group.mesh.instanceColor) {
@@ -814,7 +1051,7 @@ class DioramaRenderer implements DioramaRendererPort {
       const rejecting = targetKey === rejectingKey;
       const pulse = rejecting ? this.rejectionPulse() : 1;
       this.setInstanceTransform(this.shelfMesh!, index, slot.position, (focused ? 1.08 : 1) * pulse, 0);
-      this.setStateColor(this.shelfMesh!, index, WORKBENCH, 1, focused, rejecting);
+      this.setStateColor(this.shelfMesh!, index, 0.9, focused, rejecting);
     });
     this.shelfMesh.instanceMatrix.needsUpdate = true;
     if (this.shelfMesh.instanceColor) {
@@ -823,13 +1060,13 @@ class DioramaRenderer implements DioramaRendererPort {
   }
 
   private applyGemTransforms(overrides?: ReadonlyMap<GemId, WorldPoint>): void {
-    if (!this.currentState) {
+    if (!this.currentState || !this.currentLayout) {
       return;
     }
     const gemState = this.gemRenderState();
     const rejectingKey = this.rejectedTarget && this.isRejecting() ? dioramaTargetKey(this.rejectedTarget) : null;
     const focusedKey = this.focusedTarget ? dioramaTargetKey(this.focusedTarget) : null;
-    for (const [color, group] of this.gemGroups) {
+    for (const group of this.gemGroups.values()) {
       group.gemIds.forEach((gemId, index) => {
         const point = overrides?.get(gemId) ?? this.currentLayout?.gemPositions[gemId];
         if (!point) {
@@ -842,18 +1079,11 @@ class DioramaRenderer implements DioramaRendererPort {
         const selected = gemState.selectedGemIds.has(gemId);
         const locked = gemState.lockedGemIds.has(gemId);
         const motionOverride = overrides?.has(gemId) ?? false;
-        const z =
-          point.z +
-          (motionOverride ? 0 : selected ? SELECTED_GEM_LIFT : focused ? FOCUS_GEM_LIFT : locked ? -0.09 : 0);
+        const z = point.z + (motionOverride ? 0 : selected ? SELECTED_GEM_LIFT : focused ? FOCUS_GEM_LIFT : locked ? -0.03 : 0);
         const pulse = rejecting ? this.rejectionPulse() : 1;
-        this.setInstanceTransform(
-          group.mesh,
-          index,
-          { x: point.x, y: point.y, z },
-          (locked ? LOCKED_GEM_SCALE : GEM_SCALE) * (selected ? 1.13 : 1) * (focused ? 1.06 : 1) * pulse,
-          stableHash(gemId) * 0.0007,
-        );
-        this.setStateColor(group.mesh, index, PALETTE[color], locked ? 0.72 : 1, selected || focused, rejecting);
+        const scale = (locked ? LOCKED_GEM_SCALE : GEM_SCALE) * (selected ? 1.05 : 1) * (focused ? 1.04 : 1) * pulse;
+        this.setInstanceTransform(group.mesh, index, { x: point.x, y: point.y, z }, scale, 0);
+        this.setStateColor(group.mesh, index, 1, selected || focused, rejecting);
       });
       group.mesh.instanceMatrix.needsUpdate = true;
       if (group.mesh.instanceColor) {
@@ -865,11 +1095,10 @@ class DioramaRenderer implements DioramaRendererPort {
   private gemRenderState(): GemRenderState {
     const lockedGemIds = new Set<GemId>();
     if (this.currentState) {
-      for (const [coord, cell] of Object.entries(this.currentState.board.cells)) {
+      for (const cell of Object.values(this.currentState.board.cells)) {
         if (cell.gemId && this.currentState.gems[cell.gemId]?.color === cell.targetColor) {
           lockedGemIds.add(cell.gemId);
         }
-        void coord;
       }
     }
     return {
@@ -878,40 +1107,35 @@ class DioramaRenderer implements DioramaRendererPort {
     };
   }
 
-  private setInstanceTransform(
+  private setInstanceTransform(mesh: InstancedMesh, index: number, point: WorldPoint, scale: number, rotationZ: number): void {
+    this.setInstanceTransformXYZ(mesh, index, point, scale, scale, scale, rotationZ);
+  }
+
+  private setInstanceTransformXYZ(
     mesh: InstancedMesh,
     index: number,
     point: WorldPoint,
-    scale: number,
+    scaleX: number,
+    scaleY: number,
+    scaleZ: number,
     rotationZ: number,
   ): void {
     this.scratchPosition.set(point.x, point.y, point.z);
-    this.scratchScale.set(scale, scale, scale);
-    this.scratchEuler.set(0.16, -0.12, rotationZ);
+    this.scratchScale.set(scaleX, scaleY, scaleZ);
+    this.scratchEuler.set(0.12, -0.08, rotationZ);
     this.scratchQuaternion.setFromEuler(this.scratchEuler);
     this.scratchMatrix.compose(this.scratchPosition, this.scratchQuaternion, this.scratchScale);
     mesh.setMatrixAt(index, this.scratchMatrix);
   }
 
-  private setScaledColor(mesh: InstancedMesh, index: number, color: number, scale: number): void {
-    this.scratchColor.setHex(color).multiplyScalar(scale);
-    mesh.setColorAt(index, this.scratchColor);
-  }
-
-  private setStateColor(
-    mesh: InstancedMesh,
-    index: number,
-    color: number,
-    scale: number,
-    focused: boolean,
-    rejecting: boolean,
-  ): void {
-    this.scratchColor.setHex(color).multiplyScalar(scale);
+  private setStateColor(mesh: InstancedMesh, index: number, intensity: number, focused: boolean, rejecting: boolean): void {
+    this.scratchColor.setRGB(intensity, intensity, intensity);
     if (focused) {
-      this.scratchColor.lerp(this.focusColor, 0.36);
+      this.scratchColor.lerp(this.focusColor, -0.18);
     }
     if (rejecting) {
-      this.scratchColor.lerp(this.rejectionColor, 0.58);
+      this.scratchColor.setRGB(1.18, 0.52, 0.54);
+      this.scratchColor.lerp(this.rejectionColor, 0.22);
     }
     mesh.setColorAt(index, this.scratchColor);
   }
@@ -984,11 +1208,11 @@ class DioramaRenderer implements DioramaRendererPort {
       this.applyShelfTransforms();
       this.applyGemTransforms(this.motionPositions);
       this.updateWand(motion.plan, elapsedMs);
-      this.updateVictoryLight(motion.plan, elapsedMs);
+      this.updateVictoryBeam(motion.plan, elapsedMs);
       if (elapsedMs >= motion.plan.durationMs) {
         this.activeMotion = null;
         this.motionPositions.clear();
-        this.victoryLight.intensity = 0;
+        this.resetVictoryPresentation();
         this.applyStateTransforms();
         motion.resolve();
       }
@@ -1010,22 +1234,47 @@ class DioramaRenderer implements DioramaRendererPort {
       return;
     }
     const wave = Math.min(1, elapsedMs / Math.max(1, plan.durationMs));
-    this.wand.rotation.z = Math.sin(wave * Math.PI * 3) * 0.22;
-    this.wand.position.z = 0.28 + Math.sin(wave * Math.PI) * 0.32;
+    this.wand.rotation.z = Math.sin(wave * Math.PI * 3) * 0.16;
+    this.wand.position.z = 0.24 + Math.sin(wave * Math.PI) * 0.2;
   }
 
-  private updateVictoryLight(plan: DioramaMotionPlan, elapsedMs: number): void {
+  private updateVictoryBeam(plan: DioramaMotionPlan, elapsedMs: number): void {
+    const material = this.victoryBeam.material as MeshPhysicalMaterial;
     if (!plan.victorySweep || !this.currentLayout) {
+      material.opacity = 0;
       return;
     }
     const bounds = this.currentLayout.bounds;
     const progress = Math.min(1, elapsedMs / 620);
-    this.victoryLight.intensity = 2.8 * Math.sin(Math.PI * progress);
-    this.victoryLight.position.set(
-      bounds.minX + (bounds.maxX - bounds.minX) * progress,
-      bounds.minY + (bounds.maxY - bounds.minY) * (0.25 + progress * 0.5),
-      8,
+    const eased = progress * progress * (3 - 2 * progress);
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+    material.opacity = 0.23 * Math.sin(Math.PI * progress);
+    this.victoryBeam.position.set(
+      bounds.minX - width * 0.42 + (width * 1.84) * eased,
+      bounds.maxY + 0.46 - (height + 0.92) * eased,
+      0.92,
     );
+    this.victoryBeam.scale.set(Math.max(width * 0.62, 1.5), Math.max(height * 0.34, 1.1), 1);
+    this.victoryBeam.rotation.z = -0.42;
+    const centerX = (this.cameraFit.left + this.cameraFit.right) / 2;
+    const centerY = (this.cameraFit.top + this.cameraFit.bottom) / 2;
+    const breath = Math.sin(Math.PI * progress);
+    this.camera.position.set(
+      centerX + CAMERA_AZIMUTH + breath * 0.038,
+      centerY + CAMERA_ELEVATION + breath * 0.024,
+      25,
+    );
+    this.camera.lookAt(centerX + breath * 0.012, centerY + breath * 0.008, 0);
+    this.camera.updateMatrixWorld();
+  }
+
+  private resetVictoryPresentation(): void {
+    (this.victoryBeam.material as MeshPhysicalMaterial).opacity = 0;
+    this.victoryBeam.rotation.z = 0;
+    if (this.currentLayout) {
+      this.applyCameraFit();
+    }
   }
 
   private scheduleFrame(): void {
@@ -1040,11 +1289,13 @@ class DioramaRenderer implements DioramaRendererPort {
 
   private finishActiveMotion(): void {
     if (!this.activeMotion) {
+      this.resetVictoryPresentation();
       return;
     }
     const motion = this.activeMotion;
     this.activeMotion = null;
     this.motionPositions.clear();
+    this.resetVictoryPresentation();
     motion.resolve();
   }
 
@@ -1052,7 +1303,7 @@ class DioramaRenderer implements DioramaRendererPort {
     if (this.disposed || this.contextLost) {
       return;
     }
-    this.scene.updateMatrixWorld();
+    this.scene.updateMatrixWorld(true);
     this.renderer.render(this.scene, this.camera);
   }
 }

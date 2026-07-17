@@ -8,6 +8,8 @@ import {
   createDioramaInstanceIdentity,
   createDioramaLayout,
   dioramaTargetKey,
+  getDioramaExposedEdgeSegments,
+  getDioramaShelfRailAnchors,
 } from "../src/three/layout";
 import { planDioramaTransition, sampleDioramaGemMotion } from "../src/three/motion";
 
@@ -60,22 +62,34 @@ test("the Tux layout represents all 546 active Board cells and every Shelf slot"
   const lower = layout.boardCells.find((cell) => cell.coord.row === 1);
   expect(top && lower && top.target.y > lower.target.y).toBe(true);
 });
-
-test("portrait recomposes both Shelf banks below the Board while landscape keeps them beside it", () => {
+test("both Shelf banks stay on horizontal rails below the Board", () => {
   const state = createGameState(tuxLevel);
   const landscape = createDioramaLayout(state, "landscape");
   const portrait = createDioramaLayout(state, "portrait");
-  const boardMinY = Math.min(...portrait.boardCells.map((cell) => cell.target.y));
-  const boardMinX = Math.min(...landscape.boardCells.map((cell) => cell.target.x));
-  const boardMaxX = Math.max(...landscape.boardCells.map((cell) => cell.target.x));
+  const landscapeBoardMinY = Math.min(...landscape.boardCells.map((cell) => cell.target.y));
+  const portraitBoardMinY = Math.min(...portrait.boardCells.map((cell) => cell.target.y));
 
-  expect(portrait.shelfSlots.every((slot) => slot.position.y < boardMinY)).toBe(true);
+  expect(landscape.shelfSlots.every((slot) => slot.position.y < landscapeBoardMinY)).toBe(true);
+  expect(new Set(landscape.shelfSlots.map((slot) => slot.position.y)).size).toBe(1);
+  expect(portrait.shelfSlots.every((slot) => slot.position.y < portraitBoardMinY)).toBe(true);
   expect(new Set(portrait.shelfSlots.map((slot) => slot.position.y)).size).toBe(2);
-  expect(
-    landscape.shelfSlots.every(
-      (slot) => slot.position.x < boardMinX || slot.position.x > boardMaxX,
-    ),
-  ).toBe(true);
+
+  const firstBank = landscape.shelfSlots.slice(0, 8);
+  const secondBank = landscape.shelfSlots.slice(8);
+  expect(firstBank.every((slot, index) => index === 0 || slot.position.x > firstBank[index - 1]!.position.x)).toBe(true);
+  expect(secondBank.every((slot, index) => index === 0 || slot.position.x > secondBank[index - 1]!.position.x)).toBe(true);
+  expect(firstBank.at(-1)!.position.x < secondBank[0]!.position.x).toBe(true);
+  expect(getDioramaShelfRailAnchors(landscape)).toHaveLength(2);
+  expect(getDioramaShelfRailAnchors(portrait)).toHaveLength(2);
+});
+
+test("the exposed Board silhouette is a deterministic batched edge list", () => {
+  const state = tinyState();
+  const first = getDioramaExposedEdgeSegments(state);
+  const second = getDioramaExposedEdgeSegments(state);
+  expect(first).toEqual(second);
+  expect(first.length).toBe(6);
+  expect(first.every((segment) => segment.from.z === 0.13 && segment.to.z === 0.13)).toBe(true);
 });
 
 test("orthographic fit preserves bounds with deterministic aspect framing", () => {
@@ -139,6 +153,8 @@ test("accepted motion plans and their sampled transforms are deterministic", () 
   expect(first.gemMotions).toHaveLength(1);
   const motion = first.gemMotions[0]!;
   expect(motion.delayMs).toBeGreaterThanOrEqual(0);
+  expect(first.durationMs).toBeGreaterThanOrEqual(0);
+  expect(first.gemMotions.every((entry) => entry.delayMs >= 0 && entry.durationMs >= 0)).toBe(true);
   expect(sampleDioramaGemMotion(motion, motion.delayMs)).toEqual(motion.from);
   expect(sampleDioramaGemMotion(motion, motion.delayMs + motion.durationMs)).toEqual(motion.to);
 });
