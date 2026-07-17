@@ -1,8 +1,9 @@
 import { createGameState } from "../core/level";
 import type { GameState, LevelSpec } from "../core/types";
-import { prismLevel, tuxLevel } from "../fixtures";
+import { chromeLevel, prismLevel, tuxLevel } from "../fixtures";
 
 const FIXTURES: Record<string, LevelSpec> = {
+  [chromeLevel.id]: chromeLevel,
   [prismLevel.id]: prismLevel,
   [tuxLevel.id]: tuxLevel,
 };

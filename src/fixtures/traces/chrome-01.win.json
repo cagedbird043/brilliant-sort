@@ -1,0 +1,5 @@
+[
+  { "type": "select-board-gem", "coord": { "row": 1, "col": 13 } },
+  { "type": "place-selection-in-shelf" },
+  { "type": "apply-global-wand" }
+]

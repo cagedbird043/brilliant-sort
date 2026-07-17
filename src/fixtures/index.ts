@@ -1,8 +1,13 @@
+import chromeLevelJson from "./chrome-01.json";
+import chromeWinningTraceJson from "./traces/chrome-01.win.json";
 import prismLevelJson from "./prism-01.json";
 import prismWinningTraceJson from "./traces/prism-01.win.json";
 import tuxLevelJson from "./tux-01.json";
 import tuxWinningTraceJson from "./traces/tux-01.win.json";
 import type { GameCommand, LevelSpec } from "../core/types";
+export const chromeLevel = chromeLevelJson as LevelSpec;
+export const chromeWinningTrace = chromeWinningTraceJson as unknown as readonly GameCommand[];
+
 
 export const prismLevel = prismLevelJson as LevelSpec;
 export const prismWinningTrace = prismWinningTraceJson as unknown as readonly GameCommand[];

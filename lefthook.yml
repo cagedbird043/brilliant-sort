@@ -9,8 +9,8 @@ pre-commit:
     - name: Bun unit and parity tests
       run: bun test
 
-    - name: Tux fixture drift
-      run: bun run level:check:tux
+    - name: Production fixture drift
+      run: bun run level:check
 
     - name: Strict OpenSpec validation
       run: bun run spec:validate
@@ -23,8 +23,8 @@ pre-push:
     - name: Desktop and mobile browser E2E
       run: bunx --bun playwright test
 
-    - name: Tux fixture drift
-      run: bun run level:check:tux
+    - name: Production fixture drift
+      run: bun run level:check
 
     - name: Strict OpenSpec validation
       run: bun run spec:validate

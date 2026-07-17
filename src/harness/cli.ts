@@ -1,5 +1,12 @@
 import { canonicalDump } from "../core";
-import { prismLevel, prismWinningTrace, tuxLevel, tuxWinningTrace } from "../fixtures";
+import {
+  chromeLevel,
+  chromeWinningTrace,
+  prismLevel,
+  prismWinningTrace,
+  tuxLevel,
+  tuxWinningTrace,
+} from "../fixtures";
 import { GameCoreFactory } from "../wasm/game-core";
 import { replayDifferential } from "./differential";
 import { replayCommandLog } from "./replay";
@@ -7,11 +14,13 @@ import { listScenarioNames, loadScenario } from "./scenario";
 
 const [operation = "list", scenarioName = "prism-01"] = Bun.argv.slice(2);
 const replayFixture =
-  scenarioName === prismLevel.id
-    ? { level: prismLevel, commands: prismWinningTrace }
-    : scenarioName === tuxLevel.id
-      ? { level: tuxLevel, commands: tuxWinningTrace }
-      : null;
+  scenarioName === chromeLevel.id
+    ? { level: chromeLevel, commands: chromeWinningTrace }
+    : scenarioName === prismLevel.id
+      ? { level: prismLevel, commands: prismWinningTrace }
+      : scenarioName === tuxLevel.id
+        ? { level: tuxLevel, commands: tuxWinningTrace }
+        : null;
 
 switch (operation) {
   case "list":
