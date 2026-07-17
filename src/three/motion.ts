@@ -37,7 +37,7 @@ function hashId(value: string): number {
 
 function coordinateDelay(gemId: GemId, point: WorldPoint, limit: number): number {
   const coordinateHash = Math.imul(Math.round(point.x * 41), 31) ^ Math.round(point.y * 41);
-  return (hashId(gemId) ^ coordinateHash) % limit;
+  return ((hashId(gemId) ^ coordinateHash) >>> 0) % limit;
 }
 
 function waveDelay(gemId: GemId, from: WorldPoint, to: WorldPoint): number {

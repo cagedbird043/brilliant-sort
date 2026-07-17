@@ -394,13 +394,15 @@ export function ThreeGameApp({ createRenderer }: ThreeGameAppProps) {
         return leftRow - rightRow || leftCol - rightCol;
       });
   const shelfSlots = state === null ? [] : Array.from({ length: state.shelf.capacity }, (_, index) => index);
-  const gameplayDisabled = state === null || state.status === "won" || inputLocked;
+  const semanticDisabled = state === null || state.status === "won";
+  const gameplayDisabled = semanticDisabled || inputLocked;
   const statusLabel = state === null ? (bootError === null ? "BOOT" : "ERROR") : state.status;
 
   return (
     <main className="three-game-shell" data-testid="three-stage">
       <section className="three-stage" aria-label="Three-dimensional game stage">
         <canvas
+          key={bootAttempt}
           ref={canvasRef}
           className="three-canvas"
           data-testid="three-canvas"
@@ -430,7 +432,8 @@ export function ThreeGameApp({ createRenderer }: ThreeGameAppProps) {
                   data-testid={`three-board-cell-${row}-${col}`}
                   aria-label={`Board ${row + 1}, ${col + 1}`}
                   aria-pressed={selected}
-                  disabled={gameplayDisabled}
+                  aria-disabled={gameplayDisabled || locked}
+                  disabled={semanticDisabled || locked}
                   onFocus={() => focusTarget(target)}
                   onClick={() => activateTarget(target)}
                 />
@@ -451,7 +454,8 @@ export function ThreeGameApp({ createRenderer }: ThreeGameAppProps) {
                   data-testid={`three-shelf-slot-${index}`}
                   aria-label={`Shelf ${index + 1}${gemId === undefined ? " empty" : " occupied"}`}
                   aria-pressed={selected}
-                  disabled={gameplayDisabled}
+                  aria-disabled={gameplayDisabled}
+                  disabled={semanticDisabled}
                   onFocus={() => focusTarget(target)}
                   onClick={() => activateTarget(target)}
                 />
@@ -473,26 +477,29 @@ export function ThreeGameApp({ createRenderer }: ThreeGameAppProps) {
           >
             <img className="three-icon-glyph" src={audioCrystal} alt="" aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            className="three-icon-control three-wand-control"
-            data-testid="global-wand"
-            aria-label="Apply global wand"
-            disabled={gameplayDisabled}
-            onClick={() => applyCommand({ type: "apply-global-wand" })}
-          >
-            <img className="three-icon-glyph" src={globalWand} alt="" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className="three-icon-control three-replay-control"
-            data-testid="replay-level"
-            aria-label="Replay level"
-            disabled={state?.status !== "won" || inputLocked}
-            onClick={() => applyCommand({ type: "restart-level" })}
-          >
-            <img className="three-icon-glyph" src={replayLevel} alt="" aria-hidden="true" />
-          </button>
+          {state?.status === "won" ? (
+            <button
+              type="button"
+              className="three-icon-control three-replay-control"
+              data-testid="replay-level"
+              aria-label="Replay level"
+              disabled={inputLocked}
+              onClick={() => applyCommand({ type: "restart-level" })}
+            >
+              <img className="three-icon-glyph" src={replayLevel} alt="" aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="three-icon-control three-wand-control"
+              data-testid="global-wand"
+              aria-label="Apply global wand"
+              disabled={gameplayDisabled}
+              onClick={() => applyCommand({ type: "apply-global-wand" })}
+            >
+              <img className="three-icon-glyph" src={globalWand} alt="" aria-hidden="true" />
+            </button>
+          )}
         </nav>
 
         <div className="three-status" data-testid="three-status" data-state={state?.status ?? "boot"} role="status" aria-live="polite">

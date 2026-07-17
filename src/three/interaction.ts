@@ -49,8 +49,3 @@ export function targetToCommand(
     : null;
 }
 
-
-// Named aliases keep the intent discoverable to callers without introducing a
-// second implementation (and make the shared mapping easy to find in tests).
-export const commandForTarget = targetToCommand;
-export const mapTargetToCommand = targetToCommand;

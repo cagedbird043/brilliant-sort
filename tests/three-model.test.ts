@@ -138,6 +138,7 @@ test("accepted motion plans and their sampled transforms are deterministic", () 
   expect(first).toMatchObject({ kind: "placement", accepted: true, victorySweep: false });
   expect(first.gemMotions).toHaveLength(1);
   const motion = first.gemMotions[0]!;
+  expect(motion.delayMs).toBeGreaterThanOrEqual(0);
   expect(sampleDioramaGemMotion(motion, motion.delayMs)).toEqual(motion.from);
   expect(sampleDioramaGemMotion(motion, motion.delayMs + motion.durationMs)).toEqual(motion.to);
 });

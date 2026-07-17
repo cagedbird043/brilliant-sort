@@ -134,35 +134,8 @@ button:focus-visible {
   border-radius: 0.3rem;
   background: transparent;
   color: transparent;
-  pointer-events: auto;
-  opacity: 0.02;
-  transition:
-    opacity 150ms ease-out,
-    border-color 150ms ease-out,
-    background-color 150ms ease-out,
-    box-shadow 150ms ease-out;
-}
-
-.three-target-control:hover,
-.three-target-control:focus-visible,
-.three-target-control.is-selected {
-  opacity: 1;
-}
-
-.three-target-control:hover {
-  border-color: rgba(116, 215, 231, 0.48);
-  background: rgba(116, 215, 231, 0.07);
-}
-
-.three-target-control:focus-visible,
-.three-target-control.is-selected {
-  border-color: var(--three-cyan);
-  background: rgba(116, 215, 231, 0.12);
-  box-shadow: 0 0 1rem rgba(116, 215, 231, 0.28);
-}
-
-.three-target-control.is-locked {
-  opacity: 0.03;
+  pointer-events: none;
+  opacity: 0;
 }
 
 .three-target-control:disabled {
@@ -234,58 +207,17 @@ button:focus-visible {
   color: var(--three-gold);
 }
 
-.three-status {
-  position: absolute;
-  right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  z-index: 5;
-  display: inline-flex;
-  min-width: 4.3rem;
-  min-height: 2rem;
-  align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--three-edge-faint);
-  border-radius: 0.35rem;
-  background: rgba(13, 18, 37, 0.76);
-  color: var(--three-muted);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.three-status[data-state="won"] {
-  border-color: rgba(133, 208, 162, 0.64);
-  color: var(--three-success);
-}
-
+.three-status,
 .three-feedback {
   position: absolute;
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  left: 50%;
-  z-index: 6;
-  max-width: min(30rem, 68vw);
-  padding: 0.45rem 0.75rem;
-  border: 1px solid var(--three-edge-faint);
-  border-radius: 0.35rem;
-  background: rgba(13, 18, 37, 0.86);
-  color: var(--three-muted);
-  font-size: 0.76rem;
-  line-height: 1.3;
-  text-align: center;
-  transform: translateX(-50%);
-}
-
-.three-feedback[data-tone="rejected"] {
-  border-color: rgba(231, 132, 145, 0.68);
-  color: var(--three-danger);
-}
-
-.three-feedback[data-tone="won"] {
-  border-color: rgba(133, 208, 162, 0.68);
-  color: var(--three-success);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .three-boot,

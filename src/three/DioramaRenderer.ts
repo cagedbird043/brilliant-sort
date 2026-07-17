@@ -152,6 +152,7 @@ class DioramaRenderer implements DioramaRendererPort {
   private readonly resizeObserver: ResizeObserver;
   private readonly contextLostListener: (event: Event) => void;
   private readonly contextRestoredListener: () => void;
+  private readonly wheelListener: (event: WheelEvent) => void;
   private readonly options: DioramaRendererOptions;
   private readonly socketGroups = new Map<GameColor, SocketGroup>();
   private readonly gemGroups = new Map<GameColor, GemGroup>();
@@ -169,7 +170,6 @@ class DioramaRenderer implements DioramaRendererPort {
   private readonly victoryLight = new PointLight(FOCUS_CYAN, 0, 18);
   private readonly keyLight = new DirectionalLight(0xdce4ef, 2.2);
   private readonly fillLight = new DirectionalLight(FOCUS_CYAN, 1.15);
-  private readonly bridge: NonNullable<Window["__BRILLIANT_SORT_3D__"]>;
 
   private currentState: GameState | null = null;
   private identity: DioramaInstanceIdentity | null = null;
@@ -184,6 +184,7 @@ class DioramaRenderer implements DioramaRendererPort {
     far: 80,
   };
   private viewport: DioramaViewport = { width: 1, height: 1 };
+  private cameraZoom = 1;
   private pixelRatio = 1;
   private lastPick: DioramaPick | null = null;
   private focusedTarget: DioramaTarget | null = null;
@@ -267,6 +268,21 @@ class DioramaRenderer implements DioramaRendererPort {
     };
     canvas.addEventListener("webglcontextlost", this.contextLostListener);
     canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+    this.wheelListener = (event) => {
+      if (this.disposed || this.layoutMode !== "landscape") {
+        return;
+      }
+      event.preventDefault();
+      const nextZoom = Math.max(0.9, Math.min(1.18, this.cameraZoom - event.deltaY * 0.0005));
+      if (nextZoom === this.cameraZoom) {
+        return;
+      }
+      this.cameraZoom = nextZoom;
+      this.camera.zoom = nextZoom;
+      this.camera.updateProjectionMatrix();
+      this.render();
+    };
+    canvas.addEventListener("wheel", this.wheelListener, { passive: false });
 
     this.resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -279,12 +295,6 @@ class DioramaRenderer implements DioramaRendererPort {
     const rect = canvas.getBoundingClientRect();
     this.resize(rect.width || canvas.clientWidth || 1, rect.height || canvas.clientHeight || 1);
 
-    this.bridge = {
-      snapshot: () => this.snapshotDiagnostics(),
-      projectTarget: (target) => this.projectTarget(target),
-      setPresentationTimeForTest: (timeMs) => this.setPresentationTimeForTest(timeMs),
-    };
-    window.__BRILLIANT_SORT_3D__ = this.bridge;
   }
 
   renderState(state: GameState): void {
@@ -417,6 +427,7 @@ class DioramaRenderer implements DioramaRendererPort {
     if (this.disposed) {
       return;
     }
+    this.cameraZoom = 1;
     this.applyCameraFit();
     this.render();
   }
@@ -447,6 +458,7 @@ class DioramaRenderer implements DioramaRendererPort {
         : 0,
       layoutMode: this.layoutMode,
       camera: this.cameraFit,
+      cameraZoom: this.cameraZoom,
       lastPick: this.lastPick,
       levelId: this.currentState?.levelId ?? null,
       status: this.currentState?.status ?? null,
@@ -498,6 +510,7 @@ class DioramaRenderer implements DioramaRendererPort {
     this.resizeObserver.disconnect();
     this.renderer.domElement.removeEventListener("webglcontextlost", this.contextLostListener);
     this.renderer.domElement.removeEventListener("webglcontextrestored", this.contextRestoredListener);
+    this.renderer.domElement.removeEventListener("wheel", this.wheelListener);
     this.clearGameplayMeshes();
     this.ownedGeometries.forEach((geometry) => geometry.dispose());
     this.ownedMaterials.forEach((material) => material.dispose());
@@ -505,9 +518,6 @@ class DioramaRenderer implements DioramaRendererPort {
     this.ownedMaterials.clear();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
-    if (window.__BRILLIANT_SORT_3D__ === this.bridge) {
-      delete window.__BRILLIANT_SORT_3D__;
-    }
   }
 
   private currentLayout: DioramaSceneLayout | null = null;
@@ -541,6 +551,9 @@ class DioramaRenderer implements DioramaRendererPort {
 
     const nextMode = getDioramaLayoutMode(this.viewport);
     const modeChanged = nextMode !== this.layoutMode;
+    if (modeChanged && nextMode === "portrait") {
+      this.cameraZoom = 1;
+    }
     this.layoutMode = nextMode;
     this.currentLayout = createDioramaLayout(this.currentState, this.layoutMode);
     if (modeChanged) {
@@ -559,7 +572,12 @@ class DioramaRenderer implements DioramaRendererPort {
     const gemGeometry = this.trackGeometry(new OctahedronGeometry(0.42, 0));
     const shelfGeometry = this.trackGeometry(new BoxGeometry(0.84, 0.84, 0.15));
     const shelfMaterial = this.trackMaterial(
-      new MeshStandardMaterial({ color: WORKBENCH, roughness: 0.74, metalness: 0.16, flatShading: true }),
+      new MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.74,
+        metalness: 0.16,
+        flatShading: true,
+      }),
     );
 
     for (const color of GAME_COLORS) {
@@ -568,7 +586,12 @@ class DioramaRenderer implements DioramaRendererPort {
       );
       if (cells.length > 0) {
         const socketMaterial = this.trackMaterial(
-          new MeshStandardMaterial({ color: PALETTE[color], roughness: 0.72, metalness: 0.12, flatShading: true, vertexColors: true }),
+          new MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.72,
+            metalness: 0.12,
+            flatShading: true,
+          }),
         );
         const socketMesh = new InstancedMesh(socketGeometry, socketMaterial, cells.length);
         socketMesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -588,7 +611,12 @@ class DioramaRenderer implements DioramaRendererPort {
         .sort();
       if (gemIds.length > 0) {
         const gemMaterial = this.trackMaterial(
-          new MeshStandardMaterial({ color: PALETTE[color], roughness: 0.38, metalness: 0.2, flatShading: true, vertexColors: true }),
+          new MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.38,
+            metalness: 0.2,
+            flatShading: true,
+          }),
         );
         const gemMesh = new InstancedMesh(gemGeometry, gemMaterial, gemIds.length);
         gemMesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -726,6 +754,7 @@ class DioramaRenderer implements DioramaRendererPort {
     const centerY = (this.cameraFit.top + this.cameraFit.bottom) / 2;
     this.camera.position.set(centerX + 0.9, centerY + 1.25, 25);
     this.camera.lookAt(centerX, centerY, 0);
+    this.camera.zoom = this.cameraZoom;
     this.camera.updateProjectionMatrix();
     this.camera.updateMatrixWorld();
   }

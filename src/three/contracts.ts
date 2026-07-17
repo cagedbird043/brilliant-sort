@@ -65,6 +65,7 @@ export interface DioramaDiagnostics {
   readonly activeMotions: number;
   readonly layoutMode: DioramaLayoutMode;
   readonly camera: DioramaCameraFit;
+  readonly cameraZoom: number;
   readonly lastPick: DioramaPick | null;
   readonly levelId: string | null;
   readonly status: GameState["status"] | null;

@@ -38,7 +38,7 @@ const shelfGem: DioramaTarget = { kind: "gem", gemId: "shelf-gem" };
 const emptyTarget: DioramaTarget = { kind: "board", coord: { row: 1, col: 0 } };
 const emptyShelf: DioramaTarget = { kind: "shelf", index: 2 };
 
- test("maps an occupied Board gem to its board coordinate", () => {
+test("maps an occupied Board gem to its board coordinate", () => {
   expect(targetToCommand(boardGem, makeState())).toEqual({
     type: "select-board-gem",
     coord: { row: 0, col: 0 },
