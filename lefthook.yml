@@ -20,6 +20,12 @@ pre-push:
     - name: Native, WASM, and production build
       run: bun run check
 
+    - name: Native ASan and UBSan
+      run: bun run test:cpp:sanitized
+
+    - name: Native ThreadSanitizer
+      run: bun run test:cpp:tsan
+
     - name: Desktop and mobile browser E2E
       run: bunx --bun playwright test
 

@@ -31,7 +31,7 @@ test("the committed Tux trace reaches victory through the WASM core", async () =
   try {
     const replay = replayCommandLog(core, tuxWinningTrace);
 
-    expect(replay.transitions).toHaveLength(48);
+    expect(replay.transitions).toHaveLength(20);
     expect(replay.transitions.every((transition) => transition.rejection === undefined)).toBe(true);
     expect(replay.finalState.status).toBe("won");
     expect(replay.finalState.shelf).toEqual({ width: 16, capacity: 16, gemIds: [] });

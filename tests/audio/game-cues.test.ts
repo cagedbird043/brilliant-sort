@@ -104,14 +104,14 @@ test("the full Tux trace emits every successful cue in strict sequence with vict
     [...new Set(kinds)].map((kind) => [kind, kinds.filter((value) => value === kind).length]),
   );
   expect(counts).toEqual({
-    selection: 24,
-    shelf_store: 4,
-    progress: 24,
-    target_place: 20,
-    shelf_compact: 9,
+    selection: 10,
+    shelf_store: 1,
+    progress: 9,
+    target_place: 8,
+    shelf_compact: 3,
     won: 1,
   });
-  expect(sequence).toBe(82);
+  expect(sequence).toBe(32);
   expect(kinds.at(-1)).toBe("won");
   expect(state.status).toBe("won");
 });

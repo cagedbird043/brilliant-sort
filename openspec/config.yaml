@@ -9,7 +9,7 @@ context: |
   Core invariants:
   - Same-color movable gems use eight-neighbor connectivity.
   - Locked matching gems are immutable.
-  - Partial extraction must leave the remaining component connected.
+  - Selection connectivity is checked when the Gem-ID snapshot is created; partial extraction may leave a disconnected remainder selected.
   - Shelf is a compact twelve-column row-major sequence.
   - Victory requires every active cell matched, Shelf empty, selection empty, and no loss state.
   - Fixed LevelSpec fixtures and command logs replay deterministically.

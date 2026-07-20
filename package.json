@@ -25,6 +25,8 @@
     "test:e2e": "bun run build && playwright test",
     "build:cpp": "cmake -S . -B .cache/cmake -DCMAKE_BUILD_TYPE=Release && cmake --build .cache/cmake --parallel",
     "test:cpp": "bun run build:cpp && ctest --test-dir .cache/cmake --output-on-failure",
+    "test:cpp:sanitized": "cmake -S . -B .cache/cmake-sanitized -DCMAKE_BUILD_TYPE=Debug -DBRILLIANT_SORT_ENABLE_SANITIZERS=ON && cmake --build .cache/cmake-sanitized --parallel && ctest --test-dir .cache/cmake-sanitized --output-on-failure",
+    "test:cpp:tsan": "cmake -S . -B .cache/cmake-tsan -DCMAKE_BUILD_TYPE=Debug -DBRILLIANT_SORT_ENABLE_TSAN=ON && cmake --build .cache/cmake-tsan --parallel && ctest --test-dir .cache/cmake-tsan --output-on-failure",
     "build:wasm": "env EM_CONFIG=\"${EM_CONFIG:-${EMSDK:-$PWD/.cache/emsdk}/.emscripten}\" \"${EMSDK:-$PWD/.cache/emsdk}\"/upstream/emscripten/emcmake cmake -S . -B .cache/wasm -DCMAKE_BUILD_TYPE=Release -DBRILLIANT_SORT_WASM_OUTPUT_DIR=src/wasm/generated -DBRILLIANT_SORT_AUDIO_OUTPUT_DIR=src/audio/generated && env EM_CONFIG=\"${EM_CONFIG:-${EMSDK:-$PWD/.cache/emsdk}/.emscripten}\" cmake --build .cache/wasm --target brilliant_sort_wasm brilliant_sort_audio --parallel",
     "test:wasm": "bun run build:wasm && bun test tests/wasm",
     "test:differential": "bun run build:cpp && bun run build:wasm && bun test tests/harness/differential.test.ts",

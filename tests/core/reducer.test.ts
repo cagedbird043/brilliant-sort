@@ -3,7 +3,6 @@ import { keyOf } from "../../src/core/coords";
 import { canonicalDump } from "../../src/core/dump";
 import { createGameState } from "../../src/core/level";
 import { reduce } from "../../src/core/reducer";
-import { isSelectionConnected } from "../../src/core/selectors";
 import type { BoardCell, Color, GameCommand, GameState, Gem } from "../../src/core/types";
 import { prismLevel } from "../../src/fixtures";
 
@@ -105,8 +104,8 @@ describe("movable components", () => {
   });
 });
 
-describe("safe extraction and Shelf movement", () => {
-  test("uses deterministic boundary priority and keeps a partial Board selection connected", () => {
+describe("latched extraction and Shelf movement", () => {
+  test("moves an articulation gem while retaining its disconnected Selection remainder", () => {
     const initial = makeState({
       rows: 1,
       cols: 3,
@@ -124,10 +123,13 @@ describe("safe extraction and Shelf movement", () => {
     const moved = reduce(selected.nextState, { type: "place-selection-in-shelf" }, initial);
 
     expect(moved.rejection).toBeUndefined();
-    expect(moved.nextState.shelf.gemIds.at(-1)).toBe("A");
-    expect(moved.nextState.selection?.gemIds).toEqual(["B", "C"]);
-    expect(moved.nextState.selection).not.toBeNull();
-    expect(isSelectionConnected(moved.nextState, moved.nextState.selection!)).toBe(true);
+    expect(moved.nextState.shelf.gemIds.at(-1)).toBe("B");
+    expect(moved.nextState.selection).toEqual({
+      container: "board",
+      anchor: { row: 0, col: 1 },
+      color: "ice",
+      gemIds: ["C", "A"],
+    });
   });
 
   test("compacts every later Shelf gem after a Shelf-origin placement", () => {

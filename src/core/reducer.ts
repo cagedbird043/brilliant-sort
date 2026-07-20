@@ -7,7 +7,6 @@ import {
   isWon,
   type GemLocation,
 } from "./selectors";
-import { isConnected8 } from "./topology";
 import {
   COLORS,
   type Color,
@@ -79,49 +78,6 @@ function resolveStatus(
   };
 }
 
-function shelfCandidateRemainsConnectedAfterCompaction(
-  state: GameState,
-  selection: Selection,
-  candidate: GemLocation,
-): boolean {
-  const sourceIndex = candidate.coord.row * state.shelf.width + candidate.coord.col;
-  if (state.shelf.gemIds[sourceIndex] !== candidate.gemId) {
-    return false;
-  }
-
-  const compactedGemIds = [...state.shelf.gemIds];
-  compactedGemIds.splice(sourceIndex, 1);
-  const remainingGemIds = selection.gemIds.filter((gemId) => gemId !== candidate.gemId);
-  if (remainingGemIds.length < 2) {
-    return true;
-  }
-
-  const indicesByGemId = new Map<GemId, number>();
-  compactedGemIds.forEach((gemId, index) => indicesByGemId.set(gemId, index));
-  const remainingCoordinates = remainingGemIds.flatMap((gemId) => {
-    const index = indicesByGemId.get(gemId);
-    return index === undefined ? [] : [shelfCoord(index, state.shelf.width)];
-  });
-
-  return (
-    remainingCoordinates.length === remainingGemIds.length &&
-    isConnected8(remainingCoordinates)
-  );
-}
-
-function nextExtractionCandidate(
-  state: GameState,
-  selection: Selection,
-): GemLocation | undefined {
-  const candidates = getExtractionCandidates(state, selection);
-  if (selection.container === "board") {
-    return candidates[0];
-  }
-
-  return candidates.find((candidate) =>
-    shelfCandidateRemainsConnectedAfterCompaction(state, selection, candidate),
-  );
-}
 
 function moveSelectionGemToBoard(
   state: GameState,
@@ -259,7 +215,7 @@ function placeSelectionAtTarget(
       break;
     }
 
-    const source = nextExtractionCandidate(nextState, currentSelection);
+    const source = getExtractionCandidates(nextState, currentSelection)[0];
     if (source === undefined) {
       break;
     }
@@ -304,7 +260,7 @@ function placeSelectionInShelf(state: GameState): ReduceResult {
       break;
     }
 
-    const source = nextExtractionCandidate(nextState, currentSelection);
+    const source = getExtractionCandidates(nextState, currentSelection)[0];
     if (source === undefined) {
       break;
     }

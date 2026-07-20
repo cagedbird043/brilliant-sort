@@ -6,6 +6,37 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(
+    BRILLIANT_SORT_ENABLE_SANITIZERS
+    "Build native targets with AddressSanitizer and UndefinedBehaviorSanitizer"
+    OFF)
+option(
+    BRILLIANT_SORT_ENABLE_TSAN
+    "Build native targets with ThreadSanitizer"
+    OFF)
+if(BRILLIANT_SORT_ENABLE_SANITIZERS AND BRILLIANT_SORT_ENABLE_TSAN)
+    message(FATAL_ERROR "AddressSanitizer and ThreadSanitizer cannot be combined")
+endif()
+if(BRILLIANT_SORT_ENABLE_SANITIZERS)
+    if(EMSCRIPTEN OR NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        message(FATAL_ERROR "BRILLIANT_SORT_ENABLE_SANITIZERS requires native Clang or GCC")
+    endif()
+    add_compile_options(
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer
+        -fno-sanitize-recover=undefined)
+    add_link_options(
+        -fsanitize=address,undefined
+        -fno-sanitize-recover=undefined)
+endif()
+if(BRILLIANT_SORT_ENABLE_TSAN)
+    if(EMSCRIPTEN OR NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        message(FATAL_ERROR "BRILLIANT_SORT_ENABLE_TSAN requires native Clang or GCC")
+    endif()
+    add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=thread)
+endif()
+
 set(BRILLIANT_SORT_CORE_SOURCES
     cpp/connected_gems.cpp
     cpp/game_core.cpp

@@ -5,7 +5,7 @@ import {
   keyOf,
   shelfCoord,
 } from "./coords";
-import { findConnectedComponent8, isConnected8, neighbors8 } from "./topology";
+import { findConnectedComponent8, neighbors8 } from "./topology";
 import type {
   BoardCell,
   Color,
@@ -162,7 +162,7 @@ export function getSelectionLocations(
 }
 
 /**
- * Computes the safe source boundary in the specified selection's current layout.
+ * Computes the accessible source boundary in the specified selection's current layout.
  * Candidates are sorted by the immutable selection-anchor priority.
  */
 export function getExtractionCandidates(
@@ -175,27 +175,15 @@ export function getExtractionCandidates(
   }
 
   const selectedCoordinates = new Set(locations.map((location) => keyOf(location.coord)));
-  const candidates: GemLocation[] = [];
-
-  for (const location of locations) {
-    const isFrontier = neighbors8(location.coord).some(
-      (neighbor) => !selectedCoordinates.has(keyOf(neighbor)),
+  return locations
+    .filter((location) =>
+      neighbors8(location.coord).some(
+        (neighbor) => !selectedCoordinates.has(keyOf(neighbor)),
+      ),
+    )
+    .sort((left, right) =>
+      compareByAnchor(selection.anchor, left.coord, right.coord),
     );
-    if (!isFrontier) {
-      continue;
-    }
-
-    const remaining = locations
-      .filter((member) => member.gemId !== location.gemId)
-      .map((member) => member.coord);
-    if (isConnected8(remaining)) {
-      candidates.push(location);
-    }
-  }
-
-  return candidates.sort((left, right) =>
-    compareByAnchor(selection.anchor, left.coord, right.coord),
-  );
 }
 
 /**
@@ -222,14 +210,6 @@ export function findEmptyTargetComponent(
   })].sort((left, right) => compareByAnchor(start, left, right));
 }
 
-/** Confirms that a surviving selection still has one eight-neighbor component. */
-export function isSelectionConnected(state: GameState, selection: Selection): boolean {
-  const locations = getSelectionLocations(state, selection);
-  return (
-    locations.length === selection.gemIds.length &&
-    isConnected8(locations.map((location) => location.coord))
-  );
-}
 
 /** The only baseline terminal condition. */
 export function isWon(state: GameState): boolean {

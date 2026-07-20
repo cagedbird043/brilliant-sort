@@ -217,6 +217,44 @@ void TestCAbiSession() {
   bs_core_destroy(session);
 }
 
+void TestArticulationSelectionRemainder() {
+  constexpr std::string_view level = R"json(
+{
+  "schemaVersion": 1,
+  "id": "articulation-selection",
+  "rows": 2,
+  "cols": 3,
+  "shelfCapacity": 1,
+  "cells": [
+    { "row": 0, "col": 0, "targetColor": "coral", "gem": { "id": "A", "color": "ice" } },
+    { "row": 0, "col": 1, "targetColor": "coral", "gem": { "id": "B", "color": "ice" } },
+    { "row": 0, "col": 2, "targetColor": "coral", "gem": { "id": "C", "color": "ice" } },
+    { "row": 1, "col": 0, "targetColor": "ice", "gem": { "id": "D", "color": "coral" } },
+    { "row": 1, "col": 1, "targetColor": "ice", "gem": { "id": "E", "color": "coral" } },
+    { "row": 1, "col": 2, "targetColor": "ice", "gem": { "id": "F", "color": "coral" } }
+  ]
+}
+)json";
+  std::string error;
+  std::unique_ptr<BrilliantSortCore> core =
+      BrilliantSortCore::Create(level, &error);
+  Expect(core != nullptr, "articulation fixture should create a core");
+
+  const CoreDispatchResult selected = core->DispatchJson(
+      R"json({"type":"select-board-gem","coord":{"row":0,"col":1}})json");
+  Expect(!selected.protocol_error, "bridge gem should create the selection");
+  const CoreDispatchResult stored =
+      core->DispatchJson(R"json({"type":"place-selection-in-shelf"})json");
+  ExpectContains(stored.json, "\"detail\":\"B->shelf\"",
+                 "the immutable anchor should move first");
+  ExpectContains(
+      core->CanonicalDump(),
+      "\"shelf\":{\"width\":1,\"capacity\":1,\"gemIds\":[\"B\"]},"
+      "\"selection\":{\"container\":\"board\",\"anchor\":{\"row\":0,"
+      "\"col\":1},\"color\":\"ice\",\"gemIds\":[\"A\",\"C\"]}",
+      "disconnected endpoints should remain in one Selection snapshot");
+}
+
 void TestInvalidLevel() {
   std::string error;
   std::unique_ptr<BrilliantSortCore> core =
@@ -233,6 +271,7 @@ int main() {
   TestExpandedPaletteAndConfiguredShelf();
   TestGlobalWand();
   TestCAbiSession();
+  TestArticulationSelectionRemainder();
   TestInvalidLevel();
   std::cout << "game_core tests passed\n";
   return EXIT_SUCCESS;

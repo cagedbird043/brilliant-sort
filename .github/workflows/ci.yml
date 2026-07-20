@@ -40,6 +40,12 @@ jobs:
       - name: Native C++ tests
         run: bun run test:cpp
 
+      - name: Native ASan and UBSan
+        run: bun run test:cpp:sanitized
+
+      - name: Native ThreadSanitizer
+        run: bun run test:cpp:tsan
+
       - name: Build WebAssembly core
         run: bun run build:wasm
 

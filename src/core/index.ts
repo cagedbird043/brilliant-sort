@@ -10,7 +10,6 @@ export {
   isLocked,
   isMovableBoardCell,
   isMovableShelfIndex,
-  isSelectionConnected,
   isWon,
 } from "./selectors";
 export { findConnectedComponent8, isConnected8, neighbors8 } from "./topology";

@@ -10,18 +10,20 @@ Live demos: <https://cagedbird043.github.io/brilliant-sort/> · <https://brillia
 
 Assessment submission: [`SUBMISSION.md`](./SUBMISSION.md) · [`PDF`](./submission/Brilliant-Sort-Answer.pdf) · [`Evidence matrix`](./submission/evidence-matrix.md)
 
+Post-submission correction: source-video review showed that removing an articulation gem may leave a disconnected Selection lifted. The immutable submission remains linked above; the current implementation and regression evidence live in [`correct-selection-snapshot-semantics`](./openspec/changes/correct-selection-snapshot-semantics/).
+
 ## What is implemented
 
 - The compiled 24×32 `tux-01` flagship fixture: 546 active sockets, a deterministic 75.09% locked opening, and a sixteen-slot Shelf.
-- Same-color movable eight-neighbor component selection with connectivity-preserving partial extraction.
+- Same-color movable eight-neighbor component creation with a latched Gem-ID Selection snapshot; partial extraction may leave a disconnected remainder selected.
 - Matching target-component placement, compact configured Shelf storage, and ordered two-bank presentation.
 - A deterministic `apply-global-wand` demo assist shared by TypeScript, native C++, and WASM: locked gems stay fixed while every remaining identity is paired to its target, the Shelf is cleared, and victory is emitted once.
 - Responsive desktop/square/portrait Tux staging with integer fit, bounded zoom/pan, ordinary WAAPI flight, a diagonal full-board wand wave, and a shared SVG arc-light plus three pixel-firework victory finale.
 - A contextual post-finale replay control that dispatches the canonical restart command, restores the initial Board and camera, and keeps onboarding/audio preferences without reloading the page.
 - A separate deterministic C++20 pixel-audio engine compiled to AudioWorklet WASM, with gameplay cues, first-gesture resume, persisted in-world mute, silent failure fallback, and an ordered replay reset cue so every run can play its victory fanfare.
-- Canonical replay, browser E2E, and byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification.
+- Canonical replay, browser E2E, byte-exact TypeScript ↔ native C++ ↔ WebAssembly differential verification, and a 32-seed deterministic reducer state-machine property sweep.
 - One-sentence, versioned onboarding that disappears only after an accepted puzzle or wand command and remains non-blocking when browser storage is unavailable.
-- Pinned Lefthook local gates: parallel type/unit/fixture/spec checks before commit, then native/WASM/build/browser verification before push.
+- Pinned Lefthook local gates: parallel type/unit/fixture/spec checks before commit, then native/WASM/build/browser verification plus native ASan/UBSan and an exercised audio-queue TSan path before push.
 - Official OpenSpec 1.6 skills and commands checked into the repository for Oh My Pi, Codex, Claude Code, and OpenCode.
 
 The built-in wand is a deterministic, non-commercial demo assist. Commercial power-ups, payment, random generation, random mode, and progression are intentionally deferred. See [`openspec/`](./openspec/) for the evidence boundary and acceptance contracts.
@@ -95,10 +97,12 @@ bun run test:cpp
 bun run test:wasm
 bun run test:differential
 bun run test:e2e
+bun run test:cpp:sanitized
+bun run test:cpp:tsan
+bun run spec:validate
 ```
 
-`bun run check` runs typechecking, native C++ tests, WASM build, TypeScript/WASM/native differential tests, and a Vite production build. Browser E2E requires Chromium installed through Playwright:
-The current local gate covers 35 Bun tests, four native CTests, and 22 Playwright runs across eleven desktop/mobile Chromium scenarios.
+`bun run check` runs typechecking, native C++ tests, WASM build, TypeScript/WASM/native differential tests, and a Vite production build. The separate sanitizer gates run the same four native CTests under ASan/UBSan and TSan; the TSan path includes a 10,000-cue concurrent SPSC transfer rather than an idle sanitizer badge. Browser E2E requires Chromium installed through Playwright:
 
 ```bash
 bunx playwright install chromium
@@ -112,7 +116,7 @@ bunx lefthook run pre-commit --all-files
 bunx lefthook run pre-push --all-files
 ```
 
-Pre-commit runs typecheck, Bun tests, fixture drift, and strict OpenSpec validation in parallel. Pre-push runs the native/WASM/production build, desktop/mobile Playwright, fixture drift, and strict specs sequentially so shared build outputs cannot race.
+Pre-commit runs typecheck, Bun tests, fixture drift, and strict OpenSpec validation in parallel. Pre-push runs the native/WASM/production build, native ASan/UBSan, the exercised audio-queue TSan path, desktop/mobile Playwright, fixture drift, and strict specs sequentially so shared build outputs cannot race.
 
 Replay the flagship fixed trace through the production WASM core, or run the three-backend Harness gate:
 
@@ -166,18 +170,20 @@ The deployed artifact is `dist/`; production does not require a Bun daemon or ba
 
 笔试材料：[`SUBMISSION.md`](./SUBMISSION.md) · [`PDF`](./submission/Brilliant-Sort-Answer.pdf) · [`需求证据矩阵`](./submission/evidence-matrix.md)
 
+提交后纠正：复核题目视频后确认，移走割点宝石时，已经抬起的 Selection 即使断成多块也会继续保持选中。上方提交材料保持不变；当前实现与回归证据见 [`correct-selection-snapshot-semantics`](./openspec/changes/correct-selection-snapshot-semantics/)。
+
 ## 已实现内容
 
 - 编译后的 24×32 `tux-01` 旗舰关卡：546 个有效 Socket、确定性的 75.09% 初始锁定比例和 16 槽 Shelf。
-- 同色可移动宝石的八方向连通选择，以及保持剩余组件连通的安全部分提取。
+- 同色可移动宝石在创建 Selection 时按八方向连通；Selection 随后锁存 Gem ID，部分提取后剩余成员即使断开也继续保持选中。
 - 匹配目标组件放置、紧凑且可配置容量的 Shelf 存储，以及有序的双 Bank 表现。
 - 确定性的 `apply-global-wand` Demo 辅助命令由 TypeScript、原生 C++ 和 WASM 共同实现：锁定宝石保持不动，其余宝石身份全局配对到目标，Shelf 清空，并且只产生一次胜利。
 - 自适应桌面/方屏/竖屏 Tux 舞台：整数尺寸拟合、受限缩放/平移、普通 WAAPI 飞行、对角线全图魔法棒波次，以及手动/魔法棒通关共用的 SVG 弧光与三组像素烟花终章。
 - 终章结束后，右上角魔法棒会换成重玩按钮；它走 canonical 重开命令，复原初始棋盘和相机，同时保留新手提示与音频偏好，不刷新页面。
 - 独立的确定性 C++20 像素音频引擎，编译到 AudioWorklet WASM，支持玩法 Cue、首次交互恢复、场景内静音持久化、静默失败降级，以及按顺序处理的重玩重置 Cue，保证每一局都能再次播放胜利音乐。
-- Canonical replay、浏览器 E2E，以及 TypeScript ↔ 原生 C++ ↔ WebAssembly 的逐字节差分验证。
+- Canonical replay、浏览器 E2E、TypeScript ↔ 原生 C++ ↔ WebAssembly 的逐字节差分验证，以及 32 个固定 seed 的 reducer 状态机属性扫描。
 - 版本化的一句话新手提示：仅在首次接受的棋盘/Shelf/魔法棒命令后消失；浏览器存储不可用时仍不阻塞游戏。
-- 固定版本的 Lefthook 本地门禁：提交前并行检查类型、单测、夹具和规格；推送前再跑 native/WASM、生产构建与浏览器 E2E。
+- 固定版本的 Lefthook 本地门禁：提交前并行检查类型、单测、夹具和规格；推送前再跑 native/WASM/生产构建、浏览器 E2E、原生 ASan/UBSan，以及真正并发执行音频队列的 TSan。
 - 仓库内直接提供 OpenSpec 1.6 为 Oh My Pi、Codex、Claude Code、OpenCode 生成的技能与命令。
 
 内置魔法棒是确定性的非商业 Demo 辅助。商业 Power-up、付费、运行时随机生成、随机模式和进度系统均被明确延后。证据边界和验收契约见 [`openspec/`](./openspec/)。
@@ -251,10 +257,12 @@ bun run test:cpp
 bun run test:wasm
 bun run test:differential
 bun run test:e2e
+bun run test:cpp:sanitized
+bun run test:cpp:tsan
+bun run spec:validate
 ```
 
-`bun run check` 会运行类型检查、原生 C++ 测试、WASM 构建、TypeScript/WASM/原生差分测试和 Vite 生产构建。浏览器 E2E 需要通过 Playwright 安装 Chromium：
-当前本地门禁覆盖 35 个 Bun 测试、4 个原生 CTest，以及 11 个 desktop/mobile Chromium 场景形成的 22 次 Playwright 运行。
+`bun run check` 会运行类型检查、原生 C++ 测试、WASM 构建、TypeScript/WASM/原生差分测试和 Vite 生产构建。两个独立的 sanitizer 门禁会在 ASan/UBSan 与 TSan 下重跑 4 个原生 CTest；TSan 路径包含 10,000 个 Cue 的并发 SPSC 传输，不是空跑工具。浏览器 E2E 需要通过 Playwright 安装 Chromium：
 
 ```bash
 bunx playwright install chromium
@@ -268,7 +276,7 @@ bunx lefthook run pre-commit --all-files
 bunx lefthook run pre-push --all-files
 ```
 
-Pre-commit 并行运行 typecheck、Bun 测试、夹具漂移和严格 OpenSpec；pre-push 顺序运行 native/WASM/生产构建、desktop/mobile Playwright、夹具漂移和严格规格，避免共享构建目录互相打架。
+Pre-commit 并行运行 typecheck、Bun 测试、夹具漂移和严格 OpenSpec；pre-push 顺序运行 native/WASM/生产构建、原生 ASan/UBSan、真正执行音频队列并发传输的 TSan、desktop/mobile Playwright、夹具漂移和严格规格，避免共享构建目录互相打架。
 
 可以通过生产 WASM 核心回放旗舰固定轨迹，或运行三后端 Harness 门禁：
 

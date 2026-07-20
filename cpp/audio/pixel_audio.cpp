@@ -585,15 +585,13 @@ void PixelAudioEngine::StartVoice(std::array<Voice, kMaxMusicVoices> &voices,
   const std::size_t pool_size =
       std::min<std::size_t>(score_.max_music_voices, voices.size());
   Voice *selected = &voices[0];
-  bool found_inactive = false;
   for (std::size_t index = 0; index < pool_size; ++index) {
     Voice &voice = voices[index];
     if (!voice.active) {
       selected = &voice;
-      found_inactive = true;
       break;
     }
-    if (!found_inactive && voice.age < selected->age) {
+    if (voice.age < selected->age) {
       selected = &voice;
     }
   }
@@ -605,14 +603,12 @@ void PixelAudioEngine::StartVoice(std::array<Voice, kMaxEffectVoices> &voices,
                                   std::int32_t midi_note,
                                   std::uint32_t duration_samples) noexcept {
   Voice *selected = &voices[0];
-  bool found_inactive = false;
   for (Voice &voice : voices) {
     if (!voice.active) {
       selected = &voice;
-      found_inactive = true;
       break;
     }
-    if (!found_inactive && voice.age < selected->age) {
+    if (voice.age < selected->age) {
       selected = &voice;
     }
   }

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -13,6 +14,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <thread>
 
 namespace {
 
@@ -321,6 +323,68 @@ void TestQueuePriorityAndOrder() {
   Expect(!queue.Pop(popped), "queue should be empty after ordered drain");
 }
 
+void TestQueueSingleProducerSingleConsumer() {
+  constexpr std::uint32_t kCueCount = 10'000U;
+  AudioCueQueue queue;
+  std::atomic<bool> abort{false};
+  std::atomic<bool> producer_done{false};
+
+  std::thread producer([&] {
+    for (std::uint32_t sequence = 1U; sequence <= kCueCount; ++sequence) {
+      if (abort.load(std::memory_order_acquire)) {
+        return;
+      }
+      const AudioCue cue{sequence, CueKind::TargetPlace, CueColor::Coral, 1, 0,
+                         0};
+      while (!queue.Push(cue)) {
+        if (abort.load(std::memory_order_acquire)) {
+          return;
+        }
+        std::this_thread::yield();
+      }
+    }
+    producer_done.store(true, std::memory_order_release);
+  });
+
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds(10);
+  std::uint32_t expected_sequence = 1U;
+  bool timed_out = false;
+  bool order_mismatch = false;
+  bool ended_early = false;
+  AudioCue popped{};
+  while (expected_sequence <= kCueCount) {
+    if (queue.Pop(popped)) {
+      if (popped.sequence != expected_sequence) {
+        order_mismatch = true;
+        abort.store(true, std::memory_order_release);
+        break;
+      }
+      ++expected_sequence;
+      continue;
+    }
+    if (producer_done.load(std::memory_order_acquire)) {
+      ended_early = true;
+      break;
+    }
+    if (std::chrono::steady_clock::now() >= deadline) {
+      timed_out = true;
+      abort.store(true, std::memory_order_release);
+      break;
+    }
+    std::this_thread::yield();
+  }
+
+  producer.join();
+  Expect(!timed_out, "concurrent queue transfer should finish before timeout");
+  Expect(!order_mismatch, "concurrent queue transfer should preserve order");
+  Expect(!ended_early,
+         "producer should not finish before all cues are consumed");
+  Expect(expected_sequence == kCueCount + 1U,
+         "consumer should receive every concurrently produced cue");
+  Expect(!queue.Pop(popped), "concurrent queue should be empty after transfer");
+}
+
 void TestScoreConstraints() {
   Expect(ValidateScore(TuxScore()).ok(), "reviewed Tux score should validate");
 
@@ -364,7 +428,8 @@ void EnqueueReferenceCues(PixelAudioEngine &engine) {
 }
 
 void TestDeterministicReferencePcm() {
-  constexpr std::size_t kFrames = kReferenceSampleRate * 2U;
+  constexpr std::size_t kFrames =
+      static_cast<std::size_t>(kReferenceSampleRate) * 2U;
   static std::array<std::int16_t, kFrames> first{};
   static std::array<std::int16_t, kFrames> second{};
 
@@ -483,6 +548,7 @@ void TestRenderHasNoAllocations() {
 
 int main() {
   TestQueuePriorityAndOrder();
+  TestQueueSingleProducerSingleConsumer();
   TestScoreConstraints();
   TestTuxScoreSourceConsistency();
   TestJadeCueAbi();

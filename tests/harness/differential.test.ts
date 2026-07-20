@@ -57,7 +57,7 @@ const fullShelfLevel = level(
   ]).flat(),
 );
 
-const partialExtractionLevel = level("partial-extraction", 4, 11, [
+const articulationExtractionLevel = level("articulation-extraction", 4, 11, [
   ...Array.from({ length: 11 }, (_, col) => cell(0, col, "coral", `n-${col}`, "navy")),
   ...Array.from({ length: 11 }, (_, col) => cell(1, col, "navy", `c-${col}`, "coral")),
   ...Array.from({ length: 3 }, (_, col) => cell(2, col, "jade", `i-${col}`, "ice")),
@@ -96,12 +96,12 @@ const scenarios: readonly DifferentialScenario[] = [
     ],
   },
   {
-    name: "safe-partial-extraction",
-    level: partialExtractionLevel,
+    name: "articulation-partial-extraction",
+    level: articulationExtractionLevel,
     commands: [
       { type: "select-board-gem", coord: { row: 0, col: 0 } },
       { type: "place-selection-in-shelf" },
-      { type: "select-board-gem", coord: { row: 2, col: 0 } },
+      { type: "select-board-gem", coord: { row: 2, col: 1 } },
       { type: "place-selection-in-shelf" },
     ],
   },
@@ -156,8 +156,8 @@ describe("differential core replay", () => {
     expect(diagonal.selection.gemIds).toEqual(["a", "b"]);
     const fullShelf = JSON.parse(results[3]!.final);
     expect(fullShelf.shelf.gemIds).toHaveLength(12);
-    const partial = JSON.parse(results[4]!.final);
-    expect(partial.selection.gemIds).toEqual(["i-1", "i-2"]);
+    const articulation = JSON.parse(results[4]!.final);
+    expect(articulation.selection.gemIds).toEqual(["i-0", "i-2"]);
     expect(JSON.parse(results[5]!.final).status).toBe("playing");
     const tux = JSON.parse(results[6]!.final);
     expect(tux.status).toBe("won");

@@ -813,32 +813,6 @@ GetSelectionLocations(const State &state, const Selection &selection) {
   return locations;
 }
 
-[[nodiscard]] bool
-CoordinatesAreConnected(const State &state, SelectionContainer container,
-                        const std::vector<Coord> &coordinates) {
-  if (coordinates.size() < 2U) {
-    return true;
-  }
-  const int rows = container == SelectionContainer::kBoard ? state.rows : 1;
-  const int cols = container == SelectionContainer::kBoard
-                       ? state.cols
-                       : state.shelf_capacity;
-  std::vector<std::vector<GemCell>> grid(
-      static_cast<std::size_t>(rows),
-      std::vector<GemCell>(static_cast<std::size_t>(cols), {-1, false}));
-  for (const Coord coord : coordinates) {
-    if (coord.row < 0 || coord.col < 0 || coord.row >= rows ||
-        coord.col >= cols) {
-      return false;
-    }
-    grid[static_cast<std::size_t>(coord.row)]
-        [static_cast<std::size_t>(coord.col)] = {0, true};
-  }
-  return FindConnectedMovableGems(grid, coordinates.front().row,
-                                  coordinates.front().col)
-             .size() == coordinates.size();
-}
-
 [[nodiscard]] std::vector<Location>
 GetExtractionCandidates(const State &state, const Selection &selection) {
   const std::vector<Location> locations =
@@ -865,18 +839,7 @@ GetExtractionCandidates(const State &state, const Selection &selection) {
         break;
       }
     }
-    if (!is_frontier) {
-      continue;
-    }
-
-    std::vector<Coord> remaining;
-    remaining.reserve(locations.size() - 1U);
-    for (const Location &member : locations) {
-      if (member.gem_id != location.gem_id) {
-        remaining.push_back(member.coord);
-      }
-    }
-    if (CoordinatesAreConnected(state, selection.container, remaining)) {
+    if (is_frontier) {
       candidates.push_back(location);
     }
   }
@@ -887,65 +850,6 @@ GetExtractionCandidates(const State &state, const Selection &selection) {
                                      right.coord) < 0;
             });
   return candidates;
-}
-
-[[nodiscard]] bool ShelfCandidateRemainsConnectedAfterCompaction(
-    const State &state, const Selection &selection, const Location &candidate) {
-  const std::size_t source_index =
-      static_cast<std::size_t>(candidate.coord.col);
-  if (source_index >= state.shelf_gem_ids.size() ||
-      state.shelf_gem_ids[source_index] != candidate.gem_id) {
-    return false;
-  }
-
-  std::vector<std::string> compacted = state.shelf_gem_ids;
-  compacted.erase(compacted.begin() +
-                  static_cast<std::ptrdiff_t>(source_index));
-  std::vector<std::string> remaining_gem_ids;
-  for (const std::string &gem_id : selection.gem_ids) {
-    if (gem_id != candidate.gem_id) {
-      remaining_gem_ids.push_back(gem_id);
-    }
-  }
-  if (remaining_gem_ids.size() < 2U) {
-    return true;
-  }
-
-  std::map<std::string, std::size_t> indices_by_gem_id;
-  for (std::size_t index = 0; index < compacted.size(); ++index) {
-    indices_by_gem_id.emplace(compacted[index], index);
-  }
-  std::vector<Coord> remaining_coordinates;
-  remaining_coordinates.reserve(remaining_gem_ids.size());
-  for (const std::string &gem_id : remaining_gem_ids) {
-    const auto found = indices_by_gem_id.find(gem_id);
-    if (found == indices_by_gem_id.end()) {
-      return false;
-    }
-    remaining_coordinates.push_back({0, static_cast<int>(found->second)});
-  }
-  return CoordinatesAreConnected(state, SelectionContainer::kShelf,
-                                 remaining_coordinates);
-}
-
-[[nodiscard]] std::optional<Location>
-NextExtractionCandidate(const State &state, const Selection &selection) {
-  const std::vector<Location> candidates =
-      GetExtractionCandidates(state, selection);
-  if (selection.container == SelectionContainer::kBoard) {
-    if (candidates.empty()) {
-      return std::nullopt;
-    }
-    return candidates.front();
-  }
-
-  for (const Location &candidate : candidates) {
-    if (ShelfCandidateRemainsConnectedAfterCompaction(state, selection,
-                                                      candidate)) {
-      return candidate;
-    }
-  }
-  return std::nullopt;
 }
 
 void RemoveSelectedGem(State &state, const std::string &gem_id) {
@@ -1098,19 +1002,20 @@ void MoveSelectionGemToShelf(State &state, const Selection &selection,
       break;
     }
     const Selection current_selection = *state.selection;
-    const std::optional<Location> source =
-        NextExtractionCandidate(state, current_selection);
-    if (!source.has_value()) {
+    const std::vector<Location> candidates =
+        GetExtractionCandidates(state, current_selection);
+    if (candidates.empty()) {
       break;
     }
-    MoveSelectionGemToBoard(state, current_selection, *source, destination);
+    const Location &source = candidates.front();
+    MoveSelectionGemToBoard(state, current_selection, source, destination);
     transition.events.push_back({
         "gem-placed",
-        source->gem_id + "->" + std::to_string(destination.row) + ":" +
+        source.gem_id + "->" + std::to_string(destination.row) + ":" +
             std::to_string(destination.col),
     });
     if (current_selection.container == SelectionContainer::kShelf) {
-      transition.events.push_back({"shelf-compacted", source->gem_id});
+      transition.events.push_back({"shelf-compacted", source.gem_id});
     }
   }
   return ResolveStatus(state, std::move(transition));
@@ -1138,13 +1043,14 @@ void MoveSelectionGemToShelf(State &state, const Selection &selection,
       break;
     }
     const Selection current_selection = *state.selection;
-    const std::optional<Location> source =
-        NextExtractionCandidate(state, current_selection);
-    if (!source.has_value()) {
+    const std::vector<Location> candidates =
+        GetExtractionCandidates(state, current_selection);
+    if (candidates.empty()) {
       break;
     }
-    MoveSelectionGemToShelf(state, current_selection, *source);
-    transition.events.push_back({"gem-placed", source->gem_id + "->shelf"});
+    const Location &source = candidates.front();
+    MoveSelectionGemToShelf(state, current_selection, source);
+    transition.events.push_back({"gem-placed", source.gem_id + "->shelf"});
   }
   return ResolveStatus(state, std::move(transition));
 }
